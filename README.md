@@ -132,6 +132,7 @@ clang++ game.c AVA.c         && echo AVA as library (OSX)
 
 ## Status
 
-[![Discord Channel](https://img.shields.io/badge/discord-AVA%20lounge-738bd7.svg)](https://discord.gg/vu6Vt9d)
+[![Discord](https://img.shields.io/badge/chat-AVA%20lounge-738bd7.svg?logo=discord)](https://discord.gg/vu6Vt9d)
 [![Travis](https://api.travis-ci.org/r-lyeh/AVA.svg?branch=master)](https://travis-ci.org/r-lyeh/AVA)
+[![Issues](https://github-meta-badges.herokuapp.com/r-lyeh/AVA/issues.svg)](https://github.com/r-lyeh/AVA/issues)
 [![Unlicensed](http://img.shields.io/badge/license-Unlicense-blue.svg?style=flat)](http://unlicense.org/)
