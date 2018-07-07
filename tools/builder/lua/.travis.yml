@@ -1,0 +1,14 @@
+language: cpp
+os:
+  - linux
+  - osx
+before_install:
+  - bash .travis.sh
+  - export PATH=$(pwd)/.bins:$PATH
+  - python --version
+  - premake5 --version
+  - ninja --version
+script:
+  - pushd tests
+  - python run_tests.py
+  - popd
