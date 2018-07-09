@@ -12,6 +12,9 @@
 #   define API            __declspec(dllexport)
 #endif
 
+#define ASYNC_C 1
+#include "async/async.c"
+
 API
 int init() {
     return 0;

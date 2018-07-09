@@ -18,7 +18,7 @@ project "engine"
 --	files {"../../#sdk/*.c", "../../#sdk/*.cpp", "../../#sdk/*.h", "../../#sdk/*.inl"}
 --	files {"../../src/**.c", "../../src/**.cpp", "../../src/**.h", "../../src/**.inl"}
 	files {"../../engine/ava.c"}
-	includedirs {"../../engine/"}
+	includedirs {"../../engine/", "../../engine/core/"}
 	defines {"DLL_EXPORT"}
 
 	filter "configurations:debug"
