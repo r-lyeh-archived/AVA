@@ -13,7 +13,10 @@
 #endif
 
 #define ASYNC_C 1
+#define DEBUG_C 1
+
 #include "async/async.c"
+#include "debug/debug.c"
 
 API
 int init() {
