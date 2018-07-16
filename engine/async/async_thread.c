@@ -8,7 +8,6 @@
 
 #ifndef THREAD_H
 #define THREAD_H
-
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -20,9 +19,8 @@ bool join(int thread_id);
 
 #endif
 
-#if THREAD_C
+#ifdef THREAD_C
 #pragma once
-
 #include "system.c"
 #include "builtin.c"
 #include "realloc.c"

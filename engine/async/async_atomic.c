@@ -5,7 +5,6 @@
 
 #ifndef ATOMIC_H
 #define ATOMIC_H
-
 #include <stdint.h>
 
 int64_t atomic_set( int64_t *ptr, const int value );
@@ -15,9 +14,8 @@ int64_t atomic_dec( int64_t *ptr );
 
 #endif
 
-#if ATOMIC_C
+#ifdef ATOMIC_C
 #pragma once
-
 #  if defined(_MSC_VER) && defined(_WIN64)
 #   include <intrin.h>
 #   define __sync_add_and_fetch(p,x)               (_InterlockedExchangeAdd64((__int64 volatile *)(p), (x)) + (x))

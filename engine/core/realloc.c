@@ -1,6 +1,5 @@
 #ifndef REALLOC_H
 #define REALLOC_H
-
 #include <string.h>
 
 void *REALLOC( void *ptr, int size );
@@ -14,9 +13,8 @@ int MSIZE( void *ptr );
 #endif
 
 
-#if REALLOC_C
+#ifdef REALLOC_C
 #pragma once
-
 #include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h> 

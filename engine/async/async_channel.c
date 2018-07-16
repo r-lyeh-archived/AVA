@@ -30,12 +30,10 @@ int      channel_wait(channel *chan, void *output, int ms);
 
 #endif
 
-#if CHANNEL_C
+#ifdef CHANNEL_C
 #pragma once
-
 #include <stdlib.h>
 #include <string.h>
-
 #include "async_mutex.c"
 #include "async_condv.c"
 #include "realloc.c"

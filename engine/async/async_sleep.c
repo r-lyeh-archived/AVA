@@ -11,9 +11,8 @@ void sleep_ss( double ss );
 
 #endif
 
-#if SLEEP_C
+#ifdef SLEEP_C
 #pragma once
-
 #ifdef _WIN32
 #include <winsock2.h>
 #else

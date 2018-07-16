@@ -26,9 +26,8 @@ void condv_wait( condv *c, void *mutex, int ms );
 
 #endif
 
-#if CONDV_C
+#ifdef CONDV_C
 #pragma once
-
 #include "async_mutex.c"
 
 #if defined(__cplusplus)

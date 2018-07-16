@@ -12,10 +12,10 @@
 #   define API            __declspec(dllexport)
 #endif
 
-#define ASYNC_C 1
-#define DEBUG_C 1
-#define ECS_C 1
-#define VALLOC_C 1
+#define ASYNC_C
+#define DEBUG_C
+#define ECS_C
+#define VALLOC_C
 
 #include "async/async.c"
 #include "debug/debug.c"

@@ -3,7 +3,6 @@
 
 #ifndef MUTEX_H
 #define MUTEX_H
-
 #include <stdbool.h>
 
 typedef union mutex mutex;
@@ -16,7 +15,7 @@ void mutex_release(mutex *m);
 
 #endif
 
-#if MUTEX_C
+#ifdef MUTEX_C
 #pragma once
 
 union mutex {

@@ -11,7 +11,7 @@ void tls_quit();
 
 #endif
 
-#if TLS_C
+#ifdef TLS_C
 #pragma once
 
 static struct tls {

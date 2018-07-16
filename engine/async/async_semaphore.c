@@ -14,9 +14,8 @@ void semaphore_quit( semaphore *s );
 
 #endif
 
-#if SEMAPHORE_C
+#ifdef SEMAPHORE_C
 #pragma once
-
 #include "async_condv.c"
 #include "async_mutex.c"
 

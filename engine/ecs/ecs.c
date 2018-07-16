@@ -67,7 +67,7 @@ extern struct world w;
 
 
 #ifdef ECS_C
-
+#pragma once
 #include <stdint.h>
 #include <stdarg.h>
 
