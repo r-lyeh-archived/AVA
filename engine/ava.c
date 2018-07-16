@@ -14,9 +14,12 @@
 
 #define ASYNC_C 1
 #define DEBUG_C 1
+#define ECS_C 1
+#define VALLOC_C 1
 
 #include "async/async.c"
 #include "debug/debug.c"
+#include "ecs/ecs.c"
 
 API
 int init() {
