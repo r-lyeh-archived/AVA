@@ -1,7 +1,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include "valloc.c" // vector-based allocator
+#include "vrealloc.c" // vector-based allocator
 
 // array library --------------------------------------------------------------
 
@@ -15,6 +15,25 @@
 #define array_count(t) (int)( (t) ? vsize(t) / sizeof(0[t]) : 0u )
 #define array_sort(t, cmpfunc) qsort( t, array_count(t), sizeof(t[0]), cmpfunc )
 #define array_free(t) ( vrealloc((t), 0), (t) = 0 )
+
+#define array_insert(t, i, n) do { \
+    int ac = array_count(t); \
+    if( i >= ac ) { \
+        array_append(t, n); \
+    } else { \
+        (t) = vrealloc( (t), (ac + 1) * sizeof(t[0]) ); \
+        memmove( &(t)[(i)+1], &(t)[i], (ac - (i)) * sizeof(t[0]) ); \
+        (t)[ i ] = (n); \
+    } \
+} while(0)
+
+#if 0
+#define array_reserve(t, n) do { \
+    int osz = array_count(t); \
+    (t) = vrealloc( (t), (n) * sizeof(t[0]) ); \
+    (t) = vresize( (t), osz * sizeof(t[0]) ); \
+} while(0)
+#endif
 
 #define array_copy(t, src) do { \
     array_free(t); \
@@ -43,7 +62,7 @@
             } \
         } \
         if( dupes ) { \
-            (t) = REALLOC((t), (array_count(t) - dupes) * sizeof(0[t])); \
+            (t) = vrealloc((t), (array_count(t) - dupes) * sizeof(0[t])); \
         } \
     } \
 } while(0)
@@ -60,7 +79,7 @@ int main() {
     array(int) a;
 
     array_init(a);
-    array_append(a, 2);
+    array_insert(a, 0, 2); // same than append()
     array_append(a, 32);
     array_append(a, 100);
     array_append(a, 56);
@@ -68,6 +87,7 @@ int main() {
     array_append(a, 88);
     array_append(a, 2);
     array_append(a, 25);
+    array_insert(a, 1, 17);
     for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
 
     array_erase(a, 2);

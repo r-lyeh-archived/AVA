@@ -19,7 +19,7 @@ extern "C" {
 #define ASYNC_C
 #define DEBUG_C
 #define ECS_C
-#define VALLOC_C
+#define VREALLOC_C
 #define JSON5_C
 
 #include "async/async.c"

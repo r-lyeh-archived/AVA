@@ -19,7 +19,7 @@ void hexdump( const void *ptr, int len ) {
             hex += sprintf( hex, "%02x ", /*"0x%02x,",*/ (unsigned char)*data);
             str += sprintf( str, "%c", *data >= 32 && *data != '\\' ? *data : '.' );
         }
-        LOG( HEX|DUMP, "%s%*.s// %06x %s", hexbuf, (width * 3 /*5*/) - (hex - hexbuf), hexbuf, jt, strbuf );
+        LOG( HEX|DUMP, "%s%*.s// %06x %s", hexbuf, (int)(width * 3 /*5*/) - (hex - hexbuf), hexbuf, jt, strbuf );
     }
 }
 

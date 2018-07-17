@@ -26,7 +26,6 @@
 #define CALLSTACK_C 1
 #define CONSOLE_C 1
 #define CRASH_C 1
-#define DEBUG_C 1
 #define DEBUGGER_C 1
 #define DIALOG_C 1
 #define HEXDUMP_C 1

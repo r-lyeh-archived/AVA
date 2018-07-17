@@ -8,6 +8,12 @@
 //
 // cons:
 // - 64 components max
+//
+// @todo:
+// - thread-safe
+// - world management
+// - api for adding/removing components
+// - components() could return negative offsets to minimize mem storage requirements
 
 #ifndef ECS_H
 #define ECS_H
@@ -52,7 +58,7 @@ struct world {
     int ne, nc;                  // ne: number of entities, nc: number of components (stride) (cN)
     array(component) instanced;  // instanced components
     array(int) entities;         // components table per entity [ e1(cflags,c1,c2..nc) e2(cflags,c1,c2..nc) .. eN(cflags,c1,c2..nc) ]
-    array(int) registered;       // registered components, also sizeof(registered) == stride(entities)
+    uint64_t registered;         // registered components, also sizeof(registered) == stride(entities)
 };
 
 extern struct world w;
@@ -74,10 +80,8 @@ extern struct world w;
 static struct world w = {0};
 
 static void register_component(int cid) {
-    for (int i = 0; i < array_count(w.registered); ++i) {
-        if (w.registered[i] == cid) {
-            return;
-        }
+    if (w.registered & (1ull << (uint64_t)cid)) {
+        return;
     }
 
     if( !w.nc ) {
@@ -85,6 +89,11 @@ static void register_component(int cid) {
         array_append( w.entities, 0 );
     }
 
+#if 0
+    for( int i = 0; i < w.ne; ++i ) {
+        array_insert( w.entities, (i+1) * w.nc, -1 );
+    }
+#else
     array(int) ec = 0;
     for( int i = 0; i < w.ne; ++i ) {
         for( int j = 0; j < w.nc; ++j ) {
@@ -94,8 +103,9 @@ static void register_component(int cid) {
     }
     array_copy(w.entities,ec);
     array_free(ec);
+#endif
 
-    array_append(w.registered, cid);
+    w.registered |= 1ull << (uint64_t) cid;
     w.nc ++;
 }
 
@@ -159,11 +169,11 @@ void (world_dump)( FILE *fp, int smask ) {
     for( int i = 0; i < w.ne; ++i ) {
         int s = w.entities[ i * w.nc + 0 ];
         if( smask && (smask != (s & smask))) continue;
-        fprintf(fp, "e%02d s%02d ", i, s);
+        fprintf(fp, "eid:%d sys:%d ", i, s);
         for( int j = 1; j < w.nc; ++j ) {
             int cid = w.entities[ i * w.nc + j ];
             if( cid >= 0 ) {
-                fprintf(fp, "c%d (void*)[%p (i%d)] ", j, &w.instanced[ cid ], cid );
+                fprintf(fp, "cid:%d (void*)[%p (idx#%d)] ", j, &w.instanced[ cid ], cid );
             }
         }
         fputc('\n', fp);
@@ -186,6 +196,7 @@ void (world_dump)( FILE *fp, int smask ) {
 #endif
 
 int main(int argc, char **argv) {
+    int player;
 
     /* entities to spawn */
     #ifndef N
@@ -200,58 +211,77 @@ int main(int argc, char **argv) {
     // declare components: c1, c2, ...
     enum { POSITION, VELOCITY, COLOR, HEALTH, INPUT };
 
-    // spawn entities
-    int player = new_entity(POSITION, VELOCITY, HEALTH, INPUT);
-    component(player, VELOCITY)->vx = 1;
-    component(player, VELOCITY)->vy = 2;
+#if 0
+    array_reserve( w.entities, N );
+    array_reserve( w.instanced, N * 64 );
+#endif
 
-    for (int i = 0; i < N; ++i) {
-        switch (i & 3) {
-            break; case 0:; /* static enemy */
-            int enemy0 = new_entity(POSITION, COLOR, HEALTH);
-            break; case 1:; /* dynamic enemy */
-            int enemy1 = new_entity(POSITION, COLOR, HEALTH, VELOCITY);
-            break; case 2:; /* static light */
-            int light0 = new_entity(POSITION, COLOR);
-            break; case 3:; /* dynamic light */
-            int light1 = new_entity(POSITION, COLOR, VELOCITY);
+    // spawn entities
+    {
+        clock_t start = clock();
+
+        player = new_entity(POSITION, VELOCITY, HEALTH, INPUT);
+        component(player, VELOCITY)->vx = 1;
+        component(player, VELOCITY)->vy = 2;
+
+        for (int i = 0; i < N; ++i) {
+            switch (i & 3) {
+                break; case 0:; /* static enemy */
+                int enemy0 = new_entity(POSITION, COLOR, HEALTH);
+                break; case 1:; /* dynamic enemy */
+                int enemy1 = new_entity(POSITION, COLOR, HEALTH, VELOCITY);
+                break; case 2:; /* static light */
+                int light0 = new_entity(POSITION, COLOR);
+                break; case 3:; /* dynamic light */
+                int light1 = new_entity(POSITION, COLOR, VELOCITY);
+            }
         }
+
+        clock_t end = clock();
+        double t = (end - start) / CLOCKS_PER_SEC * 1.0;
+
+        int T = 1 * N;
+        printf("%17s: %d frame(s) * %d num_entities = %d total ops, in %.3fs => %.3fM ops/s, %.2fms/frame\n", 
+            "spawn benchmark", 1, N, T, t, (T / 1000000.0) / t, (t * 1000 / 1) );
     }
 
     // process & benchmark 
-    clock_t start = clock();
+    {
+        clock_t start = clock();
 
-    for( int frame = 0; frame < F; ++frame ) {
-        foreach(obj, POSITION, VELOCITY) {
-            component *p = obj[POSITION];
-            component *v = obj[VELOCITY];
-            p->x += v->vx;
-            p->y += v->vy;
-            p->z += v->vz;
+        for( int frame = 0; frame < F; ++frame ) {
+            foreach(obj, POSITION, VELOCITY) {
+                component *p = obj[POSITION];
+                component *v = obj[VELOCITY];
+                p->x += v->vx;
+                p->y += v->vy;
+                p->z += v->vz;
+            }
         }
+
+        clock_t end = clock();
+        double t = (end - start) / CLOCKS_PER_SEC * 1.0;
+
+        // stats
+        int num_iterated_entities = N;
+        int num_processed_entities = 0;
+        foreach(obj, POSITION, VELOCITY) {
+            ++num_processed_entities;
+        }
+
+        int T = F * num_processed_entities;
+        printf("%17s: %d frame(s) * %d num_entities = %d total ops, in %.3fs => %.3fM ops/s, %.2fms/frame\n", 
+            "process benchmark", F, num_processed_entities, T, t, (T / 1000000.0) / t, (t * 1000 / F) );
     }
 
-    clock_t end = clock();
-    double t = (end - start) / CLOCKS_PER_SEC * 1.0;
-
     // verify
-    // world_dump(stdout, INPUT);
+    world_dump(stdout, INPUT);
 
     {component *p = components(player)[POSITION];
      printf("eid:%d (position: %f,%f,%f)\n", player, p->x, p->y, p->z );}
 
     assert( components(player)[POSITION]->x == (F * 1));
     assert( components(player)[POSITION]->y == (F * 2));
-
-    // stats
-    int num_phys_entities = 0;
-    foreach(obj, POSITION, VELOCITY) {
-        ++num_phys_entities;
-    }
-
-    int T = F * num_phys_entities;
-    printf("%d frames * %d num_phys_entities = %d total ops, in %.3fs => %.3fM ops/s, %.2fms/frame\n", 
-        F, num_phys_entities, T, t, (T / 1000000.0) / t, (t * 1000 / F) );
 }
 
 #endif
