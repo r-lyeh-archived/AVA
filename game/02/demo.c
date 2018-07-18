@@ -9,12 +9,12 @@
 
 EXPORT
 int main(int argc, char **argv) {
-    puts(";; hello from game "
+    puts(";; hello from game 02"
         // IF(WIN, "(win)", "(not win)")
         // IF(MSC, "(msc)", "(not msc)")
     );
 
-    window_create(0.85f, 0);
+    window_create(0.25f, 0);
 
     int w, h;
     void *pixels = 0;

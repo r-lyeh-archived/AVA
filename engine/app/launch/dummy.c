@@ -1,6 +1,6 @@
 #include "AVA.h"
 
-__declspec(dllexport)
+EXPORT
 int main(int argc, char **argv) {
     init();
 }

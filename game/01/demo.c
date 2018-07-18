@@ -8,6 +8,6 @@
 
 EXPORT
 int main(int argc, char **argv) {
-    puts(";; hello from game");
+    puts(";; hello from game 01");
 }
 

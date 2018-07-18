@@ -22,7 +22,7 @@
 // linkage
 
 #ifndef LINKAGE
-#define LINKAGE IMPORT
+#define LINKAGE STATIC
 #endif
 
 #ifndef STATIC
@@ -64,9 +64,11 @@ extern "C" {
 #endif
 
 #include "core/system.c"
+#include "core/format.c"
 
 #include "async/async.c"
 #include "debug/debug.c"
+#include "os/os.c"
 #include "ecs/ecs.c"
 #include "serial/json5.c"
 #include "framework/framework.c"
