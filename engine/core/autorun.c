@@ -35,6 +35,7 @@
 
 #ifdef AUTORUN_DEMO
 #include <stdio.h>
+#include <stdlib.h>
 
 void byebye(void);
 

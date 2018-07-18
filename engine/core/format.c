@@ -38,3 +38,10 @@ char *format( const char *fmt, ... ) {
 }
 
 #endif
+
+#ifdef FORMAT_DEMO
+#include <stdio.h>
+int main() {
+    puts( format("hello %s", format("%s%s", "wo", "rld")));
+}
+#endif
