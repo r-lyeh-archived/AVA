@@ -1,11 +1,16 @@
 #ifndef GLFW3_H
 #define GLFW3_H
-// #include "opengl.c"
-// #include "3rd/GLFW/glfw3.h"
+//#include "opengl.c"
+#define GLFW_INCLUDE_NONE
+#include "3rd/GLFW/glfw3.h"
 #endif
 
 #ifdef GLFW3_C
 #pragma once
+
+#define GLFW_INCLUDE_NONE
+#include "3rd/GLFW/glfw3.h"
+#undef GLFW_INCLUDE_NONE
 
 #ifdef _MSC_VER
 #pragma comment(lib, "opengl32.lib")

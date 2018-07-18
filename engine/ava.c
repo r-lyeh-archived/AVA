@@ -6,32 +6,28 @@
 //
 // People who worked on this file: @r-lyeh,
 
-#  if !defined(API) && defined(__cplusplus)
-#   define API extern "C" __declspec(dllexport)
-#elif !defined(API)
-#   define API            __declspec(dllexport)
-#endif
+#include "ava.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#ifdef AVA_C
+#pragma once
 #define ASYNC_C
 #define DEBUG_C
 #define ECS_C
 #define VREALLOC_C
 #define JSON5_C
+#define FRAMEWORK_C
+#endif
+
+#include "core/system.c"
+#include "core/vrealloc.c"
 
 #include "async/async.c"
 #include "debug/debug.c"
 #include "ecs/ecs.c"
 #include "serial/json5.c"
+#include "framework/framework.c"
 
 API
 int init() {
     return 0;
 }
-
-#ifdef __cplusplus
-}
-#endif

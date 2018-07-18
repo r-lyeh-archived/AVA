@@ -18,8 +18,8 @@ project "engine"
 --	files {"../../#sdk/*.c", "../../#sdk/*.cpp", "../../#sdk/*.h", "../../#sdk/*.inl"}
 --	files {"../../src/**.c", "../../src/**.cpp", "../../src/**.h", "../../src/**.inl"}
 	files {"../../engine/ava.c"}
-	includedirs {"../../engine/", "../../engine/core/"}
-	defines {"DLL_EXPORT"}
+	includedirs {"../../engine/"}
+	defines {"LINKAGE=EXPORT", "AVA_C"}
 
 	filter "configurations:debug"
 		defines {"DEBUG"}
@@ -38,10 +38,10 @@ project "editor"
 	location "../../.project"
 	language "C++"
 	targetdir "../../.build/%{cfg.buildcfg}"
+	--defines {"LINKAGE=IMPORT"}
 
 	files {"../../editor/**.c*", "../../editor/**.h*"}
 	includedirs {"../../editor/", "../../engine/"}
-	defines {"DLL_EXPORT"}
 
 	filter "configurations:debug"
 		defines {"DEBUG"}
@@ -55,16 +55,41 @@ project "editor"
 		defines {"NDEBUG", "SHIPPING"}
 		optimize "On"
 
-project "game"
+project "game01"
 	kind "SharedLib"
 	location "../../.project"
 	language "C++"
 	targetdir "../../.build/%{cfg.buildcfg}"
 
-	files { "../../game/**.c", "../../game/**.cpp", "../../game/**.cc", "../../game/**.cxx", "../../game/**.h", "../../game/**.hpp", "../../game/**.inl"}
+	files { "../../game/01/**.c", "../../game/01/**.cpp", "../../game/01/**.cc", "../../game/01/**.cxx", "../../game/01/**.h", "../../game/01/**.hpp", "../../game/01/**.inl"}
 	--removefiles { "../../app/**" }
 	includedirs {"../../editor/", "../../engine/"}
-	defines {"DLL_EXPORT"}
+	links {"engine"}
+	defines {"LINKAGE=IMPORT"}
+
+	filter "configurations:debug"
+		defines {"DEBUG"}
+		symbols "On"
+
+	filter "configurations:release"
+		defines {"NDEBUG"}
+		optimize "On"
+
+	filter "configurations:shipping"
+		defines {"NDEBUG", "SHIPPING"}
+		optimize "On"
+
+project "game02"
+	kind "SharedLib"
+	location "../../.project"
+	language "C++"
+	targetdir "../../.build/%{cfg.buildcfg}"
+
+	files { "../../game/02/**.c", "../../game/02/**.cpp", "../../game/02/**.cc", "../../game/02/**.cxx", "../../game/02/**.h", "../../game/02/**.hpp", "../../game/02/**.inl"}
+	--removefiles { "../../app/**" }
+	includedirs {"../../editor/", "../../engine/"}
+	links {"engine"}
+	defines {"LINKAGE=IMPORT"}
 
 	filter "configurations:debug"
 		defines {"DEBUG"}
@@ -80,15 +105,16 @@ project "game"
 
 -- app
 
-project "launcher"
+project "launch"
 	kind "ConsoleApp" --"WindowedApp"
 	location "../../.project"
 	language "C++"
 	targetdir "../../.build/%{cfg.buildcfg}"
 
-	files {"../../engine/app/launcher/**.c*", "../../engine/app/launcher/**.h*" } -- "../../engine/app/launcher/dialog.rc" }
+	files {"../../engine/app/launch/**.c*", "../../engine/app/launch/**.h*" } -- "../../engine/app/launcher/dialog.rc" }
 	includedirs {"../../editor/", "../../engine/"}
-	links {"engine", "editor", "game" }
+	links {"engine", "editor", "game01", "game02" }
+	--defines {"LINKAGE=IMPORT"}
 
 	configuration "windows"
 		links { "user32", "gdi32" }

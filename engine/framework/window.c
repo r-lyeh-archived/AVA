@@ -1,7 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-//#include "opengl.c"
+#include "opengl.c"
 #include "3rd/GLFW/glfw3.h"
 
 extern GLFWwindow *window;
@@ -10,17 +10,17 @@ enum {
     WINDOW_LEGACY_OPENGL = 0x4,
 };
 
-int window_create( float zoom /* 10.0f */, int flags );
-int window_update( int *w, int *h );
-void window_swap( void **pixels );
-void window_destroy();
+API int window_create( float zoom /* 10.0f */, int flags );
+API int window_update( int *w, int *h );
+API void window_swap( void **pixels );
+API void window_destroy();
 
 enum {
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
 };
 
-double *window_get( int variable );
+API double *window_get( int variable );
 
 
 #endif
@@ -29,7 +29,6 @@ double *window_get( int variable );
 #ifdef WINDOW_C
 #pragma once
 #include "input.c"
-#include "logger.c"
 #include "render.c"
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,6 +36,7 @@ double *window_get( int variable );
 
 // extern const char *callstack(int traces);
 const char * (*callstack_handler)(int traces) = 0; // = callstack;
+int (*printf_handler)(const char *fmt, ...) = printf;
 
 static void die_callback( const char *text ) {
     fprintf(stderr, "%s\n", text);
@@ -105,7 +105,7 @@ static void APIENTRY glDebugCallback(GLenum source, GLenum type, GLuint id, GLen
     */
 
     if( severity == GL_DEBUG_SEVERITY_HIGH ) {
-        LOGERROR(OPENGL, "!glDebugCallback: %s (%d) (source=%s, type=%s, severity=%s)", message, id,
+        printf_handler("!glDebugCallback: %s (%d) (source=%s, type=%s, severity=%s) #OPENGL\n", message, id,
             source == GL_DEBUG_SOURCE_API               ? "API" :
             source == GL_DEBUG_SOURCE_APPLICATION       ? "Application" :
             source == GL_DEBUG_SOURCE_OTHER             ? "Other" :
@@ -141,9 +141,9 @@ void trap_gl() {
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback((GLDEBUGPROC)glDebugCallback, /*NULL*/0);
         //GL( glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, /*NULL*/0, GL_TRUE) );
-        LOGDEBUG(OPENGL, "Debug output initialized.");
+        printf_handler("%s #OPENGL\n", "Debug output initialized.");
     } else {
-        LOGDEBUG(OPENGL, "Debug output not supported.");
+        printf_handler("%s #OPENGL\n", "Debug output not supported.");
     }
 #endif
 }

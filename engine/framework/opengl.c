@@ -1,4 +1,5 @@
-#pragma once
+#ifndef OPENGL_H
+#define OPENGL_H
 
 // defined in glfw_internal.h
 #ifndef GL_VERSION
@@ -12,6 +13,8 @@
 #endif
 #ifndef GL_CONTEXT_FLAGS
 #define GL_CONTEXT_FLAGS 0x821e
+#endif
+
 #endif
 
 /*
@@ -5109,7 +5112,8 @@ GLAPI PFNGLGETPOINTERVKHRPROC glad_glGetPointervKHR;
 #endif
 
 
-#ifdef GLAD_IMPLEMENTATION
+#ifdef OPENGL_C /* GLAD_IMPLEMENTATION */
+#pragma once
 
 /*
 

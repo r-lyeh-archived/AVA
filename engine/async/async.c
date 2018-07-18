@@ -14,9 +14,9 @@
 #define TLS_C
 #endif
 
-#include "builtin.c"
-#include "realloc.c"
-#include "system.c"
+#include "../core/builtin.c"
+#include "../core/realloc.c"
+#include "../core/system.c"
 
 #include "async_atomic.c"
 #include "async_channel.c"

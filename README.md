@@ -48,7 +48,7 @@
 
 ### 01
 Project structure, build system and makefiles.
-<img src="assets/docs/001.gif" height="96px" align="right">
+<img src="game/01/game.gif" height="96px" align="right">
 <br><br>
 
 ## Releases

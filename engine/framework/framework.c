@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FRAMEWORK_H
+#define FRAMEWORK_H
 
 #define GLAD_IMPLEMENTATION
 
@@ -10,23 +11,25 @@
 #define _USE_MATH_DEFINES
 #endif
 
-#define SYS_WIN 1
-#define SYS_MSC 1
-#define MSC 1
-#define WIN 1
-
-#define IF(x, true_, ...)  IF_(x, true_, __VA_ARGS__)
-#define IFN(x, true_, ...) IF_(x, __VA_ARGS__, true_)
-#define IF_(x, true_, ...) IF_##x(true_, __VA_ARGS__)
-#define IF_0(true_,...)    __VA_ARGS__
-#define IF_1(true_,...)    true_
+#ifndef SYS_WIN
+	#define SYS_WIN 1
+	#define SYS_MSC 1
+	#define MSC 1
+	#define WIN 1
+	#define IF(x, true_, ...)  IF_(x, true_, __VA_ARGS__)
+	#define IFN(x, true_, ...) IF_(x, __VA_ARGS__, true_)
+	#define IF_(x, true_, ...) IF_##x(true_, __VA_ARGS__)
+	#define IF_0(true_,...)    __VA_ARGS__
+	#define IF_1(true_,...)    true_
+	#endif
 #endif
-
 
 //#include "includes.c"
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
+
+#endif
 
 // 
 // #include "opengl.c"
@@ -42,7 +45,6 @@
 #define IMAGE_C
 #define INPUT_C
 #define LINEAR_C
-//#define LOGGER_C
 #define MATH_C
 #define NETWORK_C
 #define NOISE_C
@@ -54,8 +56,14 @@
 #define WINDOW_C
 #endif
 
-#include "glfw3.c"
 #include "opengl.c"
+
+#ifdef _WIN32
+//#include <windows.h>
+//#include <mmsystem.h>
+#endif
+
+#include "glfw3.c"
 
 #include "app.c"
 #include "camera.c"
@@ -64,7 +72,6 @@
 #include "image.c"
 #include "input.c"
 #include "linear.c"
-#include "logger.c"
 #include "math.c"
 //#include "network.c"
 #include "noise.c"
@@ -73,11 +80,11 @@
 #include "transform.c"
 #include "units.c"
 #include "window.c"
+
 // #include "palette.c"
 //#include "memory.c"
 //#include "string32.c"
 //#include "stringv.c"
-
 
 #ifdef FRAMEWORK_DEMO
 int main() {

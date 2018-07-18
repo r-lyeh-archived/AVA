@@ -44,7 +44,7 @@
 // This is a workaround for the fact that glfw3.h needs to export APIENTRY (for
 // example to allow applications to correctly declare a GL_ARB_debug_output
 // callback) but windows.h assumes no one will define APIENTRY before it does
-#undef APIENTRY
+// #undef APIENTRY // @r-lyeh
 
 // GLFW on Windows is Unicode only and does not work in MBCS mode
 #ifndef UNICODE

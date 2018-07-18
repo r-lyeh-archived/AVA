@@ -94,9 +94,9 @@ exit
 
             if "0"=="%OK%" (
                 color
-                echo ^>^> launcher
-                .build\debug\launcher.exe %*
-                echo ^<^< launcher
+                echo ^>^> launch
+                .build\debug\launch.exe %*
+                echo ^<^< launch
             ) else (
                 color 4f
                 echo  && rem beep
