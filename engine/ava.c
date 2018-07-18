@@ -1,11 +1,3 @@
-//                     /\\ \// /\\
-//                  small game engine
-//
-// This file is subject to the license terms in the LICENSE file
-// found in the top-level directory of this distribution.
-//
-// People who worked on this file: @r-lyeh,
-
 #include "ava.h"
 
 #ifdef AVA_C
