@@ -337,6 +337,7 @@ extern "C" {
 #include "ecs/ecs.c"
 #include "serial/json5.c"
 #include "framework/framework.c"
+#include "audio/audio.c"
 
 #ifdef __cplusplus
 }

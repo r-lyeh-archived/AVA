@@ -103,6 +103,30 @@ project "game02"
 		defines {"NDEBUG", "SHIPPING"}
 		optimize "On"
 
+project "game03"
+	kind "SharedLib"
+	location "../../.project"
+	language "C++"
+	targetdir "../../.build/%{cfg.buildcfg}"
+
+	files { "../../game/03/**.c", "../../game/03/**.cpp", "../../game/03/**.cc", "../../game/03/**.cxx", "../../game/03/**.h", "../../game/03/**.hpp", "../../game/03/**.inl"}
+	--removefiles { "../../app/**" }
+	includedirs {"../../editor/", "../../engine/"}
+	links {"engine"}
+	defines {"LINKAGE=IMPORT"}
+
+	filter "configurations:debug"
+		defines {"DEBUG"}
+		symbols "On"
+
+	filter "configurations:release"
+		defines {"NDEBUG"}
+		optimize "On"
+
+	filter "configurations:shipping"
+		defines {"NDEBUG", "SHIPPING"}
+		optimize "On"
+
 -- app
 
 project "launch"
@@ -113,7 +137,7 @@ project "launch"
 
 	files {"../../engine/app/launch/**.c*", "../../engine/app/launch/**.h*" } -- "../../engine/app/launcher/dialog.rc" }
 	includedirs {"../../editor/", "../../engine/"}
-	links {"engine", "editor", "game01", "game02" }
+	links {"engine", "editor", "game01", "game02", "game03" }
 	--defines {"LINKAGE=IMPORT"}
 
 	configuration "windows"
