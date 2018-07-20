@@ -207,7 +207,7 @@
 #define IF_0(true_,...)    __VA_ARGS__
 #define IF_1(true_,...)    true_
 #else
-#include "core/system.c"
+#include "core/detect.c"
 #endif
 
 // tags
@@ -304,17 +304,30 @@ IF(MSC, typedef ptrdiff_t ssize_t); // 64bit ssize_t for MSC
 
 // string helpers
 
-static builtin(thread) char strfv_buf[8][256];
-static builtin(thread) int  strfv_idx = 0;
-static builtin(inline) char *strfv( const char *fmt, va_list vl ) {
-    char *dst = strfv_buf[ (strfv_idx+1)%8 ];
-    vsnprintf( dst, 256, fmt, vl );
+#ifdef _MSC_VER
+#define __thread __declspec(thread)
+#else
+#define __inline inline
+#endif
+#ifndef VSNPRINTF
+#define VSNPRINTF vsnprintf
+#endif
+#include <stdarg.h>
+#include <assert.h>
+static __thread char vav_buf[2048];
+static __thread int  vav_idx = 0;
+static __inline char *vav( const char *fmt, va_list vl ) {
+    int l = vsnprintf(0, 0, fmt, vl );
+    assert(l >= 0);
+    assert(l+1 <= 2048);
+    char *dst = vav_buf + (vav_idx + l < 2048 ? vav_idx : 0);
+    vav_idx += VSNPRINTF( dst, 2048, fmt, vl );
     return dst;
 }
-static builtin(inline) char *strf( const char *fmt, ... ) {
+static __inline char *va( const char *fmt, ... ) {
     va_list vl;
     va_start(vl, fmt);
-    char *dst = strfv( fmt, vl );
+    char *dst = vav( fmt, vl );
     va_end(vl);
     return dst;
 }
@@ -328,8 +341,9 @@ static builtin(inline) char *strf( const char *fmt, ... ) {
 extern "C" {
 #endif
 
-#include "core/system.c"
-#include "core/format.c"
+#include "core/detect.c"
+
+#include "ds/ds.c"
 
 #include "async/async.c"
 #include "debug/debug.c"

@@ -13,8 +13,7 @@ void* dllquick( const char *filename, const char *symbol );
 
 #ifdef DLL_C
 #pragma once
-#include "../core/system.c"
-#include "../core/format.c"
+#include "../core/detect.c"
 #include "os_exec.c"
 #if WIN
 #include <io.h>
@@ -36,7 +35,7 @@ void* dllquick( const char *filename, const char *symbol );
 #if OSX || IOS
 #   include <mach-o/dyld.h>
 #endif
-bool fexists( const char *filename ) {
+bool dllexists( const char *filename ) {
 #if WIN
     return _access( filename, 0 ) != -1;
 #else
@@ -46,11 +45,11 @@ bool fexists( const char *filename ) {
 static DLLTYPE libraries[256] = {0};
 bool dllopen(int plug_id, const char *filename) {
     const char *buf;
-    if( fexists(buf = format("%s", filename)) ||
-        fexists(buf = format("%s.dll", filename)) ||
-        fexists(buf = format("%s.so", filename)) ||
-        fexists(buf = format("lib%s.so", filename)) ||
-        fexists(buf = format("%s.dylib", filename)) ) {
+    if( dllexists(buf = va("%s", filename)) ||
+        dllexists(buf = va("%s.dll", filename)) ||
+        dllexists(buf = va("%s.so", filename)) ||
+        dllexists(buf = va("lib%s.so", filename)) ||
+        dllexists(buf = va("%s.dylib", filename)) ) {
         filename = buf;
     } else {
         return 0;
@@ -61,10 +60,10 @@ bool dllopen(int plug_id, const char *filename) {
     char outfile[512];
     char *tmpdir = getenv("TMP") ? getenv("TMP") : getenv("TEMP") ? getenv("TEMP") : 0;
     if( tmpdir ) {
-        os_exec(format("mkdir %s\\DLL 1> nul 2> nul", tmpdir));
-        strcpy(outfile, os_exec(format("echo %s\\DLL\\%%random%%", tmpdir)) );
-        os_exec(format("copy /y \"%s\" \"%s.%s\" 1> nul 2> nul", filename, outfile, filename));
-        strcpy(outfile, os_exec(format("echo %s.%s", outfile, filename)));
+        os_exec(va("mkdir %s\\DLL 1> nul 2> nul", tmpdir));
+        strcpy(outfile, os_exec(va("echo %s\\DLL\\%%random%%", tmpdir)) );
+        os_exec(va("copy /y \"%s\" \"%s.%s\" 1> nul 2> nul", filename, outfile, filename));
+        strcpy(outfile, os_exec(va("echo %s.%s", outfile, filename)));
         filename = outfile;
     }
 #endif

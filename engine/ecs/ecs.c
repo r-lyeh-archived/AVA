@@ -18,7 +18,7 @@
 #ifndef ECS_H
 #define ECS_H
 
-#include "../core/array.c"
+#include "../ds/ds_array.c"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -86,7 +86,7 @@ static void register_component(int cid) {
 
     if( !w.nc ) {
         /* cflags */
-        array_append( w.entities, 0 );
+        array_push( w.entities, 0 );
     }
 
 #if 0
@@ -97,9 +97,9 @@ static void register_component(int cid) {
     array(int) ec = 0;
     for( int i = 0; i < w.ne; ++i ) {
         for( int j = 0; j < w.nc; ++j ) {
-            array_append(ec, w.entities[ i * w.nc + j ]);
+            array_push(ec, w.entities[ i * w.nc + j ]);
         }
-        array_append(ec, -1);
+        array_push(ec, -1);
     }
     array_copy(w.entities,ec);
     array_free(ec);
@@ -111,7 +111,7 @@ static void register_component(int cid) {
 
 static int new_component() {
     component c = {0};
-    array_append( w.instanced, c );
+    array_push( w.instanced, c );
     return array_count( w.instanced ) - 1;
 }
 
@@ -137,7 +137,7 @@ int (new_entity)( int cid1, ... ) {
     va_end(ap);
 
     for (int i = 0; i < w.nc; ++i) {
-        array_append(w.entities, -1);
+        array_push(w.entities, -1);
     }
 
     uint64_t flags = 0;

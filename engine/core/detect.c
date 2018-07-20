@@ -1,5 +1,5 @@
-#ifndef SYSTEM_H
-#define SYSTEM_H
+#ifndef DETECT_H
+#define DETECT_H
 
 // detect language
 
@@ -94,7 +94,7 @@
 
 #endif
 
-#if SYSTEM_DEMO
+#if DETECT_DEMO
 #include <stdio.h>
 int main() {
     const char *lang = IF(C99, "C", "C++");

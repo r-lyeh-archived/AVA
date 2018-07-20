@@ -10,9 +10,12 @@
 #define JSON5_C
 #define FRAMEWORK_C
 #define AUDIO_C
+#define DS_C
 #endif
 
 #include "core/core.c"
+
+#include "ds/ds.c"
 
 #include "async/async.c"
 #include "debug/debug.c"
@@ -30,13 +33,13 @@ int init() {
         if( 0 != (ptr = dllquick( "game.dll", "main" ) ) ) {
             ptr();
         }
-        if( 0 != (ptr = dllquick( format("game%d.dll", i), "main" ) ) ) {
+        if( 0 != (ptr = dllquick( va("game%d.dll", i), "main" ) ) ) {
             ptr();
         }
-        if( 0 != (ptr = dllquick( format("game%02d.dll", i), "main" ) ) ) {
+        if( 0 != (ptr = dllquick( va("game%02d.dll", i), "main" ) ) ) {
             ptr();
         }
-        if( 0 != (ptr = dllquick( format("game%03d.dll", i), "main" ) ) ) {
+        if( 0 != (ptr = dllquick( va("game%03d.dll", i), "main" ) ) ) {
             ptr();
         }
     }

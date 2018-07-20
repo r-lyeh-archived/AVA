@@ -1,7 +1,7 @@
 #ifndef ARRAY_H
 #define ARRAY_H
 
-#include "vrealloc.c" // vector-based allocator
+#include "ds_vrealloc.c" // vector-based allocator
 
 // array library --------------------------------------------------------------
 
@@ -11,15 +11,19 @@
 #define array(t) t*
 #define array_init(t) ( (t) = 0 )
 #define array_resize(t, n) ( memset( (t) = vrealloc((t), (n) * sizeof(0[t]) ), 0, (n) * sizeof(0[t]) ) )
-#define array_append(t, i) ( (t) = vrealloc((t), (array_count(t) + 1) * sizeof(0[t]) ), (t)[ array_count(t) - 1 ] = (i) )
+#define array_push(t, i) ( (t) = vrealloc((t), (array_count(t) + 1) * sizeof(0[t]) ), (t)[ array_count(t) - 1 ] = (i) )
+#define array_back(t) ( (t) ? &(t)[ vsize(t) - 1 ] : NULL )
 #define array_count(t) (int)( (t) ? vsize(t) / sizeof(0[t]) : 0u )
 #define array_sort(t, cmpfunc) qsort( t, array_count(t), sizeof(t[0]), cmpfunc )
 #define array_free(t) ( vrealloc((t), 0), (t) = 0 )
 
+#define array_search(t, key, cmpfn) /* requires sorted array beforehand */ \
+    bsearch(&key, t, array_count(t), sizeof(t[0]), cmpfn )
+
 #define array_insert(t, i, n) do { \
     int ac = array_count(t); \
     if( i >= ac ) { \
-        array_append(t, n); \
+        array_push(t, n); \
     } else { \
         (t) = vrealloc( (t), (ac + 1) * sizeof(t[0]) ); \
         memmove( &(t)[(i)+1], &(t)[i], (ac - (i)) * sizeof(t[0]) ); \
@@ -70,24 +74,31 @@
 #endif
 
 #ifdef ARRAY_DEMO
+#include <string.h>
 
 int cmpi(const void * a, const void * b) {
    return ( *(const int*)a - *(const int*)b );
+}
+int cmps(const void *a, const void *b ) {
+    return strcmp(*(const char**)a,*(const char**)b);
 }
 
 int main() {
     array(int) a;
 
     array_init(a);
-    array_insert(a, 0, 2); // same than append()
-    array_append(a, 32);
-    array_append(a, 100);
-    array_append(a, 56);
-    array_append(a, 88);
-    array_append(a, 88);
-    array_append(a, 2);
-    array_append(a, 25);
+    array_insert(a, 0, 2);
+    array_push(a, 32);
+    array_push(a, 100);
+    array_push(a, 56);
+    array_push(a, 88);
+    array_push(a, 88);
+    array_push(a, 2);
+    array_push(a, 25);
+    printf("%p %d\n", array_back(a), *array_back(a));
+
     array_insert(a, 1, 17);
+
     for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
 
     array_erase(a, 2);
@@ -99,7 +110,36 @@ int main() {
     array_unique(a, cmpi);
     for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
 
+
+    {
+        int key = 88;
+        int *found = array_search(a, key, cmpi);
+        if (!found)
+            printf ("%d is not in the array.\n",key);
+        else
+            printf ("%d is in the array.\n",*found);
+    }
+
     array_free(a);
+
+    {
+        array(char*) as = 0;
+
+        char *values[] = {"some","example","strings","here",":D",":("};
+        for( int i = 0; i < 6; ++i ) {
+            array_push(as, values[i]);
+        }
+        array_sort(as, cmps);
+
+        char *key = "example";
+        char **found = array_search(as, key, cmps);
+        if (!found)
+            printf ("%s is not in the array.\n",key);
+        else
+            printf ("%s is in the array.\n",*found);
+
+        array_free(as);
+    }
 }
 
 #endif

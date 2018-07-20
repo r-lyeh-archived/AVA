@@ -20,7 +20,7 @@ at end, close task and call callback
 os_exec( cmd, args, []{ prog }, []{ err }, []{ ok } );
 */
 
-#include "../core/system.c"
+#include "../core/detect.c"
 #include "../core/realloc.c"
 
 #include <stdlib.h>
@@ -52,7 +52,7 @@ char *os_exec( const char *cmd ) {
 
 bool os_task( const char *cmd, int *progress ) {
     int ok = 1;
-    char *buf = (char *)MALLOC( 4096 );
+    char buf[4096] = {0};
     FILE *fp = popen( cmd, "rt" ); // also check 'unbuffer {cmd}' under linux
     if( fp ) {
         while( fgets(buf, 4096 - 1, fp) ) {
@@ -77,7 +77,6 @@ bool os_task( const char *cmd, int *progress ) {
             }
         }
     }
-    FREE(buf);
     pclose(fp);
     return ok;
 }

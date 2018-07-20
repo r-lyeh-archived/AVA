@@ -13,7 +13,7 @@ int dialog( int buttons, const char *title, const char *message );
 #ifdef _WIN32
 #include <winsock2.h>
 #include <shlobj.h>
-wchar_t *widen(wchar_t *buf, int sz, const char *utf8) { // wide strings (windows only)
+wchar_t *dialog_widen(wchar_t *buf, int sz, const char *utf8) { // wide strings (windows only)
     int needed = 2 * MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
     buf[0] = 0;
     if( needed < sz ) {
@@ -43,7 +43,7 @@ int dialog( int buttons, const char *title, const char *message ) {
 #if _WIN32
     #pragma comment(lib, "user32.lib")
     wchar_t buf1[256], buf2[2048];
-    wchar_t *title16 = widen(buf1, 256, title), *message16 = widen(buf2, 2048, message);
+    wchar_t *title16 = dialog_widen(buf1, 256, title), *message16 = dialog_widen(buf2, 2048, message);
     int rc = MessageBoxW(0, message16, title16, MB_SETFOREGROUND |
         (buttons >= 3 ? MB_YESNOCANCEL : buttons >= 2 ? MB_YESNO : MB_OK) |
         (is_fail ? MB_ICONERROR :

@@ -21,7 +21,7 @@ bool join(int thread_id);
 
 #ifdef THREAD_C
 #pragma once
-#include "../core/system.c"
+#include "../core/detect.c"
 #include "../core/builtin.c"
 #include "../core/realloc.c"
 #include "async_tls.c"

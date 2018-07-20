@@ -55,7 +55,7 @@ void  json5_free(json5 *root);
 
 #ifdef JSON5_C
 #pragma once
-#include "../core/array.c"
+#include "../ds/ds_array.c"
 #include <assert.h>
 #include <ctype.h>
 #include <math.h>
@@ -160,7 +160,7 @@ char *json5__parse_object(json5 *obj, char *p, char **err_code) {
             }
 
             if( node.type != json5_undefined ) {
-                array_append(obj->nodes, node);
+                array_push(obj->nodes, node);
                 ++obj->count;
             }
 
@@ -209,7 +209,7 @@ char *json5__parse_value(json5 *obj, char *p, char **err_code) {
             }
 
             if( elem.type != json5_undefined ) {
-                array_append(obj->array, elem);
+                array_push(obj->array, elem);
                 ++obj->count;
             }
             if (*p == ']') { ++p; break; }

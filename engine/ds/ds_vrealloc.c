@@ -13,6 +13,7 @@ void *vresize( void *p, size_t sz );
 
 #ifdef VREALLOC_C
 #pragma once
+#include "../core/realloc.c"
 #include <stdlib.h>
 
 size_t vsize( void *p ) {
@@ -22,7 +23,7 @@ size_t vsize( void *p ) {
 void *vresize( void *p, size_t sz ) {
     size_t *ret = (size_t*)p - 2;
     if( !p ) {
-        ret = malloc( sizeof(size_t) * 2 + sz );
+        ret = REALLOC( 0, sizeof(size_t) * 2 + sz );
         ret[0] = sz;
         ret[1] = 0;
     } else {
@@ -32,7 +33,7 @@ void *vresize( void *p, size_t sz ) {
             ret[0] = sz;
             ret[1] = ocp - (sz - osz);
         } else {
-            ret = realloc( ret, sizeof(size_t) * 2 + sz * 1.75 );
+            ret = REALLOC( ret, sizeof(size_t) * 2 + sz * 1.75 );
             ret[0] = sz;
             ret[1] = (size_t)(sz * 1.75) - sz;
         }
@@ -48,7 +49,7 @@ void *vrealloc( void *p, size_t sz ) {
             size_t *ret = (size_t*)p - 2;
             ret[0] = 0;
             ret[1] = 0;
-            free( ret );
+            REALLOC( ret, 0 );
         }
         return 0;
     }

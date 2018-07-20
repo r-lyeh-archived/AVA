@@ -16,7 +16,7 @@
 
 #include "../core/builtin.c"
 #include "../core/realloc.c"
-#include "../core/system.c"
+#include "../core/detect.c"
 
 #include "async_atomic.c"
 #include "async_channel.c"
