@@ -42,6 +42,7 @@
 ## Todo ᕕ(ᐛ)ᕗ
 - [x] 01 [Project structure, build system and makefiles.](#01)
 - [x] 02 [Window creation and basic framework.](#02)
+- [x] 03 [Audio.](#03)
 -
 
 ## Screenshots
@@ -54,6 +55,11 @@ Project structure, build system and makefiles.
 ### 02
 Window creation and basic framework.
 <img src="game/02/demo.png" height="96px" align="right">
+<br><br>
+
+### 03
+Audio.
+<img src="game/03/demo.png" height="96px" align="right">
 <br><br>
 
 ## Releases

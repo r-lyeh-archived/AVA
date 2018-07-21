@@ -11,6 +11,7 @@
 #define FRAMEWORK_C
 #define AUDIO_C
 #define DS_C
+#define ASSET_C
 #endif
 
 #include "core/core.c"
@@ -24,10 +25,13 @@
 #include "serial/json5.c"
 #include "framework/framework.c"
 #include "audio/audio.c"
+#include "asset/asset.c"
 
 API int init();
 
 int init() {
+    import("game/**");
+    import("assets/**");
     void (*ptr)();
     for( int i = 0; i < 128; ++i ) {
         if( 0 != (ptr = dllquick( "game.dll", "main" ) ) ) {

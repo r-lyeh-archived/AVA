@@ -205,12 +205,12 @@ function ninja.generateProjectCfg(cfg)
 	p.w("# core rules for " .. cfg.name)
 	if toolset_name == "msc" then -- TODO /NOLOGO is invalid, we need to use /nologo
 		p.w("rule cc")
-		p.w("  command = " .. cc .. all_cflags .. " /nologo /showIncludes -c $in /Fo$out")
+		p.w("  command = " .. cc .. all_cflags .. " /nologo -c $in /Fo$out") -- /showIncludes
 		p.w("  description = cc $out")
 		p.w("  deps = msvc")
 		p.w("")
 		p.w("rule cxx")
-		p.w("  command = " .. cxx .. all_cxxflags .. " /nologo /showIncludes -c $in /Fo$out")
+		p.w("  command = " .. cxx .. all_cxxflags .. " /nologo -c $in /Fo$out") -- /showIncludes
 		p.w("  description = cxx $out")
 		p.w("  deps = msvc")
 		p.w("")

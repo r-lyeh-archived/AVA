@@ -74,7 +74,8 @@
 // OS includes here
 
 #if _WIN32
-//#include <winsock2.h>
+#include <winsock2.h>
+#include <shlobj.h>
 //#include <io.h>
 #else
 #include <unistd.h>
@@ -321,7 +322,7 @@ static __inline char *vav( const char *fmt, va_list vl ) {
     assert(l >= 0);
     assert(l+1 <= 2048);
     char *dst = vav_buf + (vav_idx + l < 2048 ? vav_idx : 0);
-    vav_idx += VSNPRINTF( dst, 2048, fmt, vl );
+    vav_idx += VSNPRINTF( dst, 2048, fmt, vl ) + 1;
     return dst;
 }
 static __inline char *va( const char *fmt, ... ) {
@@ -352,6 +353,7 @@ extern "C" {
 #include "serial/json5.c"
 #include "framework/framework.c"
 #include "audio/audio.c"
+#include "asset/asset.c"
 
 #ifdef __cplusplus
 }
