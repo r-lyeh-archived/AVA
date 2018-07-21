@@ -1,5 +1,5 @@
-int   file_size(const char* name);
-char* file_read(const char* name);
+int   file_size_(const char* name);
+char* file_read_(const char* name);
 char* file_find(const char* name);
 
 /*
@@ -21,18 +21,18 @@ or,
 #include <stdlib.h>
 #include <sys/stat.h>
 
-int file_size(const char *name) {
+int file_size_(const char *name) {
     struct stat st;
     return stat(name, &st) >= 0 ? (int)st.st_size : 0;
 }
 
-char* file_read(const char* name) {
+char* file_read_(const char* name) {
     char *buf;
     size_t len;
 
     FILE *fp = fopen(name, "rb");
     if( fp ) {
-        len = file_size(name);
+        len = file_size_(name);
         buf = malloc(len + 1);
         len = fread(buf, 1, len, fp);
         fclose(fp);

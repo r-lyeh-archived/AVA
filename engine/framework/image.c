@@ -56,7 +56,7 @@ void image_flip( image * );
 
 #ifdef IMAGE_C
 #pragma once
-#include "filesys.c"
+#include "filesys_.c"
 #define swapifbe(x) (x) // endian.h
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -114,8 +114,8 @@ bool pug_decoder( image *img, const void *ptr, size_t size, int flags ) {
 }
 
 bool image_loadfile( image *img, const char *pathfile, int flags ) {
-    void *ptr = file_read(pathfile);
-    int size = file_size(pathfile);
+    void *ptr = file_read_(pathfile);
+    int size = file_size_(pathfile);
     bool ok = 0;
     if( !ok ) {
         ok = pug_decoder( img, ptr, size, flags );
