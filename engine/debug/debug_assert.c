@@ -2,8 +2,9 @@
 
 #ifndef ASSERT_H
 #define ASSERT_H
-
 #include <stdio.h>
+
+API void panic( const char *description );
 
 #if SHIPPING
 #define ASSERT(EXPR, ...)
@@ -24,18 +25,12 @@
 
 #endif
 
-#ifdef ASSERT_C
-#pragma once
-#include "debug_panic.c"
-#endif
-
 #ifdef ASSERT_DEMO
-
+#pragma once
 int main() {
 	ASSERT(1 < 2);
 	ASSERT(1 > 2, "Assert demo: %d bigger than %d?", 1, 2);
 }
-
 #endif
 
 

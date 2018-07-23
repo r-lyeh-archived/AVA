@@ -15,10 +15,10 @@ void console_run2(const char* name, void *arg1, void *arg2 );
 
 #endif
 
+// ------------------------------------------------
+
 #ifdef CONSOLE_C
 #pragma once
-
-// ------------------------------------------------
 
 typedef struct console_opcode {
     const char *name;
@@ -99,6 +99,8 @@ AUTORUN {
 #endif
 
 #endif
+
+// ------------------------------------------------
 
 #ifdef CONSOLE_DEMO
 #include <stdio.h>

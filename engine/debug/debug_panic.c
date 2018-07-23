@@ -1,10 +1,10 @@
 // # err ######################################################################
 
-extern void (*on_panic)( const char *description );
-void die();
-void error( const char *description );
-void fatal( const char *description );
-void panic( const char *description );
+extern API void (*on_panic)( const char *description );
+API void die();
+API void error( const char *description );
+API void fatal( const char *description );
+API void panic( const char *description );
 
 #ifdef PANIC_C
 #pragma once

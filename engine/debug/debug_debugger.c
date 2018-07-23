@@ -2,7 +2,6 @@
 
 #ifndef DEBUGGER_H
 #define DEBUGGER_H
-#include <stdbool.h>
 
 int  debugging();
 int  asserting();
@@ -13,7 +12,7 @@ int  asserting();
 
 #ifdef DEBUGGER_C
 #pragma once
-
+#include <stdbool.h>
 #include <stdio.h>
 #include <assert.h>
 #include <signal.h>

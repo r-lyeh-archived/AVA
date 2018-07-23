@@ -3,42 +3,37 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#ifndef MALLOC
-#define MALLOC malloc
-#define FREE free
-#define REALLOC realloc
-#endif
-
-#ifndef HEAP
+#ifndef API
+#define API
+#define MALLOC(sz)    malloc(sz)
+#define FREE(p)       (free(p), 0)
+#define REALLOC(p,sz) realloc(p,sz)
 #define HEAP
-#endif
-
-#if defined(_MSC_VER) && !defined(__thread)
+#ifdef _MSC_VER
 #define __thread __declspec(thread)
+#endif
 #endif
 
 #ifdef DEBUG_C
 #pragma once
-#define ASSERT_C 1
-#define BENCHMARK_C 1
-#define BREAKPOINT_C 1
-#define BUILD_C 1
-#define CALLSTACK_C 1
-#define CONSOLE_C 1
-#define CRASH_C 1
-#define DEBUGGER_C 1
-#define DIALOG_C 1
-#define HEXDUMP_C 1
-#define LOGGER_C 1
-#define PANIC_C 1
-#define TEST_C 1
+#define ASSERT_C
+#define BENCHMARK_C
+#define BREAKPOINT_C
+#define BUILD_C
+#define CONSOLE_C
+#define CRASH_C
+#define DEBUGGER_C
+#define DIALOG_C
+#define HEXDUMP_C
+#define LOGGER_C
+#define PANIC_C
+#define TEST_C
 #endif
 
 #include "debug_assert.c"
 #include "debug_benchmark.c"
 #include "debug_breakpoint.c"
 #include "debug_build.c"
-#include "debug_callstack.c"
 #include "debug_console.c"
 #include "debug_crash.c"
 #include "debug_debugger.c"

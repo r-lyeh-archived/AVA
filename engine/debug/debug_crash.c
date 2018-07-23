@@ -3,7 +3,6 @@ void crash();
 
 #ifdef CRASH_C
 #pragma once
-
 #include <stdio.h>
 #include <assert.h>
 #include <signal.h>

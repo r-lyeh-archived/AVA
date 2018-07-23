@@ -1,12 +1,16 @@
-#ifdef TEST_C
-#pragma once
-
 // # tst ######################################################################
 
 // @todo: measure time with overrides as well, so it works as benchmark.
 // double (*benchmark)() = 0;
 // unit() { now = benchmark(); }
 // test() { ... }
+
+#include <stdbool.h>
+API bool unit(const char *name);
+API bool test(int expr);
+
+#ifdef TEST_C
+#pragma once
 
 #include "debug.c"
 #include "debug_logger.c"

@@ -70,16 +70,16 @@ extern const char *(*callstack_handler)(int traces);
 
 #endif
 
-#if LOGGER_C
+#ifdef LOGGER_C
 #pragma once
-#include "debug_callstack.c"
 
+API char *callstack(int traces);
 const char *(*callstack_handler)(int traces) = callstack;
 
 #endif
 
 
-#if LOGGER_DEMO
+#ifdef LOGGER_DEMO
 int main() {
     FIXME("write a better demo");
     LOG(AUDIO|ASSET, "!This is an audio test %d, with callstack", 123);

@@ -3,12 +3,7 @@
 // If you are linking your binary using GNU ld you need to add --export-dynamic
 // - rlyeh, public domain.
 
-#ifndef CALLSTACK_H
-#define CALLSTACK_H
-
 char *callstack( int traces );
-
-#endif
 
 #ifdef CALLSTACK_C
 #pragma once
@@ -172,7 +167,6 @@ char *callstack( int traces ) { //$
     }
     return buf;
 }
-
 #endif
 
 #ifdef CALLSTACK_DEMO
