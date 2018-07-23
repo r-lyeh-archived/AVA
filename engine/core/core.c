@@ -5,6 +5,7 @@
 #define WATCH_C
 #define REALLOC_C
 #define CALLSTACK_C
+#define MALLOCA_C
 #endif
 
 #include "detect.c"
@@ -12,3 +13,4 @@
 #include "watch.c"
 #include "realloc.c"
 #include "callstack.c"
+#include "malloca.c"

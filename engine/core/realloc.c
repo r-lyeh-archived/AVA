@@ -24,10 +24,34 @@ API void* forget( void *ptr );
 
 #ifdef REALLOC_C
 #pragma once
-#include <malloc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+
+#ifndef MSIZE_
+#include <stdint.h>
+#if defined(__GLIBC__)
+#  include <malloc.h>
+#  define MSIZE_ malloc_usable_size
+#elif defined(__APPLE__) || defined(__FreeBSD__)
+#  include <malloc/malloc.h>
+#  define MSIZE_  malloc_size
+#elif defined(__ANDROID_API__)
+#  include <malloc.h>
+/*extern "C"*/ size_t dlmalloc_usable_size(void*);
+#  define MSIZE_ dlmalloc_usable_size
+#elif defined(_WIN32)
+#  include <malloc.h>
+#  define MSIZE_ _msize
+#else
+#  error Unsupported malloc_usable_size()
+#endif
+#endif
+
+int MSIZE( void *p) {
+    if( p ) return _msize(p);
+    return 0;
+}
 
 static char *oom = 0;
 #ifdef AUTORUN
@@ -54,11 +78,6 @@ void *REALLOC(void *ptr, int size) {
     }
 #endif
     return ptr;
-}
-
-int MSIZE( void *p) {
-    if( p ) return _msize(p);
-    return 0;
 }
 
 #endif

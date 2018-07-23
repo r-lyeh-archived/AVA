@@ -9,8 +9,8 @@
 API char*       file_map( const char *pathfile, size_t offset, size_t len );
 API void        file_unmap( char *buf, size_t len );
 
-API int         file_stamp( const char *pathfile ); // Y2038
 API int         file_size( const char *pathfile ); // 4gib limit
+API int         file_stamp( const char *pathfile ); // Y2038
 
 API bool        file_exist( const char *pathfile );
 API bool        file_isdir( const char *pathfile );
@@ -116,15 +116,15 @@ void file_unmap( char *buf, size_t len ) {
     munmap( buf, len );
 }
 
-int file_stamp( const char *pathfile ) {
-    struct stat_ st;
-    uint64_t t = stat8(pathfile, &st) < 0 ? 0ULL : (uint64_t)st.st_mtime;
-    return (int)t;
-}
 int file_size( const char *pathfile ) {
     struct stat_ st;
     uint64_t s = stat8(pathfile, &st) < 0 ? 0ULL : (uint64_t)st.st_size;
     return (int)s;
+}
+int file_stamp( const char *pathfile ) {
+    struct stat_ st;
+    uint64_t t = stat8(pathfile, &st) < 0 ? 0ULL : (uint64_t)st.st_mtime;
+    return (int)t;
 }
 
 bool file_exist( const char *pathfile ) {
