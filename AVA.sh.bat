@@ -30,8 +30,13 @@ exit
 @echo off
 
     REM cleanup
+	if "%1"=="rebuild" (
+	call "%0" clean
+	call "%0" 
+	exit /b
+	)
 
-        if "%1"=="wipe" (
+        if "%1"=="clean" (
             if exist .build   rd /q /s .build   && if exist .build   echo "error cannot clean up .build" && exit /b
             if exist .project rd /q /s .project && if exist .project echo "error cannot clean up .project" && exit /b
             echo Clean up && exit /b
