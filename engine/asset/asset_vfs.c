@@ -22,6 +22,7 @@ struct asset_counter {
 #include <string.h>
 static char *dir_registry = 0;
 static bool append( const char *str ) {
+    str = strchr(str, ' ') + 1;
     int slen = strlen(str);
     int olen = (dir_registry ? strlen(dir_registry) : 0);
     dir_registry = REALLOC( dir_registry, olen + slen + 2 );
