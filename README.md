@@ -14,13 +14,19 @@
   <a href="#todo-ᕕᐛᕗ">Todo ᕕ(ᐛ)ᕗ</a> |
 <br/>
 <br/>
+<br/>
+<a href="https://discord.gg/vu6Vt9d"><img alt="Discord" src="https://img.shields.io/badge/chat-AVA%20lounge-738bd7.svg?logo=discord"/></a>
+<a href="https://travis-ci.org/r-lyeh/AVA"><img alt="Travis" src="https://api.travis-ci.org/r-lyeh/AVA.svg?branch=master"/></a>
+<a href="https://github.com/r-lyeh/AVA/issues"><img alt="Issues" src="https://github-meta-badges.herokuapp.com/r-lyeh/AVA/issues.svg"/></a>
+<a href="http://unlicense.org/"><img alt="Unlicensed" src="http://img.shields.io/badge/license-Unlicense-blue.svg?style=flat"/></a>
+<br/>
 </p>
 
 ## Features
 
+- [x] ~C++~. C.
 - [x] ~Fast~. Simple.
 - [x] ~Modern~. Readable.
-- [x] ~C++~. Bindable C.
 - [x] ~Full featured~. Extendable.
 - [x] ~Object-oriented~. Data-oriented.
 - [x] ~Infinite documentation~. Browsable sources.
@@ -140,10 +146,3 @@ clang++ game.c AVA.c         && echo AVA as library (OSX)
 [roam](https://github.com/search?utf8=%E2%9C%93&q=game+engine+roam&type=),
 [sushi](https://github.com/search?utf8=%E2%9C%93&q=game+engine+sushi&type=),
 [tigr](https://github.com/search?utf8=%E2%9C%93&q=game+engine+tigr&type=),
-
-## Status
-
-[![Discord](https://img.shields.io/badge/chat-AVA%20lounge-738bd7.svg?logo=discord)](https://discord.gg/vu6Vt9d)
-[![Travis](https://api.travis-ci.org/r-lyeh/AVA.svg?branch=master)](https://travis-ci.org/r-lyeh/AVA)
-[![Issues](https://github-meta-badges.herokuapp.com/r-lyeh/AVA/issues.svg)](https://github.com/r-lyeh/AVA/issues)
-[![Unlicensed](http://img.shields.io/badge/license-Unlicense-blue.svg?style=flat)](http://unlicense.org/)
