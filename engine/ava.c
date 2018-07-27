@@ -12,6 +12,7 @@
 #define AUDIO_C
 #define DS_C
 #define ASSET_C
+#define NETWORK_C
 #endif
 
 #include "core/core.c"
@@ -26,6 +27,7 @@
 #include "framework/framework.c"
 #include "audio/audio.c"
 #include "asset/asset.c"
+#include "network/network.c"
 
 API int init();
 

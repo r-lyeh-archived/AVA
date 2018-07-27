@@ -354,6 +354,7 @@ extern "C" {
 #include "framework/framework.c"
 #include "audio/audio.c"
 #include "asset/asset.c"
+#include "network/network.c"
 
 #ifdef __cplusplus
 }
