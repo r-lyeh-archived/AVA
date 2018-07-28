@@ -167,7 +167,7 @@ __thread
 struct reflect_context {
     const char *name;
     const char *info;
-} context = { "", "" };
+} reflect_ctx = { "", "" };
 
 void reflect_iterate_fields( const char *base, void *obj, void (*callback)( const reflect *r, void *value, void *userdata ), void *userdata ) {
     if( base ) for( int i = 0, nb = strlen(base); i < reflect_counter; ++i ) {
@@ -180,16 +180,16 @@ void reflect_iterate_fields( const char *base, void *obj, void (*callback)( cons
                 }
 
                 if( any ) {
-                    struct reflect_context copy = context;
-                    char buf1[128]; sprintf(buf1, "%s.%s", context.name, registry[i]->name);
-                    char buf2[128] = {0}; if( registry[i]->info[0] ) sprintf(buf2, "%s%s%.*s", context.info, context.info[0] ? " > " : "", (int)(strlen(registry[i]->info) - 2), 1+registry[i]->info);
-                    context.name = buf1 + (buf1[0] == '.');
-                    context.info = buf2;
+                    struct reflect_context copy = reflect_ctx;
+                    char buf1[128]; sprintf(buf1, "%s.%s", reflect_ctx.name, registry[i]->name);
+                    char buf2[128] = {0}; if( registry[i]->info[0] ) sprintf(buf2, "%s%s%.*s", reflect_ctx.info, reflect_ctx.info[0] ? " > " : "", (int)(strlen(registry[i]->info) - 2), 1+registry[i]->info);
+                    reflect_ctx.name = buf1 + (buf1[0] == '.');
+                    reflect_ctx.info = buf2;
 
                     if( registry[i]->is_pod ) {
                         reflect m = *registry[i];
-                        m.name = context.name;
-                        m.info = context.info;
+                        m.name = reflect_ctx.name;
+                        m.info = reflect_ctx.info;
                         callback( &m, any, userdata );
                     } else {
                         char buf3[128], *rebase = (char*)registry[i]->type;
@@ -197,7 +197,7 @@ void reflect_iterate_fields( const char *base, void *obj, void (*callback)( cons
                         reflect_iterate_fields( rebase, any, callback, userdata );
                     }
 
-                    context = copy;
+                    reflect_ctx = copy;
                 }
             }
             return;
