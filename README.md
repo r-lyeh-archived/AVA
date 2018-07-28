@@ -41,8 +41,8 @@
 - Heap allocations under control.
 - No installation, no makefiles, fast compilation times.
 - Generic 3D editor, that can be decoupled from the project.
-- Generic data pipeline, that can be decoupled from the project.
-- Data pipeline tools speak JSON everywhere: still human-readable, still mergeable workflow.
+- Generic asset pipeline, that can be decoupled from the project.
+- JSON workflow: still human-readable, still mergeable.
 - Inspiration from: bitsquid, stb, rlk, krig, mio, tigr, jo.
 
 ## Todo ᕕ(ᐛ)ᕗ
