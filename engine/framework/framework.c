@@ -44,15 +44,13 @@
 #define GLFW3_C
 #define IMAGE_C
 #define INPUT_C
-#define LINEAR_C
-#define MATH_C
+//#define LINEAR_C
+//#define MATH_C
 #define NETWORK_C
-#define NOISE_C
+//#define NOISE_C
 #define OPENGL_C
 #define RENDER_C
-#define TIMER_C
-#define TRANSFORM_C
-#define UNITS_C
+//#define TRANSFORM_C
 #define WINDOW_C
 #endif
 
@@ -71,14 +69,12 @@
 #include "filesys_.c"
 #include "image.c"
 #include "input.c"
-#include "linear.c"
-#include "math.c"
+//#include "linear.c"
+//#include "math.c"
 //#include "network.c"
-#include "noise.c"
+//#include "noise.c"
 #include "render.c"
-#include "timer.c"
-#include "transform.c"
-#include "units.c"
+//#include "transform.c"
 #include "window.c"
 
 // #include "palette.c"

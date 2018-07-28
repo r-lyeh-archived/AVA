@@ -201,7 +201,8 @@ void CreatePerspectiveProjection(float * proj, float aspect, float fov_y_rad, fl
 
 #include <math.h>
 #include <assert.h>
-#include "linear.c"
+//#include "linear.c"
+#include "../math/math_linear.c"
 
 void flycam(
     float view[16],

@@ -13,6 +13,8 @@
 #define DS_C
 #define ASSET_C
 #define NETWORK_C
+#define TIME_C
+#define MATH_C
 #endif
 
 #include "core/core.c"
@@ -24,10 +26,12 @@
 #include "os/os.c"
 #include "ecs/ecs.c"
 #include "serial/serial.c"
+#include "math/math.c"
 #include "framework/framework.c"
 #include "audio/audio.c"
 #include "asset/asset.c"
 #include "network/network.c"
+#include "time/time.c"
 
 API int init();
 

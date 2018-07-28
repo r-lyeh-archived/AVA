@@ -1,6 +1,6 @@
 #ifndef TRANSFORM_H
 #define TRANSFORM_H
-#include "linear.c"
+#include "math_linear.c"
 
 float* transform( mat4x4 r, float position[3], float rotquat[4], float scale[3] );
 

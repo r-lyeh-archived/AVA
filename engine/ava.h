@@ -100,6 +100,7 @@ static __inline char *va( const char *fmt, ... ) {
 #include "audio/audio.c"
 #include "asset/asset.c"
 #include "network/network.c"
+#include "time/time.c"
 
 #ifdef __cplusplus
 }
