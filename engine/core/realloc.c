@@ -15,6 +15,13 @@ API int   MSIZE( void *ptr );
 #define WATCH(p,sz)    (p)
 #define FORGET(p)      (p)
 
+#ifdef _MSC_VER //#if MSC
+#include <malloc.h>
+#define ALLOCA(type,name,sz) type *name = (type*)_alloca(sz)
+#else
+#define ALLOCA(type,name,sz) type name[sz]
+#endif
+
 // forward declarations (in case memory leaks are watched)
 API void* watch( void *ptr, int sz );
 API void* forget( void *ptr );

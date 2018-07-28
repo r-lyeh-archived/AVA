@@ -48,8 +48,7 @@ API char *dir_list(char **s, const char *pathmask);
 
 #ifdef DIR_C
 #pragma once
-#include "../core/detect.c"
-#include "../core/builtin.c"
+#include "../detect/detect.c"
 #include "../core/realloc.c"
 #include "../ava.h"
 #include "asset_file.c"

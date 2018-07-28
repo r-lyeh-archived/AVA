@@ -20,7 +20,7 @@ at end, close task and call callback
 os_exec( cmd, args, []{ prog }, []{ err }, []{ ok } );
 */
 
-#include "../core/detect.c"
+#include "../detect/detect.c"
 #include "../core/realloc.c"
 
 #include <stdlib.h>

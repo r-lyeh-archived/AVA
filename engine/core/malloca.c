@@ -10,7 +10,7 @@
 
 #ifdef MALLOCA_C
 #pragma once
-#include "../core/builtin.c"
+#include "../detect/detect_builtin.c"
 #include "realloc.c"
 #include <stdlib.h>
 #include <stdio.h>

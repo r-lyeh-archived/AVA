@@ -7,7 +7,7 @@
 #define DEBUG_C
 #define ECS_C
 #define OS_C
-#define JSON5_C
+#define SERIAL_C
 #define FRAMEWORK_C
 #define AUDIO_C
 #define DS_C
@@ -23,7 +23,7 @@
 #include "debug/debug.c"
 #include "os/os.c"
 #include "ecs/ecs.c"
-#include "serial/json5.c"
+#include "serial/serial.c"
 #include "framework/framework.c"
 #include "audio/audio.c"
 #include "asset/asset.c"

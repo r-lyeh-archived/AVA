@@ -13,7 +13,7 @@ void* dllquick( const char *filename, const char *symbol );
 
 #ifdef DLL_C
 #pragma once
-#include "../core/detect.c"
+#include "../detect/detect.c"
 #include "os_exec.c"
 #if WIN
 #include <io.h>
