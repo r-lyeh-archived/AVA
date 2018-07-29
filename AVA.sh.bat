@@ -11,14 +11,14 @@ bin/builder/premake5.linux gmake
 bin/builder/premake5.linux vs2013
 bin/builder/premake5.linux xcode4
 bin/builder/premake5.linux ninja
-bin/builder/ninja.linux -C .project
+bin/builder/ninja.linux -C _project
 
 bin/builder/premake5.osx codelite
 bin/builder/premake5.osx gmake
 bin/builder/premake5.osx vs2013
 bin/builder/premake5.osx xcode4
 bin/builder/premake5.osx ninja
-bin/builder/ninja.osx   -C .project
+bin/builder/ninja.osx   -C _project
 
 exit
 
@@ -29,16 +29,20 @@ exit
 :windows
 @echo off
 
+    REM rebuild
+
+        if "%1"=="rebuild" (
+            call "%0" clean
+            call "%0" 
+            exit /b
+        )
+
+
     REM cleanup
-	if "%1"=="rebuild" (
-	call "%0" clean
-	call "%0" 
-	exit /b
-	)
 
         if "%1"=="clean" (
-            if exist .build   rd /q /s .build   && if exist .build   echo "error cannot clean up .build" && exit /b
-            if exist .project rd /q /s .project && if exist .project echo "error cannot clean up .project" && exit /b
+            if exist _build   rd /q /s _build   && if exist _build   echo "error cannot clean up _build" && exit /b
+            if exist _project rd /q /s _project && if exist _project echo "error cannot clean up _project" && exit /b
             echo Clean up && exit /b
         )
 
@@ -88,7 +92,7 @@ exit
 
             REM actual build
             set NINJA_STATUS="[%%e] [%%r/%%f]"
-            ninja.exe -v -C ..\..\.project
+            ninja.exe -v -C ..\..\_project
             set OK=%ERRORLEVEL%
 
         popd
@@ -100,7 +104,7 @@ exit
             if "0"=="%OK%" (
                 color
                 echo ^>^> launch
-                .build\debug\launch.exe %*
+                _build\debug\launch.exe %*
                 echo ^<^< launch
             ) else (
                 color 4f
