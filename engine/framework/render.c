@@ -26,11 +26,25 @@ void render_quit();
 // void vrswap( const void *pixels, int w, int h, int comp );
 // void vrsize( int w, int h, int comp );
 
+// error checking
+
 #ifndef SHIPPING
     #define GL(func) do { \
         func; \
         for(GLenum err; GL_NO_ERROR != (err = glGetError()); ) { \
-            LOGERROR(OPENGL, "!OpenGL ERROR %08x ; after executing: %s", err, #func); \
+            const char *rc; \
+            switch( err ) { \
+                break; case GL_INVALID_ENUM:                   rc = "GL_INVALID_ENUM"; \
+                break; case GL_INVALID_FRAMEBUFFER_OPERATION:  rc = "GL_INVALID_FRAMEBUFFER_OPERATION"; \
+                break; case GL_INVALID_OPERATION:              rc = "GL_INVALID_OPERATION"; \
+                break; case GL_INVALID_VALUE:                  rc = "GL_INVALID_VALUE"; \
+                break; case GL_NO_ERROR:                       rc = "GL_NO_ERROR"; \
+                break; case GL_OUT_OF_MEMORY:                  rc = "GL_OUT_OF_MEMORY"; \
+                break; case GL_STACK_OVERFLOW:                 rc = "GL_STACK_OVERFLOW"; \
+                break; case GL_STACK_UNDERFLOW:                rc = "GL_STACK_UNDERFLOW"; \
+                break; default:                                rc = "UNKNOWN GL ERROR"; \
+            } \
+            LOGERROR(OPENGL, "!OpenGL ERROR %08x (%s) ; after executing: %s", err, rc, #func); \
         } \
     } while (0)
 #else

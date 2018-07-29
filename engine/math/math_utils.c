@@ -8,6 +8,7 @@
 
 #include <math.h>
 #include <float.h> // FLT_MIN, FLT_MAX
+#include <stdint.h>
 
 #ifndef M_PI // even with _USE_MATH_DEFINES not always available
 #define M_PI 3.14159265358979323846
