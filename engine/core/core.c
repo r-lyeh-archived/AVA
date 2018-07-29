@@ -9,10 +9,10 @@
 #define TEST_C
 #endif
 
-#include "autorun.c"
-#include "watch.c"
-#include "realloc.c"
-#include "callstack.c"
-#include "malloca.c"
-#include "reflect.c"
-#include "test.c"
+#include "core_autorun.c"
+#include "core_watch.c"
+#include "core_realloc.c"
+#include "core_callstack.c"
+#include "core_malloca.c"
+#include "core_reflect.c"
+#include "core_test.c"

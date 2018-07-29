@@ -1,4 +1,3 @@
-#include "autorun.c"
 #include <stdio.h>
 #include <string.h>
 
@@ -13,6 +12,7 @@
 #endif
 
 #ifdef TEST_DEMO
+#include "core_autorun.c"
 
 AUTORUN {
     TEST(0 == 0);

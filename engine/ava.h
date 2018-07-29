@@ -87,7 +87,7 @@ static __inline char *va( const char *fmt, ... ) {
 #include "detect/detect.c"
 
 // memory wrappers
-#include "core/realloc.c"
+#include "core/core.c"
 
 #include "ds/ds.c"
 

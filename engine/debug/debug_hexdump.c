@@ -1,7 +1,7 @@
 #ifndef HEXDUMP_H
 #define HEXDUMP_H
 
-void hexdump( const void *ptr, int len );
+API void hexdump( const void *ptr, int len );
 
 #endif
 
@@ -25,9 +25,9 @@ void hexdump( const void *ptr, int len ) {
 
 #endif
 
-#ifdef AUTORUN
-AUTORUN {
-    log_add(stdout,16384);
+#ifdef HEXDUMP_DEMO
+int main() {
+    // log_add(stdout,16384);
     hexdump( "hello world", sizeof("hello world"));
     hexdump( "there's a lady who's sure all that glitters is gold...", sizeof("there's a lady who's sure all that glitters is gold..."));
 }

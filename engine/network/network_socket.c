@@ -26,7 +26,7 @@ API int  socket_accept( int s );
 #ifdef SOCKET_C
 #pragma once
 #include <string.h>
-#include "../core/autorun.c"
+#include "../core/core_autorun.c"
 
 #define SWRAP_IMPLEMENTATION
 #include "3rd/swrap.h"

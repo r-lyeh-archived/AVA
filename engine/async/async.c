@@ -15,7 +15,7 @@
 #endif
 
 #include "../detect/detect.c"
-#include "../core/realloc.c"
+#include "../core/core_realloc.c"
 
 #include "async_atomic.c"
 #include "async_channel.c"

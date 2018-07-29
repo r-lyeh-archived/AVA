@@ -8,11 +8,11 @@ API void* forget( void *ptr );
 
 #ifdef WATCH_C
 #pragma once
-#include "realloc.c"
+#include "core_realloc.c"
 #include <stdlib.h>
 #include <stdio.h>
 
-API char *callstack(int traces);
+// API char *callstack(int traces);
 
 void* watch( void *ptr, int sz ) {
     if( ptr ) {

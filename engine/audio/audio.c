@@ -27,8 +27,7 @@ API audio audio_delete( audio s );
 
 #ifdef AUDIO_C
 #pragma once
-
-#include "../core/realloc.c"
+#include "../core/core_realloc.c"
 
 #ifdef _WIN32
 #include <winsock2.h>

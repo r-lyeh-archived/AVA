@@ -34,7 +34,7 @@ int      channel_wait(channel *chan, void *output, int ms);
 #pragma once
 #include <stdlib.h>
 #include <string.h>
-#include "../core/realloc.c"
+#include "../core/core_realloc.c"
 #include "async_mutex.c"
 #include "async_condv.c"
 

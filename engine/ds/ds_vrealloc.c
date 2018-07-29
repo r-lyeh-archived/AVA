@@ -13,7 +13,7 @@ void *vresize( void *p, size_t sz );
 
 #ifdef VREALLOC_C
 #pragma once
-#include "../core/realloc.c"
+#include "../core/core_realloc.c"
 #include <stdlib.h>
 
 size_t vsize( void *p ) {

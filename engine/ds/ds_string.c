@@ -13,7 +13,7 @@ void  string_del( string s );
 #pragma once
 #include <stdlib.h>
 #include <stdarg.h>
-#include "../core/realloc.c"
+#include "../core/core_realloc.c"
 
 #define beg(s) (0[s])
 #define end(s) (1[s])

@@ -11,7 +11,7 @@
 #ifdef MALLOCA_C
 #pragma once
 #include "../detect/detect_builtin.c"
-#include "realloc.c"
+#include "../core/core_realloc.c"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
