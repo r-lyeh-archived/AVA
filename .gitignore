@@ -1,0 +1,25 @@
+## pipeline
+
+*.temp
+*.cook
+
+## gcc, clang object files
+
+*.o
+
+## visual studio: object files
+
+*.obj
+
+## visual studio
+
+*.exe
+*.pdb
+*.ilk
+*.suo
+*.exp
+*.lib
+
+## wavefront obj: do not ignore wavefront .obj files in assets/ folder
+
+!assets/*.obj
