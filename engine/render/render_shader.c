@@ -140,7 +140,7 @@ void set_uniform_mat4(Uniform u, float m[16]);
     "#version 130\n" \
     COMMON \
     NO_LAYOUT \
-    "#define texCoord gl_TexCoord[0]\n" \
+/*  "#define texCoord gl_TexCoord[0]\n" */ \
     "#define fragColor gl_FragColor\n" \
 /*    "#define texture texture2D\n"*/ \
 /*    "#define sampler sampler2D\n" */
@@ -149,7 +149,7 @@ void set_uniform_mat4(Uniform u, float m[16]);
     "#version 140\n" \
     COMMON \
     NO_LAYOUT \
-    "#define texCoord gl_TexCoord[0]\n" \
+/*  "#define texCoord gl_TexCoord[0]\n" */ \
     "#define fragColor gl_FragColor\n" \
 /*    "#define texture texture2D\n"*/ \
 /*    "#define sampler sampler2D\n" */
