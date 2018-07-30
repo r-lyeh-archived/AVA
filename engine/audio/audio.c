@@ -11,7 +11,8 @@
 #define AUDIO_H
 #include <stdbool.h>
 
-typedef struct audio* audio;
+API struct audio_handle;
+API typedef struct audio_handle* audio;
 
 API bool audio_init( int flags );
 API void audio_drop();
@@ -396,24 +397,24 @@ void audio_drop() {
     mal_context_uninit(&context);
 }
 
-struct audio {
+typedef struct audio_handle {
     bool is_clip;
     bool is_stream;
     union {
     sts_mixer_sample_t clip;
     mystream_t         stream;
     };
-};
+} audio_handle;
 
 audio audio_loadclip( const char *pathfile ) {
-    struct audio *a = REALLOC(0, sizeof(struct audio) );
-    memset(a, 0, sizeof(audio));
+    audio_handle *a = REALLOC(0, sizeof(audio_handle) );
+    memset(a, 0, sizeof(audio_handle));
     a->is_clip = load_sample( &a->clip, pathfile );
     return a;
 }
 audio audio_loadstream( const char *pathfile ) {
-    struct audio *a = REALLOC(0, sizeof(struct audio) );
-    memset(a, 0, sizeof(audio));
+    audio_handle *a = REALLOC(0, sizeof(audio_handle) );
+    memset(a, 0, sizeof(audio_handle));
     a->is_stream = load_stream( &a->stream, pathfile );
     return a;
 }

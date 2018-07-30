@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include "../core/core_realloc.c"
 
 #if !defined(_MSC_VER) && !defined(__inline)
 #define __inline inline
@@ -20,14 +21,14 @@ static __inline void map_clear(map *h) {
     memset(h->keys, 0xff, sizeof(*h->keys) * h->n);
 }
 static __inline void map_new(map *h, unsigned elems) {
-    h->keys = malloc( sizeof(uint64_t) * elems );
-    h->values = malloc( sizeof(uint32_t) * elems );
+    h->keys = (uint64_t*)MALLOC( sizeof(uint64_t) * elems );
+    h->values = (uint32_t*)MALLOC( sizeof(uint32_t) * elems );
     h->n = elems;
     map_clear(h);
 }
 static __inline void map_destroy(map *h) {
-    free(h->keys), h->keys = 0;
-    free(h->values), h->values = 0;
+    FREE(h->keys), h->keys = 0;
+    FREE(h->values), h->values = 0;
     h->n = 0;
 }
 static __inline void map_set(map *h, uint64_t key, uint32_t value) {

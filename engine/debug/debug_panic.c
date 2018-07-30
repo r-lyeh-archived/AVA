@@ -1,6 +1,6 @@
 // # err ######################################################################
 
-extern API void (*on_panic)( const char *description );
+// extern API void (*on_panic)( const char *description );
 API void die();
 API void error( const char *description );
 API void fatal( const char *description );

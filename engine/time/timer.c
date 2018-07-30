@@ -1,9 +1,9 @@
-uint64_t time_hh();
-uint64_t time_mm();
-uint64_t time_ss();
-uint64_t time_ms();
-uint64_t time_us();
-uint64_t time_ns();
+API uint64_t time_hh();
+API uint64_t time_mm();
+API uint64_t time_ss();
+API uint64_t time_ms();
+API uint64_t time_us();
+API uint64_t time_ns();
 
 #ifdef TIMER_C
 #pragma once
