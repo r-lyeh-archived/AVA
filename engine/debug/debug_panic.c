@@ -19,6 +19,29 @@ API void panic( const char *description );
 #include "debug_breakpoint.c"
 #include "debug_dialog.c"
 
+#ifdef _WIN32
+
+void on_panic_windows( const char *description ) {
+#ifdef SHIPPING
+    dialog( 1, "!Error", description );
+#else
+    dialog( 1, "!Error (dev hint: attach debugger now).", description );
+    if( debugging() ) {
+        // can we invoke debugger?
+        breakpoint();
+        abort();
+    }
+#endif
+}
+
+void (*on_panic)( const char *description ) = on_panic_windows;
+
+#else
+
+void (*on_panic)( const char *description ) = 0;
+
+#endif
+
 void die() {
     // flush everything
     fflush(NULL);
@@ -49,29 +72,6 @@ void panic( const char *description ) {
     }
     die();
 }
-
-#ifdef _WIN32
-
-void on_panic_windows( const char *description ) {
-#ifdef SHIPPING
-    dialog( 1, "!Error", description );
-#else
-    dialog( 1, "!Error (dev hint: attach debugger now).", description );
-    if( debugging() ) {
-        // can we invoke debugger?
-        breakpoint();
-        abort();
-    }
-#endif
-}
-
-void (*on_panic)( const char *description ) = on_panic_windows;
-
-#else
-
-void (*on_panic)( const char *description ) = 0;
-
-#endif
 
 #endif
 

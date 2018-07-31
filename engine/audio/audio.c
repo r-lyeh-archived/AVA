@@ -11,7 +11,6 @@
 #define AUDIO_H
 #include <stdbool.h>
 
-API struct audio_handle;
 API typedef struct audio_handle* audio;
 
 API bool audio_init( int flags );

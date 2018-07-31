@@ -15,7 +15,7 @@
 #endif
 
 // extra tip, redefinable:
-extern const char *(*callstack_handler)(int traces);
+// extern const char *(*callstack_handler)(int traces);
 
 // ---
 
@@ -72,10 +72,9 @@ extern const char *(*callstack_handler)(int traces);
 
 #ifdef LOGGER_C
 #pragma once
+#include "../core/core_callstack.c"
 
-API char *callstack(int traces);
-const char *(*callstack_handler)(int traces) = callstack;
-
+API const char *(*callstack_handler)(int traces) = callstack;
 #endif
 
 

@@ -35,7 +35,7 @@ API double *window_get( int variable );
 #include <math.h>
 
 // extern const char *callstack(int traces);
-const char * (*callstack_handler)(int traces) = 0; // = callstack;
+// const char * (*callstack_handler)(int traces) = 0; // = callstack;
 int (*printf_handler)(const char *fmt, ...) = printf;
 
 static void die_callback( const char *text ) {

@@ -718,15 +718,15 @@ void ddraw_frustum(float projview[16]) {
 #include <stdlib.h>
 #include <string.h>
 
-char *console[16] = {0};
-int line = 0;
+static char *ddraw__console[16] = {0};
+static int ddraw__line = 0;
 void ddraw_console(const char *fmt, ...) {
     //fmt = FORMAT(fmt);
     char buf[256]; va_list vl; va_start(vl, fmt); vsnprintf(buf, 256, fmt, vl); va_end(vl); fmt = buf;
 
-    line++; line %= 16;
-    //strcpyf( &console[line], "%s", fmt );
-    console[line] = realloc( console[line], strlen(fmt)+1); strcpy( console[line], fmt );
+    ddraw__line++; ddraw__line %= 16;
+    //strcpyf( &ddraw__console[ddraw__line], "%s", fmt );
+    ddraw__console[ddraw__line] = realloc( ddraw__console[ddraw__line], strlen(fmt)+1); strcpy( ddraw__console[ddraw__line], fmt );
 }
 
 // ----------------------------------------------------------------------------
@@ -846,17 +846,17 @@ void ddraw_render2d( float *pm, float *vm ) {
     //glBlendFunc(GL_DST_COLOR, GL_ZERO); // modulate: fb_color * src_color + 0 * fb_color
 
     float spacing = fonts[ddraw_font].spaceY;
-    for(int l = line; l < line + 16; ++l) {
-        int p = l - line;
+    for(int l = ddraw__line; l < ddraw__line + 16; ++l) {
+        int p = l - ddraw__line;
         int i = l % 16;
-        if( console[i] ) {
+        if( ddraw__console[i] ) {
             mat4x4 m;
             mat4x4_identity(m);
             float scale = 3;
             mat4x4_scale_aniso(m, m, scale / window_get(WINDOW_WIDTH)[0], scale / window_get(WINDOW_HEIGHT)[0], 1);
             mat4x4_translate_in_place( m, 0, -p * spacing,0 );
             renderable_t r = {0};
-            text( &r, ddraw_font, console[i] );
+            text( &r, ddraw_font, ddraw__console[i] );
             draw( &r, &m[0][0]);
             renderable_destroy(&r);
         }
