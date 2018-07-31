@@ -213,7 +213,7 @@ int window_create( float zoom, int flags ) {
     for( int i = 0; i < sizeof(majors) / sizeof(majors[0]); ++i ) {
         int majv = majors[i], minv = minors[i];
         if( !window && !(flags & WINDOW_LEGACY_OPENGL) ) {
-            // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+            // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, majv);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minv);
             glfwWindowHint(GLFW_OPENGL_PROFILE, have_core );

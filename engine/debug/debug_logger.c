@@ -15,7 +15,7 @@
 #endif
 
 // extra tip, redefinable:
-// extern const char *(*callstack_handler)(int traces);
+extern const char *(*callstack_handler)(int traces);
 
 // ---
 
