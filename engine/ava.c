@@ -16,6 +16,7 @@
 #define TIME_C
 #define MATH_C
 #define RENDER_C
+#define STORAGE_C
 #endif
 
 #include "core/core.c"
@@ -34,6 +35,7 @@
 #include "network/network.c"
 #include "time/time.c"
 #include "render/render.c"
+#include "storage/storage.c"
 
 API int init();
 

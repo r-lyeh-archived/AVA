@@ -102,6 +102,7 @@ static __inline char *va( const char *fmt, ... ) {
 #include "network/network.c"
 #include "time/time.c"
 #include "render/render.c"
+#include "storage/storage.c"
 
 #ifdef __cplusplus
 }
