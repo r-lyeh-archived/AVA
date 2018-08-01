@@ -3,12 +3,16 @@
 
 // symbol linkage and visibility
 
-#ifndef EXPORT
-#define EXPORT __declspec(dllexport)
+#if   !defined(IMPORT) && defined(_MSC_VER)
+#define IMPORT __declspec(dllimport)
+#elif !defined(IMPORT)
+#define IMPORT __attribute__((visibility("default")))
 #endif
 
-#ifndef IMPORT
-#define IMPORT __declspec(dllimport)
+#if   !defined(EXPORT) && defined(_MSC_VER)
+#define EXPORT __declspec(dllexport)
+#elif !defined(EXPORT)
+#define EXPORT __attribute__((visibility("default")))
 #endif
 
 #ifndef STATIC

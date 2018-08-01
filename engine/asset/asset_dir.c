@@ -83,8 +83,8 @@ API char *dir_list(char **s, const char *pathmask);
 #include <winsock2.h>
 #include <shlobj.h>
 wchar_t *dir_widen(const char *utf8) { // wide strings (windows only)
-    static builtin(thread) wchar_t bufs[4][260];
-    static builtin(thread) int index = 0;
+    static __thread wchar_t bufs[4][260];
+    static __thread int index = 0;
 
     int sz = (int)sizeof(bufs[0]);
     wchar_t *buf = bufs[(++index) % 4];
@@ -256,7 +256,7 @@ int dir_ls(const char *pathmask, bool (*yield)(const char *name) ) {
     return ls_recurse( !!strstr(pathmask, "**"), path_, mask_, yield );
 }
 
-static builtin(thread) char *dirlst = 0;
+static __thread char *dirlst = 0;
 static bool dir_list_add( const char *buf ) {
     int slen = strlen(dirlst);
     int blen = strlen(buf);

@@ -1,7 +1,6 @@
 #ifdef ASYNC_C
 #pragma once
 #define ATOMIC_C
-#define BUILTIN_C
 #define CHANNEL_C
 #define CONDV_C
 #define LFQ_C

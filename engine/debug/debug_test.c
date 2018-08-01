@@ -45,19 +45,16 @@ bool test(int expr) {
     return !!expr;
 }
 
-#ifdef AUTORUN
+#if 0 // def AUTORUN
 AUTORUN {
     if( unit( "first unit" ) ) {
         test( 1 == 1 );
-        test( 1 + 10 );
     }
     if( unit( "second unit" ) ) {
         test( 1 < 2 );
-        test( 2 > 1 );
     }
     if( unit( "simulate fail") ) {
         test( 10 < 10 ); // <-- simulated fail here
-        test( 1 < 2 );
     }
 }
 #endif

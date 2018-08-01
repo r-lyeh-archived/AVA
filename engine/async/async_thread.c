@@ -61,7 +61,7 @@ uint64_t thread_self() {
     IF(XB1, return GetCurrentThreadId() );
     IF(AND, return pthread_self() );
     // fallback
-    static builtin(thread) int id;
+    static __thread int id;
     return (intptr_t)&id;
 }
 

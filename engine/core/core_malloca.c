@@ -10,14 +10,14 @@
 
 #ifdef MALLOCA_C
 #pragma once
-#include "../detect/detect_builtin.c"
+#include "../detect/detect.c"
 #include "../core/core_realloc.c"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 
-static builtin(thread) uint8_t *stack_mem = 0;
-static builtin(thread) uint64_t stack_size = 0, stack_max = 0;
+static __thread uint8_t *stack_mem = 0;
+static __thread uint64_t stack_size = 0, stack_max = 0;
 /*stack*/ char *malloca(int bytes) {
     if( bytes < 0 ) {
         if( stack_size > stack_max ) stack_max = stack_size;

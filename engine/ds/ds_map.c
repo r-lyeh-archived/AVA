@@ -5,11 +5,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#include "../detect/detect_inline.c"
 #include "../core/core_realloc.c"
-
-#if !defined(_MSC_VER) && !defined(__inline)
-#define __inline inline
-#endif
 
 static const uint64_t HASH_UNUSED = 0xffffffffffffffffULL;
 typedef struct map {

@@ -27,17 +27,13 @@ API audio audio_delete( audio s );
 
 #ifdef AUDIO_C
 #pragma once
+#include "../detect/detect.c"
 #include "../core/core_realloc.c"
 
 #ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <unistd.h>
-#endif
-
-#ifdef _MSC_VER
-#define restrict
-#define inline __inline
 #endif
 
 #define _USE_MATH_DEFINES

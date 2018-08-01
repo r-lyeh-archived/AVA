@@ -29,7 +29,7 @@ API bool        file_delete( const char *path );
 
 #ifdef FILE_C
 #pragma once
-#include "ava.h"
+#include "../detect/detect.c"
 #include <stdio.h>
 #include <sys/stat.h>
 
@@ -85,8 +85,8 @@ static void munmap(void* addr, size_t length) {
 #include <winsock2.h>
 #include <shlobj.h>
 wchar_t *file_widen(const char *utf8) { // wide strings (windows only)
-    static builtin(thread) wchar_t bufs[4][260];
-    static builtin(thread) int index = 0;
+    static __thread wchar_t bufs[4][260];
+    static __thread int index = 0;
 
     int sz = (int)sizeof(bufs[0]);
     wchar_t *buf = bufs[(++index) % 4];

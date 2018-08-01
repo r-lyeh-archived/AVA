@@ -17,7 +17,7 @@ float* transform( mat4x4 r, float position[3], float rotquat[4], float scale[3] 
 }
 
 /*
-static inline
+static __inline
 float* transform( mat4x4 m, vec3 position, quat rotation, vec3 scaling) {
     mat4x4 r;
     mat4x4_from_quat(r, rotation);

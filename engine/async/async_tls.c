@@ -45,8 +45,8 @@ void tls_quit() {
 void tlspush(void*);
 void*tlspop();
 
-builtin(tls) any argstack[32] = {0};
-builtin(tls) void **argptr = argstack;
+__thread any argstack[32] = {0};
+__thread void **argptr = argstack;
 void tlspush(void *arg) {
     *argptr++ = arg;
 }

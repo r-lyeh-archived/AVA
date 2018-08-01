@@ -1,14 +1,10 @@
 // includes code by @glampert (public domain).
 
 #pragma once
-
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-
-#include <math.h>
+#include "../detect/detect_inline.c"
 #include <float.h> // FLT_MIN, FLT_MAX
 #include <stdint.h>
+#include <math.h>
 
 #ifndef M_PI // even with _USE_MATH_DEFINES not always available
 #define M_PI 3.14159265358979323846
@@ -71,14 +67,14 @@ typedef union Float2UInt {
     uint32_t asUInt;
 } Float2UInt;
 
-static inline float floatRound(float x) {
+static __inline float floatRound(float x) {
     // Probably slower than std::floor(), also depends of FPU settings,
     // but we only need this for that special sin/cos() case anyways...
     const int i = (int)(x);
     return (x >= 0.0f) ? (float)(i) : (float)(i - 1);
 }
 
-static inline float floatAbs(float x) {
+static __inline float floatAbs(float x) {
     // Mask-off the sign bit
     Float2UInt i;
     i.asFloat = x;
@@ -86,7 +82,7 @@ static inline float floatAbs(float x) {
     return i.asFloat;
 }
 
-static inline float floatInvSqrt(float x) {
+static __inline float floatInvSqrt(float x) {
     // Modified version of the emblematic Q_rsqrt() from Quake 3.
     // See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
     Float2UInt i;
@@ -99,7 +95,7 @@ static inline float floatInvSqrt(float x) {
     return r;
 }
 
-static inline float floatSin(float radians) {
+static __inline float floatSin(float radians) {
     static const float A = -2.39e-08;
     static const float B = 2.7526e-06;
     static const float C = 1.98409e-04;
@@ -127,7 +123,7 @@ static inline float floatSin(float radians) {
     return radians * (((((A * s + B) * s - C) * s + D) * s - E) * s + 1.0f);
 }
 
-static inline float floatCos(float radians) {
+static __inline float floatCos(float radians) {
     static const float A = -2.605e-07;
     static const float B = 2.47609e-05;
     static const float C = 1.3888397e-03;

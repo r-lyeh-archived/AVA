@@ -15,7 +15,7 @@
 #endif
 
 // extra tip, redefinable:
-extern const char *(*callstack_handler)(int traces);
+API const char *(*callstack_handler)(int traces);
 
 // ---
 
@@ -74,7 +74,7 @@ extern const char *(*callstack_handler)(int traces);
 #pragma once
 #include "../core/core_callstack.c"
 
-API const char *(*callstack_handler)(int traces) = callstack;
+const char *(*callstack_handler)(int traces) = callstack;
 #endif
 
 
