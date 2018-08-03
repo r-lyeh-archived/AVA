@@ -17,7 +17,7 @@ API int   MSIZE( void *ptr );
 
 #ifdef _MSC_VER //#if MSC
 #include <malloc.h>
-#define ALLOCA(type,name,sz) type *name = (type*)_alloca(sz)
+#define ALLOCA(type,name,sz) type *name = (type*)_alloca(sz * sizeof(type))
 #else
 #define ALLOCA(type,name,sz) type name[sz]
 #endif
