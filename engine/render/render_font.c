@@ -60,7 +60,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags );
 #include "render_renderer.c"
 #include "render_shader.c"
 #include "../framework/filesys_.c"
-#include "render_font.c"
+#include "render_texture.c"
 
 #define STB_RECT_PACK_IMPLEMENTATION
 #include "3rd/stb_rect_pack.h"
@@ -286,7 +286,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
 
 int font( const char *fontfile, int fontSize, int flags ) {
     char *data = file_read_(fontfile);
-    int id = font_mem( data, file_size(fontfile), fontSize, flags );
+    int id = font_mem( data, file_size_(fontfile), fontSize, flags );
     free(data);
     return id;
 }

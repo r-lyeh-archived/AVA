@@ -19,6 +19,7 @@ void text(void *renderable, int font_id, const char *text );
 #include "render_renderer.c"
 #include "render_font.c"
 #include "render_unicode.c"
+#include "render_mesh.c" // buffer
 #include "../core/core_realloc.c"
 
 
