@@ -77,7 +77,7 @@ void console_run2(const char* name, void *arg1, void *arg2 ) {
 char *prompt() {
     static char buffer[512];
     buffer[0] = 0;
-    if( !fgets(buffer, 512, stdin) ) {
+    if( !fgets(buffer, 512, stdin) || feof(stdin) ) {
         return 0;
     }
     for( int c = strlen(buffer); c && buffer[c-1] < 32; c = strlen(buffer) ) {
@@ -93,9 +93,31 @@ void console(void *userdata) {
 }
 
 #ifdef AUTORUN
-AUTORUN {
-    detach( console, 0 );
-}
+    void console_bye(void) {
+    #ifdef _WIN32
+        // sendEnterToStdin() - original code by Asain Kujovic
+        // https://stackoverflow.com/questions/28119770/kill-fgets-thread-in-mingw-and-wine
+        INPUT_RECORD ir[2];
+        for (int i=0; i<2; i++) {
+            KEY_EVENT_RECORD *kev =&ir[i].Event.KeyEvent;
+            ir[i].EventType        =KEY_EVENT;
+            kev->bKeyDown          = i == 0;    //<-true, than false
+            kev->dwControlKeyState = 0;
+            kev->wRepeatCount      = 1;
+            kev->uChar.UnicodeChar = VK_RETURN;
+            kev->wVirtualKeyCode   = VK_RETURN;
+            kev->wVirtualScanCode  = MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC);
+        }
+        DWORD dw; WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), ir, 2, &dw);
+    #else
+        fclose(stdin);
+    #endif
+    }
+
+    AUTORUN {
+        atexit( console_bye );
+        detach( console, 0 );
+    }
 #endif
 
 #endif
