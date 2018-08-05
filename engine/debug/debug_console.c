@@ -97,18 +97,20 @@ void console(void *userdata) {
     #ifdef _WIN32
         // sendEnterToStdin() - original code by Asain Kujovic
         // https://stackoverflow.com/questions/28119770/kill-fgets-thread-in-mingw-and-wine
-        INPUT_RECORD ir[2];
-        for (int i=0; i<2; i++) {
-            KEY_EVENT_RECORD *kev =&ir[i].Event.KeyEvent;
-            ir[i].EventType        =KEY_EVENT;
-            kev->bKeyDown          = i == 0;    //<-true, than false
-            kev->dwControlKeyState = 0;
-            kev->wRepeatCount      = 1;
-            kev->uChar.UnicodeChar = VK_RETURN;
-            kev->wVirtualKeyCode   = VK_RETURN;
-            kev->wVirtualScanCode  = MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC);
+        for( int j = 0; j < 2; ++j ) {
+            INPUT_RECORD ir[2];
+            for (int i = 0; i < 2; i++) {
+                KEY_EVENT_RECORD *kev = &ir[i].Event.KeyEvent;
+                ir[i].EventType        = KEY_EVENT;
+                kev->bKeyDown          = i == 0;    //<-true, than false
+                kev->dwControlKeyState = 0;
+                kev->wRepeatCount      = 1;
+                kev->uChar.UnicodeChar = VK_RETURN;
+                kev->wVirtualKeyCode   = VK_RETURN;
+                kev->wVirtualScanCode  = MapVirtualKey(VK_RETURN, MAPVK_VK_TO_VSC);
+            }
+            DWORD dw; WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), ir, 2, &dw);
         }
-        DWORD dw; WriteConsoleInput(GetStdHandle(STD_INPUT_HANDLE), ir, 2, &dw);
     #else
         fclose(stdin);
     #endif
