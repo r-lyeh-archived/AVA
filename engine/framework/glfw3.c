@@ -3,6 +3,7 @@
 //#include "opengl.c"
 #define GLFW_INCLUDE_NONE
 #include "3rd/GLFW/glfw3.h"
+#include "3rd/gleq.h"
 #endif
 
 #ifdef GLFW3_C
@@ -130,5 +131,8 @@ _GLFW_USE_RETINA to have windows use the full resolution of Retina displays (rec
 // }
 
 #include "3rd/GLFW/egl_context.c"
+
+#define GLEQ_IMPLEMENTATION
+#include "3rd/gleq.h"
 
 #endif
