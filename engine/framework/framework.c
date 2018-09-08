@@ -1,6 +1,10 @@
 #ifndef FRAMEWORK_H
 #define FRAMEWORK_H
 
+#ifndef UNICODE
+#define UNICODE // for glfw3.c (win32)
+#endif
+
 #define GLAD_IMPLEMENTATION
 
 #if 0

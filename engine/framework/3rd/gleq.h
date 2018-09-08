@@ -362,7 +362,7 @@ static void gleq_window_content_scale_callback(GLFWwindow* window, float xscale,
 GLEQDEF void gleqInit(void)
 {
     glfwSetMonitorCallback(gleq_monitor_callback);
-#if GLFW_VERSION_MINOR >= 2
+#if 1 // GLFW_VERSION_MINOR >= 2
     glfwSetJoystickCallback(gleq_joystick_callback);
 #endif
 }

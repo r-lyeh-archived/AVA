@@ -1,7 +1,6 @@
 //========================================================================
-// GLFW 3.3 POSIX - www.glfw.org
+// GLFW 3.3 - www.glfw.org
 //------------------------------------------------------------------------
-// Copyright (c) 2002-2006 Marcus Geelnard
 // Copyright (c) 2006-2016 Camilla Löwy <elmindreda@glfw.org>
 //
 // This software is provided 'as-is', without any express or implied
@@ -27,59 +26,17 @@
 
 #include "internal.h"
 
-#include <sys/time.h>
-#include <time.h>
-
-
-//////////////////////////////////////////////////////////////////////////
-//////                       GLFW internal API                      //////
-//////////////////////////////////////////////////////////////////////////
-
-// Initialise timer
-//
-void _glfwInitTimerPOSIX(void)
-{
-#if defined(CLOCK_MONOTONIC)
-    struct timespec ts;
-
-    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0)
-    {
-        _glfw.timer.posix.monotonic = GLFW_TRUE;
-        _glfw.timer.posix.frequency = 1000000000;
-    }
-    else
-#endif
-    {
-        _glfw.timer.posix.monotonic = GLFW_FALSE;
-        _glfw.timer.posix.frequency = 1000000;
-    }
-}
-
 
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW platform API                      //////
 //////////////////////////////////////////////////////////////////////////
 
-uint64_t _glfwPlatformGetTimerValue(void)
+int _glfwPlatformPollJoystick(_GLFWjoystick* js, int mode)
 {
-#if defined(CLOCK_MONOTONIC)
-    if (_glfw.timer.posix.monotonic)
-    {
-        struct timespec ts;
-        clock_gettime(CLOCK_MONOTONIC, &ts);
-        return (uint64_t) ts.tv_sec * (uint64_t) 1000000000 + (uint64_t) ts.tv_nsec;
-    }
-    else
-#endif
-    {
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-        return (uint64_t) tv.tv_sec * (uint64_t) 1000000 + (uint64_t) tv.tv_usec;
-    }
+    return GLFW_FALSE;
 }
 
-uint64_t _glfwPlatformGetTimerFrequency(void)
+void _glfwPlatformUpdateGamepadGUID(char* guid)
 {
-    return _glfw.timer.posix.frequency;
 }
 

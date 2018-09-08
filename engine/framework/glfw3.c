@@ -1,9 +1,11 @@
 #ifndef GLFW3_H
 #define GLFW3_H
+
 //#include "opengl.c"
 #define GLFW_INCLUDE_NONE
 #include "3rd/GLFW/glfw3.h"
 #include "3rd/gleq.h"
+
 #endif
 
 #ifdef GLFW3_C
@@ -63,18 +65,40 @@ _GLFW_USE_RETINA to have windows use the full resolution of Retina displays (rec
 
 */
 
+// null_init.c
+// null_joystick.c
+// null_monitor.c
+// null_window.c
+
 #ifdef _WIN32
 #   define _GLFW_WIN32 1
-#   define _GLFW_USE_OPENGL
-#   define _GLFW_WGL 1
+#// define _GLFW_USE_OPENGL 1
+#// define _GLFW_WGL 1
 #// define _GLFW_USE_HYBRID_HPG 1
+#   ifndef UNICODE
+#   define UNICODE
+#   endif
+#   ifdef APIENTRY
+#// undef APIENTRY
+#   endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN 1
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX 1
+#endif
+#include <winsock2.h>
+//#include <windows.h>
+#include <mmsystem.h>
 #   pragma comment(lib, "shell32.lib")
 #   pragma comment(lib, "gdi32.lib")
+#   pragma comment(lib, "user32.lib")
+#   pragma comment(lib, "shell32.lib")
 #   include "3rd/GLFW/win32_init.c"
 #   include "3rd/GLFW/win32_joystick.c"
 #   include "3rd/GLFW/win32_monitor.c"
+#   include "3rd/GLFW/win32_thread.c"
 #   include "3rd/GLFW/win32_time.c"
-#   include "3rd/GLFW/win32_tls.c"
 #   include "3rd/GLFW/win32_window.c"
 #   include "3rd/GLFW/wgl_context.c"
 #elif defined(__DARWIN__)
@@ -85,6 +109,15 @@ _GLFW_USE_RETINA to have windows use the full resolution of Retina displays (rec
 #   include "3rd/GLFW/cocoa_time.c"
 #else
 #   if 1
+    // x11
+#   define _GLFW_X11 1
+#// define _GLFW_HAS_XF86VM 1
+#   include "3rd/GLFW/x11_init.c"
+#   include "3rd/GLFW/x11_monitor.c"
+#   include "3rd/GLFW/x11_window.c"
+#   include "3rd/GLFW/xkb_unicode.c"
+#   include "3rd/GLFW/glx_context.c"
+#   elif 0
     // wayland
 #   define _GLFW_WAYLAND 1
 #   include "3rd/GLFW/wl_init.c"
@@ -98,39 +131,25 @@ _GLFW_USE_RETINA to have windows use the full resolution of Retina displays (rec
 #   include "3rd/GLFW/mir_monitor.c"
 #   include "3rd/GLFW/mir_window.c"
 #   include "3rd/GLFW/glx_context.c"
-#   elif 0
-    // x11
-#   define _GLFW_X11 1
-#// define _GLFW_HAS_XF86VM 1
-#   include "3rd/GLFW/x11_init.c"
-#   include "3rd/GLFW/x11_monitor.c"
-#   include "3rd/GLFW/x11_window.c"
-#   include "3rd/GLFW/xkb_unicode.c"
-#   include "3rd/GLFW/glx_context.c"
 #   endif
-#endif
-
-#ifdef __linux__
-#   include "3rd/GLFW/linux_joystick.c"
 #endif
 
 #ifndef _WIN32
 #   include "3rd/GLFW/posix_time.c"
-#   include "3rd/GLFW/posix_tls.c"
+#   include "3rd/GLFW/posix_thread.c"
+#   ifdef __linux__
+#       include "3rd/GLFW/linux_joystick.c"
+#   endif
 #endif
 
 #include "3rd/GLFW/context.c"
+#include "3rd/GLFW/egl_context.c"
 #include "3rd/GLFW/init.c"
 #include "3rd/GLFW/input.c"
 #include "3rd/GLFW/monitor.c"
-#include "3rd/GLFW/window.c"
+#include "3rd/GLFW/osmesa_context.c"
 #include "3rd/GLFW/vulkan.c"
-
-// following static functions have been renamed in egl_context.c (@r-lyeh) {
-// makeContextCurrent, swapBuffers, swapInterval, extensionSupported, getProcAddress, destroyContext, getErrorString, 
-// }
-
-#include "3rd/GLFW/egl_context.c"
+#include "3rd/GLFW/window.c"
 
 #define GLEQ_IMPLEMENTATION
 #include "3rd/gleq.h"
