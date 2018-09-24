@@ -14,6 +14,7 @@
 #define array_push(t, i) ( (t) = vrealloc((t), (array_count(t) + 1) * sizeof(0[t]) ), (t)[ array_count(t) - 1 ] = (i) )
 #define array_back(t) ( (t) ? &(t)[ vsize(t) - 1 ] : NULL )
 #define array_count(t) (int)( (t) ? vsize(t) / sizeof(0[t]) : 0u )
+#define array_bytes(t) (int)( (t) ? vsize(t) : 0u )
 #define array_sort(t, cmpfunc) qsort( t, array_count(t), sizeof(t[0]), cmpfunc )
 #define array_free(t) ( vrealloc((t), 0), (t) = 0 )
 
@@ -95,7 +96,7 @@ int main() {
     array_push(a, 88);
     array_push(a, 2);
     array_push(a, 25);
-    printf("%p %d\n", array_back(a), *array_back(a));
+    printf("%p %d (%d elems, %d bytes)\n", array_back(a), *array_back(a), array_count(a), array_bytes(a));
 
     array_insert(a, 1, 17);
 
