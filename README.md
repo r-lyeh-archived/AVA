@@ -1,6 +1,6 @@
 <p align="center">
 <br/>
-  <img src="assets/logo/free_logo_2.png" width="80px"/><br/>
+  <img src="editor/assets/logo/free_logo_2.png" width="80px"/><br/>
   ΛVΛ<br/>
   Small game engine.<br/>
   Written in 32 random ̷d̷a̷y̷s̷ m̷o̷n̷t̷h̷s̷ years.<br/>

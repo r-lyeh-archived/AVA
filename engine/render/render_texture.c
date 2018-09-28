@@ -1,6 +1,8 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include "../media/image/image.c"
+
 enum FLAGS {
     FLAG_00 = 1<<0,
     FLAG_01 = 1<<1,

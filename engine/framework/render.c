@@ -7,7 +7,7 @@
 #endif
 
 #include "opengl.c"
-#include "../debug/debug_logger.c"
+#include "../core/debug/debug_logger.c"
 
 #ifndef GL_TEXTURE_MAX_ANISOTROPY_EXT
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE

@@ -11,7 +11,7 @@ int strlen32( const uint32_t *utf32 );
 
 #ifdef UNICODE_C
 #pragma once
-#include "../core/core_realloc.c"
+#include "ava.h" // realloc
 
 static
 uint32_t extract_utf32(const char **p) {

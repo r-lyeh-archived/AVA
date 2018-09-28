@@ -23,7 +23,7 @@ extern "C" {
 
 // detect platform
 
-#include "detect/detect.c"
+#include "core/detect/detect.c"
 /*
 #include "detect/defines.c"
 #include "detect/includes.c"
@@ -84,25 +84,17 @@ static __inline char *va( const char *fmt, ... ) {
 // ----------------------------------------------------------------------------
 // modules
 
-#include "detect/detect.c"
-
-// memory wrappers
 #include "core/core.c"
 
-#include "ds/ds.c"
-
-#include "async/async.c"
-#include "debug/debug.c"
-#include "os/os.c"
-#include "ecs/ecs.c"
-#include "serial/serial.c"
 #include "framework/framework.c"
-#include "audio/audio.c"
-#include "asset/asset.c"
-#include "network/network.c"
-#include "time/time.c"
+#include "framework/audio/audio.c"
+#include "framework/asset/asset.c"
+
+#include "media/Media.c"
+
 #include "render/render.c"
-#include "storage/storage.c"
+#include "scene/scene.c"
+#include "world/world.c"
 
 #ifdef __cplusplus
 }

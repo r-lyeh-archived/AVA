@@ -180,7 +180,7 @@ void set_uniform_mat4(Uniform u, float m[16]);
 #include <string.h>
 #include "../framework/opengl.c"
 #include "render_shader.c"
-#include "../core/core_realloc.c"
+#include "ava.h" // realloc
 
 static
 void dump_shader_log( const char *source ) {

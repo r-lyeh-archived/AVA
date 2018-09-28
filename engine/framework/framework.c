@@ -43,10 +43,7 @@
 #pragma once
 #define APP_C
 #define CAMERA_C
-#define COLOR_C
-#define FILESYS_C
 #define GLFW3_C
-#define IMAGE_C
 #define INPUT_C
 //#define LINEAR_C
 //#define MATH_C
@@ -69,9 +66,6 @@
 
 #include "app.c"
 #include "camera.c"
-#include "color.c"
-#include "filesys_.c"
-#include "image.c"
 #include "input.c"
 //#include "linear.c"
 //#include "math.c"

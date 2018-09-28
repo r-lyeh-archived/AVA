@@ -122,10 +122,9 @@ renderable_t *mesh_loadfile( void *renderable, const char *filename );
 #ifdef MESH_C
 #pragma once
 #include "render_renderer.c"
-#include "../math/math.c"
 #include <float.h>
 #include "render_mesh.c"
-#include "../framework/filesys_.c"
+#include "ava.h" // filesys, math
 
 renderable_t *
 mesh( void *renderable, int flags, int num_elems, const buffer *buffers ) {

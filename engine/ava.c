@@ -3,39 +3,29 @@
 #ifdef AVA_C
 #pragma once
 #define CORE_C
-#define ASYNC_C
-#define DEBUG_C
-#define ECS_C
-#define OS_C
-#define SERIAL_C
 #define FRAMEWORK_C
 #define AUDIO_C
-#define DS_C
 #define ASSET_C
-#define NETWORK_C
-#define TIME_C
-#define MATH_C
+#define MEDIA_C
 #define RENDER_C
-#define STORAGE_C
+#define SCENE_C
+#define WORLD_C
 #endif
 
 #include "core/core.c"
 
-#include "ds/ds.c"
-
-#include "async/async.c"
-#include "debug/debug.c"
-#include "os/os.c"
-#include "ecs/ecs.c"
-#include "serial/serial.c"
-#include "math/math.c"
 #include "framework/framework.c"
-#include "audio/audio.c"
-#include "asset/asset.c"
-#include "network/network.c"
-#include "time/time.c"
+
+#include "media/media.c"
+
+#include "framework/audio/audio.c"
+#include "framework/asset/asset.c"
+
 #include "render/render.c"
-#include "storage/storage.c"
+#include "scene/scene.c"
+#include "world/world.c"
+
+
 
 API int init();
 

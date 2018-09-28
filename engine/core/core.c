@@ -1,18 +1,28 @@
 #ifdef CORE_C
 #pragma once
-#define AUTORUN_C
-#define WATCH_C
-#define REALLOC_C
-#define CALLSTACK_C
-#define MALLOCA_C
-#define REFLECT_C
-#define TEST_C
+#define ASYNC_C
+#define DEBUG_C
+#define DETECT_C
+#define FILESYS_C
+#define MATH_C
+#define NATIVE_C
+#define OBJECT_C
+#define SERIAL_C
+#define DS_C
+#define TIME_C
 #endif
 
-#include "core_autorun.c"
-#include "core_watch.c"
-#include "core_realloc.c"
-#include "core_callstack.c"
-#include "core_malloca.c"
-#include "core_reflect.c"
-#include "core_test.c"
+#include "detect/detect.c"
+
+// memory wrappers
+#include "object/object.c"
+
+#include "ds/ds.c"
+
+#include "async/async.c"
+#include "debug/debug.c"
+#include "filesys/filesys.c"
+#include "math/math.c"
+#include "native/native.c"
+#include "serial/serial.c"
+#include "time/time.c"

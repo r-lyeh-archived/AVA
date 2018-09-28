@@ -42,6 +42,7 @@ project "editor"
 
 	files {"../../editor/**.c*", "../../editor/**.h*"}
 	includedirs {"../../editor/", "../../engine/"}
+	links {"engine"}
 
 	filter "configurations:debug"
 		defines {"DEBUG"}
@@ -135,7 +136,7 @@ project "launch"
 	language "C++"
 	targetdir "../../_build/%{cfg.buildcfg}"
 
-	files {"../../engine/app/launch/**.c*", "../../engine/app/launch/**.h*" } -- "../../engine/app/launcher/dialog.rc" }
+	files {"../../editor/app/launch/**.c*", "../../editor/app/launch/**.h*" } -- "../../engine/app/launcher/dialog.rc" }
 	includedirs {"../../editor/", "../../engine/"}
 	links {"engine", "editor", "game01", "game02", "game03" }
 	--defines {"LINKAGE=IMPORT"}

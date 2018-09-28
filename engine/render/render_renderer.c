@@ -5,7 +5,7 @@
 #include "../framework/opengl.c"
 #include "../framework/framework.c" // logger, image, network, timer, window, filesys, 
 #include "../framework/render.c"
-#include "../math/math.c"
+#include "../core/math/math.c"
 
 typedef struct renderer_t {
     GLuint texture;
