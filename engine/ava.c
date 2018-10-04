@@ -19,7 +19,6 @@
 #include "media/media.c"
 
 #include "framework/audio/audio.c"
-#include "framework/asset/asset.c"
 
 #include "render/render.c"
 #include "scene/scene.c"
@@ -30,8 +29,8 @@
 API int init();
 
 int init() {
-    import("game/**");
-    import("assets/**");
+    vfs_import("game/**");
+    vfs_import("assets/**");
     void (*ptr)();
     for( int i = 0; i < 128; ++i ) {
         if( 0 != (ptr = dllquick( "game.dll", "main" ) ) ) {

@@ -25,6 +25,10 @@ API bool        file_copy( const char *srcpath, const char *dstpath );
 API bool        file_touch( const char *pathfile );
 API bool        file_delete( const char *path );
 
+API int   file_size_(const char* name);
+API char* file_read_(const char* name);
+API char* file_find(const char* name);
+
 #endif
 
 #ifdef FILE_C
@@ -224,6 +228,34 @@ bool file_delete( const char *path ) {
     remove8( path );
     return !file_exist(path);
 }
+
+
+// to merge:
+
+int file_size_(const char *name) {
+    struct stat st;
+    return stat(name, &st) >= 0 ? (int)st.st_size : 0;
+}
+
+char* file_read_(const char* name) {
+    char *buf;
+    size_t len;
+
+    FILE *fp = fopen(name, "rb");
+    if( fp ) {
+        len = file_size_(name);
+        buf = malloc(len + 1);
+        len = fread(buf, 1, len, fp);
+        fclose(fp);
+    } else {
+        buf = calloc(1,4);
+        len = 0;
+    }
+
+    buf[len] = 0;
+    return buf;
+}
+
 
 #endif
 

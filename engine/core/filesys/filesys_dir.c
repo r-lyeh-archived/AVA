@@ -49,7 +49,7 @@ API char *dir_list(char **s, const char *pathmask);
 #ifdef DIR_C
 #pragma once
 #include "ava.h" // detect, realloc
-#include "asset_file.c"
+#include "filesys_file.c"
 //char *va( const char *, ... );
 //#include <inttypes.h>
 #include <errno.h>    // EEXIST

@@ -88,9 +88,9 @@ static __inline char *va( const char *fmt, ... ) {
 
 #include "framework/framework.c"
 #include "framework/audio/audio.c"
-#include "framework/asset/asset.c"
+//#include "framework/asset/asset.c"
 
-#include "media/Media.c"
+#include "media/media.c"
 
 #include "render/render.c"
 #include "scene/scene.c"

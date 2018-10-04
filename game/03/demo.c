@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     window_create(0.25f, 0);
 
     audio_init(0);
-    audio bgm = audio_loadstream( asset("wrath_of_the_djinn.xm") );
+    audio bgm = audio_loadstream( vfs_read("wrath_of_the_djinn.xm") );
     audio_play(bgm, 0);
 
     int w, h;
