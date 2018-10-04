@@ -41,8 +41,8 @@ exit
     REM cleanup
 
         if "%1"=="clean" (
-            if exist _build   rd /q /s _build   && if exist _build   echo "error cannot clean up _build" && exit /b
-            if exist _project rd /q /s _project && if exist _project echo "error cannot clean up _project" && exit /b
+            if exist _build   rd /q /s _build   && if exist _build   echo "error cannot clean up _build" && goto error
+            if exist _project rd /q /s _project && if exist _project echo "error cannot clean up _project" && goto error
             echo Clean up && exit /b
         )
 
@@ -63,9 +63,11 @@ exit
                       @call "%VS140COMNTOOLS%\..\..\VC\bin\x86_amd64\vcvarsx86_amd64.bat"
             ) else if exist "%VS120COMNTOOLS%\..\..\VC\bin\x86_amd64\vcvarsx86_amd64.bat" (
                       @call "%VS120COMNTOOLS%\..\..\VC\bin\x86_amd64\vcvarsx86_amd64.bat"
+            ) else if exist "%ProgramFiles(x86)%\microsoft visual studio\2017\community\VC\Auxiliary\Build\vcvarsx86_amd64.bat" (
+                      @call "%ProgramFiles(x86)%\microsoft visual studio\2017\community\VC\Auxiliary\Build\vcvarsx86_amd64.bat"
             ) else (
-                echo Warning: Could not find x64 environment variables for Visual Studio 2017/2015/2013
-                exit /b
+                echo Error: Could not find x64 environment variables for Visual Studio 2017/2015/2013
+                goto error
             )
             set Platform=x64
         )
@@ -107,6 +109,7 @@ exit
                 _build\debug\launch.exe %*
                 echo ^<^< launch
             ) else (
+                :error
                 color 4f
                 echo  && rem beep
             )
