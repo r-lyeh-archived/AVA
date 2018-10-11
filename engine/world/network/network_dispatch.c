@@ -61,16 +61,17 @@ void dispatch_bundle( char *bundle ) {
     }
 }
 
-static int strmatch( const char *text, const char *pattern ) {
+static
+int dispatch_strmatch( const char *text, const char *pattern ) {
     if( *pattern=='\0' ) return !*text;
-    if( *pattern=='*' )  return strmatch(text, pattern+1) || (*text && strmatch(text+1, pattern));
-    if( *pattern=='?' )  return *text && (*text != '.') && strmatch(text+1, pattern+1);
-    return (*text == *pattern) && strmatch(text+1, pattern+1);
+    if( *pattern=='*' )  return dispatch_strmatch(text, pattern+1) || (*text && dispatch_strmatch(text+1, pattern));
+    if( *pattern=='?' )  return *text && (*text != '.') && dispatch_strmatch(text+1, pattern+1);
+    return (*text == *pattern) && dispatch_strmatch(text+1, pattern+1);
 }
 
 void dispatch_message( const char *route, const char *message ) {
     for( int i = 0; i < num; ++i ) {
-        if( strmatch(table[i].route, route)) {
+        if( dispatch_strmatch(table[i].route, route)) {
             table[i].callback( message );
         }
     }

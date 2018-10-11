@@ -2,7 +2,12 @@
 
 #define LINKAGE __declspec(dllexport)
 #define HEAP
-#define __thread __declspec(thread)
+//#define __thread __declspec(thread)
+
+
+#ifndef VSNPRINTF
+#define VSNPRINTF vsnprintf
+#endif
 
 /*
 

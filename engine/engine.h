@@ -48,33 +48,12 @@ extern "C" {
 
 // string helpers
 
-#ifdef _MSC_VER
-#define __thread __declspec(thread)
-#else
-#define __inline inline
-#endif
+#include <stdarg.h>
 #ifndef VSNPRINTF
 #define VSNPRINTF vsnprintf
 #endif
-#include <stdarg.h>
-#include <assert.h>
-static __thread char vav_buf[2048];
-static __thread int  vav_idx = 0;
-static __inline char *vav( const char *fmt, va_list vl ) {
-    int l = vsnprintf(0, 0, fmt, vl );
-    assert(l >= 0);
-    assert(l+1 <= 2048);
-    char *dst = vav_buf + (vav_idx + l < 2048 ? vav_idx : 0);
-    vav_idx += VSNPRINTF( dst, 2048, fmt, vl ) + 1;
-    return dst;
-}
-static __inline char *va( const char *fmt, ... ) {
-    va_list vl;
-    va_start(vl, fmt);
-    char *dst = vav( fmt, vl );
-    va_end(vl);
-    return dst;
-}
+API char *vl( const char *fmt, va_list vl );
+API char *va( const char *fmt, ... );
 
 // ----------------------------------------------------------------------------
 // modules
