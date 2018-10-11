@@ -1,3 +1,7 @@
+#ifdef CONFIG_H
+#include CONFIG_H
+#endif
+
 #ifdef SERIAL_C
 #pragma once
 #define JSON5_C

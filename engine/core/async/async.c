@@ -1,3 +1,7 @@
+#ifdef CONFIG_H
+#include CONFIG_H
+#endif
+
 #ifdef ASYNC_C
 #pragma once
 #define ATOMIC_C
@@ -14,7 +18,7 @@
 #endif
 
 #include "../detect/detect.c"
-#include "../object/object_realloc.c"
+#include "../memory/memory.c" // realloc
 
 #include "async_atomic.c"
 #include "async_channel.c"

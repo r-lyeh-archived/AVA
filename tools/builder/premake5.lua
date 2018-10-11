@@ -17,9 +17,9 @@ project "engine"
 
 --	files {"../../#sdk/*.c", "../../#sdk/*.cpp", "../../#sdk/*.h", "../../#sdk/*.inl"}
 --	files {"../../src/**.c", "../../src/**.cpp", "../../src/**.h", "../../src/**.inl"}
-	files {"../../engine/ava.c"}
+	files {"../../engine/engine.c"}
 	includedirs {"../../engine/"}
-	defines {"LINKAGE=EXPORT", "AVA_C"}
+	defines {"LINKAGE=EXPORT", "ENGINE_C"}
 
 	filter "configurations:debug"
 		defines {"DEBUG"}
@@ -62,7 +62,7 @@ project "game01"
 	language "C++"
 	targetdir "../../_build/%{cfg.buildcfg}"
 
-	files { "../../game/01/**.c", "../../game/01/**.cpp", "../../game/01/**.cc", "../../game/01/**.cxx", "../../game/01/**.h", "../../game/01/**.hpp", "../../game/01/**.inl"}
+	files { "../../games/01/**.c", "../../games/01/**.cpp", "../../games/01/**.cc", "../../games/01/**.cxx", "../../games/01/**.h", "../../games/01/**.hpp", "../../games/01/**.inl"}
 	--removefiles { "../../app/**" }
 	includedirs {"../../editor/", "../../engine/"}
 	links {"engine"}
@@ -86,7 +86,7 @@ project "game02"
 	language "C++"
 	targetdir "../../_build/%{cfg.buildcfg}"
 
-	files { "../../game/02/**.c", "../../game/02/**.cpp", "../../game/02/**.cc", "../../game/02/**.cxx", "../../game/02/**.h", "../../game/02/**.hpp", "../../game/02/**.inl"}
+	files { "../../games/02/**.c", "../../games/02/**.cpp", "../../games/02/**.cc", "../../games/02/**.cxx", "../../games/02/**.h", "../../games/02/**.hpp", "../../games/02/**.inl"}
 	--removefiles { "../../app/**" }
 	includedirs {"../../editor/", "../../engine/"}
 	links {"engine"}
@@ -110,7 +110,7 @@ project "game03"
 	language "C++"
 	targetdir "../../_build/%{cfg.buildcfg}"
 
-	files { "../../game/03/**.c", "../../game/03/**.cpp", "../../game/03/**.cc", "../../game/03/**.cxx", "../../game/03/**.h", "../../game/03/**.hpp", "../../game/03/**.inl"}
+	files { "../../games/03/**.c", "../../games/03/**.cpp", "../../games/03/**.cc", "../../games/03/**.cxx", "../../games/03/**.h", "../../games/03/**.hpp", "../../games/03/**.inl"}
 	--removefiles { "../../app/**" }
 	includedirs {"../../editor/", "../../engine/"}
 	links {"engine"}

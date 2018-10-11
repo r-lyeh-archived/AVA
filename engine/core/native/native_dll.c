@@ -13,7 +13,7 @@ void* dllquick( const char *filename, const char *symbol );
 
 #ifdef DLL_C
 #pragma once
-#include "../../ava.h" // va()
+#include "engine.h" // va()
 #include "../detect/detect.c"
 #include "native_exec.c"
 #if WIN

@@ -1,3 +1,7 @@
+#ifdef CONFIG_H
+#include CONFIG_H
+#endif
+
 #ifdef FILESYS_C
 #pragma once
 #define DIR_C

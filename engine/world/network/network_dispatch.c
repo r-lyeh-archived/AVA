@@ -27,7 +27,7 @@ API char *bundle_new( char *bundle, const char *addr, const char *msg);
 
 #ifdef DISPATCH_C
 #pragma once
-#include "ava.h" // realloc
+#include "engine.h" // realloc
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

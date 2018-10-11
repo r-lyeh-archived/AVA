@@ -16,7 +16,7 @@ void *lfq_pop(struct lfq *ctx );
 
 #ifdef LFQ_C
 #pragma once
-#include "../object/object_realloc.c"
+#include "../memory/memory_realloc.c"
 #include "async_atomic.c"
 #include <stdlib.h> 
 #include <string.h>

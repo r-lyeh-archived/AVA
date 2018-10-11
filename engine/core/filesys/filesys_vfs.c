@@ -15,7 +15,7 @@ API const char *    vfs_read( const char *file );
 
 #ifdef VFS_C
 #pragma once
-#include "ava.h" // detect, realloc
+#include "engine.h" // detect, realloc
 #include "filesys_dir.c"
 struct asset_counter {
     int hits;

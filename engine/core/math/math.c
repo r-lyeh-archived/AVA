@@ -1,3 +1,7 @@
+#ifdef CONFIG_H
+#include CONFIG_H
+#endif
+
 #ifdef MATH_C
 #pragma once
 #define LINEAR_C

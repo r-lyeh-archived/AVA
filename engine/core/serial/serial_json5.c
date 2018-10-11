@@ -55,7 +55,7 @@ void  json5_free(json5 *root);
 
 #ifdef JSON5_C
 #pragma once
-#include "../ds/ds_array.c"
+#include "../struct/struct_array.c"
 #include <assert.h>
 #include <ctype.h>
 #include <math.h>
@@ -292,7 +292,7 @@ void json5_write(FILE *fp, const json5 *o) {
 #ifdef _MSC_VER
     static __declspec(thread) int indent = 0;
 #else
-    static __thread int indent = 0;
+    static THREAD_LOCAL int indent = 0;
 #endif
     static const char *tabs = 
         "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t" "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"

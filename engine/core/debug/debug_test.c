@@ -19,8 +19,8 @@ API bool test(int expr);
 #include <stdio.h>
 #include <string.h>
 
-static __thread int right = 0, wrong = 0;
-static __thread const char *suite = "";
+static THREAD_LOCAL int right = 0, wrong = 0;
+static THREAD_LOCAL const char *suite = "";
 
 bool unit(const char *name) {
     suite = name;

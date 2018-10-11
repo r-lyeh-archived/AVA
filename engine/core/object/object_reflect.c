@@ -162,7 +162,7 @@ void reflect_iterate_registry( void (*callback)( const reflect *r, void *userdat
 #ifdef _MSC_VER
 __declspec(thread)
 #else
-__thread
+THREAD_LOCAL
 #endif
 struct reflect_context {
     const char *name;

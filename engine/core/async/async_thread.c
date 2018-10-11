@@ -22,7 +22,7 @@ bool join(int thread_id);
 #ifdef THREAD_C
 #pragma once
 #include "../detect/detect.c"
-#include "../object/object_realloc.c"
+#include "../memory/memory_realloc.c"
 #include "async_tls.c"
 
 #include <stdint.h>
@@ -61,7 +61,7 @@ uint64_t thread_self() {
     IF(XB1, return GetCurrentThreadId() );
     IF(AND, return pthread_self() );
     // fallback
-    static __thread int id;
+    static THREAD_LOCAL int id;
     return (intptr_t)&id;
 }
 

@@ -72,7 +72,7 @@ API const char *(*callstack_handler)(int traces);
 
 #ifdef LOGGER_C
 #pragma once
-#include "../object/object_callstack.c"
+#include "../detect/detect_callstack.c"
 
 const char *(*callstack_handler)(int traces) = callstack;
 #endif

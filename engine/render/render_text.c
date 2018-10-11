@@ -20,7 +20,7 @@ void text(void *renderable, int font_id, const char *text );
 #include "render_font.c"
 #include "render_unicode.c"
 #include "render_mesh.c" // buffer
-#include "ava.h" // realloc
+#include "engine.h" // realloc
 
 
 void text(void *renderable, int font_id, const char *text ) {

@@ -17,7 +17,7 @@ API uint64_t folder_freespace();
 
 #ifdef FOLDER_C
 #pragma once
-#include "ava.h" // detect_threadls, asset_dir
+#include "engine.h" // detect_threadls, asset_dir
 #include <stdlib.h>
 #include <string.h>
 #ifdef _WIN32
@@ -140,7 +140,7 @@ char *folder_tempdir() {
     return t;
 }
 char *folder_workdir() {
-    static __thread char cwd[PATH_MAX+1] = {0};
+    static THREAD_LOCAL char cwd[PATH_MAX+1] = {0};
     getcwd(cwd, sizeof(cwd));
     return cwd;
 }

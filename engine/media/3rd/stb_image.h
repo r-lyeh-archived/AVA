@@ -2835,6 +2835,9 @@ static void stbi__jpeg_finish(stbi__jpeg *z)
 
 static int stbi__process_marker(stbi__jpeg *z, int m)
 {
+#ifdef L
+#undef L
+#endif
    int L;
    switch (m) {
       case STBI__MARKER_none: // no marker found

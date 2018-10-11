@@ -21,7 +21,7 @@ os_exec( cmd, args, []{ prog }, []{ err }, []{ ok } );
 */
 
 #include "../detect/detect.c"
-#include "../object/object_realloc.c"
+#include "../memory/memory_realloc.c"
 
 #include <stdlib.h>
 #include <stdio.h>

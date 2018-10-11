@@ -2,8 +2,8 @@
 
 #pragma once
 
-#if defined __GNUC__
-#define __restrict restrict
+#ifdef __GNUC__
+#define RESTRICT restrict
 #else
-#define __restrict
+#define RESTRICT
 #endif

@@ -56,7 +56,7 @@ void image_flip( image * );
 
 #ifdef IMAGE_C
 #pragma once
-#include "ava.h" // filesys
+#include "engine.h" // filesys
 #define swapifbe(x) (x) // endian.h
 
 #define STB_IMAGE_IMPLEMENTATION

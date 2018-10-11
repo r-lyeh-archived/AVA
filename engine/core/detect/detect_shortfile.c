@@ -2,7 +2,7 @@
 
 // Compile time basename. 64 chars max.
 // Hint: strlen("string") == sizeof("string")-1
-#define SHORTFILE(s) ( s + 1 + ( \
+#define SHORTFILE(s) ( (s) + 1 + ( \
     sizeof(s) > 64 && 64[s] == '/' ? 64 : \
     sizeof(s) > 63 && 63[s] == '/' ? 63 : \
     sizeof(s) > 62 && 62[s] == '/' ? 62 : \
