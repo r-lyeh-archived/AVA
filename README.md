@@ -55,17 +55,17 @@
 
 ### 01
 Project structure, build system and makefiles.
-<img src="game/01/demo.gif" height="96px" align="right">
+<img src="games/01/demo.gif" height="96px" align="right">
 <br><br>
 
 ### 02
 Window creation and basic framework.
-<img src="game/02/demo.png" height="96px" align="right">
+<img src="games/02/demo.png" height="96px" align="right">
 <br><br>
 
 ### 03
 Audio.
-<img src="game/03/demo.png" height="96px" align="right">
+<img src="games/03/demo.png" height="96px" align="right">
 <br><br>
 
 ## Releases
@@ -90,7 +90,7 @@ Additionally:
 - `editor/`, generic 3d editor and viewer.
 - `engine/`, engine runtime.
 - `tools/`, pipeline used to import foreign data.
-- `game/`, your game to be packaged.
+- `games/`, games sources.
 
 ## Download
 
