@@ -18,7 +18,7 @@ API uint64_t now_mm();
 
 #ifdef NOW_C
 #pragma once
-#include "../detect/detect.c" // platform, SYS_
+#include "../detect/detect.c" // platform
 
 #define TIMER_E3 1000ULL
 #define TIMER_E6 1000000ULL
@@ -33,13 +33,13 @@ API uint64_t now_mm();
 #endif
 
 static uint64_t nanotimer() {
-#  if SYS_WIN || SYS_360 || SYS_XB1
+#  if WIN || XB1
     LARGE_INTEGER li;
     QueryPerformanceCounter(&li);
     return (uint64_t)li.QuadPart;
-#elif SYS_PS4
+#elif PS4
     return (uint64_t)sceKernelReadTsc();
-#elif SYS_AND
+#elif AND
     return (uint64_t)clock();
 #elif defined NOW_MONOTONIC
     struct timespec ts;
@@ -53,13 +53,13 @@ static uint64_t nanotimer() {
 }
 
 static uint64_t nanofreq() {
-#  if SYS_WIN || SYS_360 || SYS_XB1
+#  if WIN || XB1
     LARGE_INTEGER li;
     QueryPerformanceFrequency(&li);
     return li.QuadPart;
-#elif SYS_PS4
+#elif PS4
     return sceKernelGetTscFrequency();
-#elif SYS_AND
+#elif AND
     return CLOCKS_PER_SEC;
 #elif defined NOW_MONOTONIC
     return TIMER_E9;

@@ -7,31 +7,7 @@
 
 #define GLAD_IMPLEMENTATION
 
-#if 0
 #include "engine.h"
-#else
-//#include "defines.c"
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-
-#ifndef SYS_WIN
-	#define SYS_WIN 1
-	#define SYS_MSC 1
-	#define MSC 1
-	#define WIN 1
-	#define IF(x, true_, ...)  IF_(x, true_, __VA_ARGS__)
-	#define IFN(x, true_, ...) IF_(x, __VA_ARGS__, true_)
-	#define IF_(x, true_, ...) IF_##x(true_, __VA_ARGS__)
-	#define IF_0(true_,...)    __VA_ARGS__
-	#define IF_1(true_,...)    true_
-	#endif
-#endif
-
-//#include "includes.c"
-#include <math.h>
-#include <stdbool.h>
-#include <stdint.h>
 
 #endif
 
@@ -56,11 +32,6 @@
 #endif
 
 #include "opengl.c"
-
-#ifdef _WIN32
-//#include <windows.h>
-//#include <mmsystem.h>
-#endif
 
 #include "glfw3.c"
 
