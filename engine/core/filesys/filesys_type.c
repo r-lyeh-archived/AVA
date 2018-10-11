@@ -2,7 +2,7 @@
 
 API const char *file_type(const char *buf, int len);
 
-#ifdef TYPE_C
+#ifdef FTYPE_C
 #pragma once
 #include <string.h>
 
@@ -88,7 +88,7 @@ const char *file_type(const char *buf, int len) {
 
 #endif
 
-#ifdef TYPE_DEMO
+#ifdef FTYPE_DEMO
 #include <stdio.h>
 int main() {
     // samples taken from https://github.com/mathiasbynens/small
