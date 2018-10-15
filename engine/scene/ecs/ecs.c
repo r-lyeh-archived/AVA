@@ -18,7 +18,7 @@
 #ifndef ECS_H
 #define ECS_H
 
-#include "../core/struct/struct_array.c"
+#include "../struct/struct_array.c"
 #include <stdint.h>
 #include <stdio.h>
 
