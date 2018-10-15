@@ -37,20 +37,20 @@ API char* file_find(const char* name);
 #include <stdio.h>
 #include <sys/stat.h>
 
-#if WIN
+#if WINDOWS
 #include <io.h>
 #else
 #include <unistd.h>
 #endif
 
-#define open8(path,mode)  IF(WIN, _wopen(file_widen(path))               ,  open(path, mode) )
-#define fopen8(path,mode) IF(WIN, _wfopen(file_widen(path),file_widen(mode)), fopen(path,mode) )
-#define remove8(path)     IF(WIN, _wremove(file_widen(path))             ,  remove(path)     )
-#define rename8(path)     IF(WIN, _wrename(file_widen(path))             ,  rename(path)     )
-#define stat8(path,st)    IF(WIN, _wstat(file_widen(path),st)            ,  stat(path,st)    )
-#define stat_             IF(WIN, _stat,                                 ,  stat_t           )
+#define open8(path,mode)  IFDEF(WINDOWS, _wopen(file_widen(path))               ,  open(path, mode) )
+#define fopen8(path,mode) IFDEF(WINDOWS, _wfopen(file_widen(path),file_widen(mode)), fopen(path,mode) )
+#define remove8(path)     IFDEF(WINDOWS, _wremove(file_widen(path))             ,  remove(path)     )
+#define rename8(path)     IFDEF(WINDOWS, _wrename(file_widen(path))             ,  rename(path)     )
+#define stat8(path,st)    IFDEF(WINDOWS, _wstat(file_widen(path),st)            ,  stat(path,st)    )
+#define stat_             IFDEF(WINDOWS, _stat,                                 ,  stat_t           )
 
-#if WIN
+#if WINDOWS
 #define O_RDONLY 00
 // mmap() replacement for Windows. Placed into the public domain (Mike Frysinger)
 enum {  PROT_READ = 0x1, PROT_WRITE = 0x2, PROT_EXEC = 0x4,
@@ -85,7 +85,7 @@ static void munmap(void* addr, size_t length) {
 }
 #endif
 
-#if WIN
+#if WINDOWS
 #include <winsock2.h>
 #include <shlobj.h>
 wchar_t *file_widen(const char *utf8) { // wide strings (windows only)
@@ -202,7 +202,7 @@ bool file_touch( const char *pathfile ) {
     return utime( pathfile, &tb ) != -1 ? true : false;
 }
 bool file_copy( const char *srcpath, const char *dstpath ) {
-#  if WIN
+#  if WINDOWS
     return CopyFileW( file_widen(srcpath), file_widen(dstpath), FALSE );
 #elif OSX
     return copyfile( srcpath, dstpath, 0, COPYFILE_DATA )>=0;

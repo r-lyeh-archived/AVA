@@ -22,7 +22,7 @@ API char *   date_format(char out[32], uint64_t rtc10);
 
 #ifdef DATE_C
 #pragma once
-#if !WIN
+#if !WINDOWS
 #include <sys/time.h>
 #endif
 #include <time.h>

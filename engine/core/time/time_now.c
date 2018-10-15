@@ -33,13 +33,13 @@ API uint64_t now_mm();
 #endif
 
 static uint64_t nanotimer() {
-#  if WIN || XB1
+#  if WINDOWS || XBOX1
     LARGE_INTEGER li;
     QueryPerformanceCounter(&li);
     return (uint64_t)li.QuadPart;
 #elif PS4
     return (uint64_t)sceKernelReadTsc();
-#elif AND
+#elif ANDROID
     return (uint64_t)clock();
 #elif defined NOW_MONOTONIC
     struct timespec ts;
@@ -53,13 +53,13 @@ static uint64_t nanotimer() {
 }
 
 static uint64_t nanofreq() {
-#  if WIN || XB1
+#  if WINDOWS || XBOX1
     LARGE_INTEGER li;
     QueryPerformanceFrequency(&li);
     return li.QuadPart;
 #elif PS4
     return sceKernelGetTscFrequency();
-#elif AND
+#elif ANDROID
     return CLOCKS_PER_SEC;
 #elif defined NOW_MONOTONIC
     return TIMER_E9;

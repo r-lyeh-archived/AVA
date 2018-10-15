@@ -16,13 +16,13 @@ void* dllquick( const char *filename, const char *symbol );
 #include "engine.h" // va()
 #include "../detect/detect.c"
 #include "native_exec.c"
-#if WIN
+#if WINDOWS
 #include <io.h>
 #else
 #include <stdio.h>
 #endif
 
-#if WIN
+#if WINDOWS
 #   include <stdlib.h>
 #   include <winsock2.h>
 #   define DLLTYPE              HMODULE
@@ -37,7 +37,7 @@ void* dllquick( const char *filename, const char *symbol );
 #   include <mach-o/dyld.h>
 #endif
 bool dllexists( const char *filename ) {
-#if WIN
+#if WINDOWS
     return _access( filename, 0 ) != -1;
 #else
     return access( filename, F_OK ) != -1;
@@ -55,7 +55,7 @@ bool dllopen(int plug_id, const char *filename) {
     } else {
         return 0;
     }
-#if WIN && !SHIPPING
+#if WINDOWS && !SHIPPING
     // We want this dll likely to be monitored and hot-reloaded, but windows will lock this dll file for writing.
     // Hack: We move the dll to the temp folder and load it from there. This temp dll will be locked instead.
     char outfile[512];

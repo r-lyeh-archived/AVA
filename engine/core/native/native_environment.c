@@ -32,7 +32,7 @@ uint64_t env_free();
 #endif
 #include <stdlib.h>
 const char *env_set( const char *key, const char *value ) { //$
-#if WIN
+#if WINDOWS
     char buf[1024];
     sprintf(buf,"%s=%s", key, value ? value : "");
     putenv( buf );
@@ -48,7 +48,7 @@ const char *env_get( const char *key ) { //$
 #ifdef ENVDEMO
 #endif
 
-#if !WIN
+#if !WINDOWS
 #include <pwd.h>
 #endif
 
@@ -65,12 +65,12 @@ char *env_proc_() {
     if (_NSGetExecutablePath(path, &i) > -1) {
         return t = STRDUP(path);
     }
-#elif LIN
+#elif LINUX
     //if (readlink(strf("/proc/%d/exe", getpid()), path, sizeof(path)) > -1) {
     if (readlink("/proc/self/exe", path, sizeof(path)) > -1) {
         return t = STRDUP(path);
     }
-#elif WIN
+#elif WINDOWS
     if (GetModuleFileNameA(0, path, sizeof(path))) {
         return t = STRDUP(path);
     }
@@ -92,7 +92,7 @@ char *ENV_FIX(const char *pathfile) {
     return buf;
 }
 
-#ifndef _MSC_VER
+#if !MSC
 extern char **__argv; // implemented in string.option.c
 #endif
 
@@ -137,7 +137,7 @@ char *env_temp() {
     t = t ? t : getenv("TMPDIR");
     t = t ? t : getenv("TMP");
     t = t ? t : getenv("TEMP");
-#if !WIN
+#if !WINDOWS
     t = t ? t : "/tmp";
 #else
     // GetTempPathW(n, buf);
@@ -147,7 +147,7 @@ char *env_temp() {
 }
 static THREAD_LOCAL char cwd[PATH_MAX+1];
 char *env_curr() { // envwork
-#if WIN
+#if WINDOWS
     _getcwd(cwd, sizeof(cwd));
 #else
     getcwd(cwd, sizeof(cwd));
@@ -155,7 +155,7 @@ char *env_curr() { // envwork
     return uri_norm( cwd, cwd ), cwd[strlen(cwd)] = '/', cwd;
 }
 uint64_t env_free() {
-#if WIN
+#if WINDOWS
     DWORD SectorsPerCluster, BytesPerSector, NumberOfFreeClusters, TotalNumberOfClusters;
     if( GetDiskFreeSpaceA( ".\\", &SectorsPerCluster, &BytesPerSector, &NumberOfFreeClusters, &TotalNumberOfClusters ) ) {
         return ((uint64_t)NumberOfFreeClusters) * SectorsPerCluster * BytesPerSector;

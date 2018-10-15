@@ -38,6 +38,9 @@ bool join(int thread_id);
 #   include <sys/time.h> // timespec
 #   include <time.h>     // nanosleep()
 #   include <unistd.h>   // getpid()
+#   if LINUX
+#   include <sys/syscall.h>
+#   endif
 #   define THREAD_API "pth"
 #endif
 #if defined(__cplusplus)
@@ -53,21 +56,21 @@ bool join(int thread_id);
 const char *thdapi = THREAD_API;
 
 uint64_t thread_self() {
-    IF(IOS, return (mach_port_t)pthread_mach_thread_np( pthread_self() ) );
-    IF(OSX, return (mach_port_t)pthread_mach_thread_np( pthread_self() ) );
-    IF(LIN, return (uint64_t)syscall(SYS_gettid); );
-    IF(PS4, return (uint64_t)scePthreadSelf() );
-    IF(WIN, return GetCurrentThreadId() );
-    IF(XB1, return GetCurrentThreadId() );
-    IF(AND, return pthread_self() );
+    IFDEF(IOS,     return (mach_port_t)pthread_mach_thread_np( pthread_self() ) );
+    IFDEF(OSX,     return (mach_port_t)pthread_mach_thread_np( pthread_self() ) );
+    IFDEF(LINUX,   return (uint64_t)syscall(SYS_gettid) );
+    IFDEF(PS4,     return (uint64_t)scePthreadSelf() );
+    IFDEF(WINDOWS, return GetCurrentThreadId() );
+    IFDEF(XBOX1,   return GetCurrentThreadId() );
+    IFDEF(ANDROID, return pthread_self() );
     // fallback
     static THREAD_LOCAL int id;
     return (intptr_t)&id;
 }
 
 void thread_yield() {
-    IF(CPP, std::this_thread::yield(),
-        IF(WIN, SwitchToThread(), // also, YieldProcessor(); Sleep(0); SleepEx(0, FALSE); _mm_pause();
+    IFDEF(CPP, std::this_thread::yield(),
+        IFDEF(WINDOWS, SwitchToThread(), // also, YieldProcessor(); Sleep(0); SleepEx(0, FALSE); _mm_pause();
             pthread_yield()       // also, sched_yield(); __asm__ __volatile__("pause" ::: "memory"); nanosleep();
         );
     );
@@ -101,14 +104,14 @@ void thread_yield() {
         tls_init();
         func( arg0 );
         tls_quit();
-        IFN(WIN, pthread_exit((void**)0) );
+        IFNDEF(WINDOWS, pthread_exit((void**)0) );
         return 0;
     }
     static void* launch( void (*func)(void *), void *args ) {
         thread_args *ta = (struct thread_args*)REALLOC( 0, sizeof(struct thread_args));
         ta->func = func;
         ta->args = args;
-        IF(WIN, {
+        IFDEF(WINDOWS, {
             return CreateThread(NULL, 0, thread_wrapper, (LPVOID)ta, 0, NULL);
         }, {
             void *ret;
@@ -120,14 +123,14 @@ void thread_yield() {
     }
     bool detach( void (*func)(void *), void *arg ) {
         void *thr = launch(func, arg);
-        IF(WIN, return CloseHandle(thr) != 0 ? true : false,
+        IFDEF(WINDOWS, return CloseHandle(thr) != 0 ? true : false,
             return pthread_detach(thr) == 0 ? true : false );
     }
     bool thread(int thread_id, void (*func)(void *), void *arg) {
         return !!(threads[thread_id] = launch(func, arg));
     }
     bool join(int thread_id) {
-        IF(WIN, {
+        IFDEF(WINDOWS, {
             if( WaitForSingleObject(threads[thread_id], INFINITE) != WAIT_FAILED ) {
                 return (CloseHandle(threads[thread_id]), true);
             }

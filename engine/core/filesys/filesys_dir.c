@@ -57,7 +57,7 @@ API char *dir_list(char **s, const char *pathmask);
 #include <stdio.h>    // sprintf
 #include <stdlib.h>   // realpath
 #include <string.h>   // strrchr, strstr
-#if WIN
+#if WINDOWS
 #include <winsock2.h> // FindFirstFileA
 //#include <direct.h>
 #else
@@ -73,12 +73,12 @@ API char *dir_list(char **s, const char *pathmask);
 #  define DIR_MAX 260
 #endif
 
-#define chdir8(path)               IF(WIN, _wchdir(dir_widen(path))                  , chdir(path) )
-#define mkdir8(path, mode)         IF(WIN, _wmkdir(dir_widen(path))                  , mkdir(path, mode) )
-#define rmdir8(path)               IF(WIN, _wrmdir(dir_widen(path))                  , rmdir(path)       )
-//#define realpath8(path,mp,buf,p) IF(WIN, GetFullPathNameW(strwiden(path),mp,buf,p), realpath(*pathfile, absolute) )
+#define chdir8(path)               IFDEF(WINDOWS, _wchdir(dir_widen(path))                  , chdir(path) )
+#define mkdir8(path, mode)         IFDEF(WINDOWS, _wmkdir(dir_widen(path))                  , mkdir(path, mode) )
+#define rmdir8(path)               IFDEF(WINDOWS, _wrmdir(dir_widen(path))                  , rmdir(path)       )
+//#define realpath8(path,mp,buf,p) IFDEF(WINDOWS, GetFullPathNameW(strwiden(path),mp,buf,p), realpath(*pathfile, absolute) )
 
-#if WIN
+#if WINDOWS
 #include <winsock2.h>
 #include <shlobj.h>
 wchar_t *dir_widen(const char *utf8) { // wide strings (windows only)
@@ -146,7 +146,7 @@ char *dir_ext( const char *pathfile ) {
 
 char *dir_abs( const char *pathfile ) {
     char out[DIR_MAX+1] = {0};
-#if WIN
+#if WINDOWS
     _fullpath(out, pathfile, DIR_MAX);
 #else
     realpath(pathfile, out);
@@ -177,7 +177,7 @@ char *dir_up(const char *pathfile) {
 #include <string.h> // strrchr, strstr
 #include <stdio.h>  // sprintf
 #include <stdlib.h> // realloc
-#ifdef _WIN32
+#if WINDOWS
 #include <winsock2.h>
 #else
 #include <dirent.h>
@@ -207,7 +207,7 @@ static int ls_strmatchi( const char *text, const char *pattern ) {
 static int ls_recurse( int recurse, const char *src, const char *pattern, bool (*yield)(const char *name) ) {
     char *dir = 0;
     int count = 0;
-#ifdef _WIN32
+#if WINDOWS
     WIN32_FIND_DATAA fdata;
     for( HANDLE h = FindFirstFileA( ls_strcat(&dir, src, "*", 0), &fdata ); h != INVALID_HANDLE_VALUE; FindClose( h ), h = INVALID_HANDLE_VALUE ) {
         for( int next = 1; next; next = FindNextFileA( h, &fdata ) != 0 ) {

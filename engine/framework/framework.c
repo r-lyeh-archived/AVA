@@ -53,9 +53,6 @@
 
 #ifdef FRAMEWORK_DEMO
 int main() {
-    IF(WIN, puts("win"), puts("not win"));
-    IF(MSC, puts("msc"), puts("not msc"));
-
     window_create(0.85f, 0);
 
     int w, h;
