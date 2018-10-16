@@ -4,7 +4,7 @@ require "ninja"
 
 solution "Project"
 	location "../../_project"
-	configurations {"debug", "release", "shipping"}
+	configurations {"debug", "debugopt", "release"}
 	platforms { "x64" } -- "native", "universal64" }
 
 -- dlls
@@ -22,15 +22,14 @@ project "engine"
 	defines {"LINKAGE=EXPORT", "ENGINE_C"}
 
 	filter "configurations:debug"
-		defines {"DEBUG"}
 		symbols "On"
 
-	filter "configurations:release"
-		defines {"NDEBUG"}
+	filter "configurations:debugopt"
+		symbols "On"
 		optimize "On"
 
-	filter "configurations:shipping"
-		defines {"NDEBUG", "SHIPPING"}
+	filter "configurations:release"
+		symbols "Off"
 		optimize "On"
 
 project "editor"
@@ -45,15 +44,14 @@ project "editor"
 	links {"engine"}
 
 	filter "configurations:debug"
-		defines {"DEBUG"}
 		symbols "On"
 
-	filter "configurations:release"
-		defines {"NDEBUG"}
+	filter "configurations:debugopt"
+		symbols "On"
 		optimize "On"
 
-	filter "configurations:shipping"
-		defines {"NDEBUG", "SHIPPING"}
+	filter "configurations:release"
+		defines {"NDEBUG", "release"}
 		optimize "On"
 
 project "game01"
@@ -69,15 +67,14 @@ project "game01"
 	defines {"LINKAGE=IMPORT"}
 
 	filter "configurations:debug"
-		defines {"DEBUG"}
 		symbols "On"
 
-	filter "configurations:release"
-		defines {"NDEBUG"}
+	filter "configurations:debugopt"
+		symbols "On"
 		optimize "On"
 
-	filter "configurations:shipping"
-		defines {"NDEBUG", "SHIPPING"}
+	filter "configurations:release"
+		symbols "Off"
 		optimize "On"
 
 project "game02"
@@ -93,15 +90,14 @@ project "game02"
 	defines {"LINKAGE=IMPORT"}
 
 	filter "configurations:debug"
-		defines {"DEBUG"}
 		symbols "On"
 
-	filter "configurations:release"
-		defines {"NDEBUG"}
+	filter "configurations:debugopt"
+		symbols "On"
 		optimize "On"
 
-	filter "configurations:shipping"
-		defines {"NDEBUG", "SHIPPING"}
+	filter "configurations:release"
+		symbols "Off"
 		optimize "On"
 
 project "game03"
@@ -117,15 +113,14 @@ project "game03"
 	defines {"LINKAGE=IMPORT"}
 
 	filter "configurations:debug"
-		defines {"DEBUG"}
 		symbols "On"
 
-	filter "configurations:release"
-		defines {"NDEBUG"}
+	filter "configurations:debugopt"
+		symbols "On"
 		optimize "On"
 
-	filter "configurations:shipping"
-		defines {"NDEBUG", "SHIPPING"}
+	filter "configurations:release"
+		symbols "Off"
 		optimize "On"
 
 -- app
@@ -148,15 +143,14 @@ project "launch"
 		links { "pthread" }
 
 	filter "configurations:debug"
-		defines {"DEBUG"}
 		symbols "On"
 
-	filter "configurations:release"
-		defines {"NDEBUG"}
+	filter "configurations:debugopt"
+		symbols "On"
 		optimize "On"
 
-	filter "configurations:shipping"
-		defines {"NDEBUG", "SHIPPING"}
+	filter "configurations:release"
+		symbols "Off"
 		optimize "On"
 
 --[[

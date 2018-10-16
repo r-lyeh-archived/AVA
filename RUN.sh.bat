@@ -84,7 +84,7 @@ exit
 
     REM build
 
-        pushd "%AVAROOT%\tools\builder"
+        pushd "%AVAROOT%\import\builder"
 
             REM project generation
             REM premake5.exe codelite

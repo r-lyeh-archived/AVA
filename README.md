@@ -9,7 +9,7 @@
   <a href="#rationale">Rationale</a> |
   <a href="#getting-started">Getting started</a> |
 <br/>|
-  <a href="#unlicense">Unlicense</a> |
+  <a href="#licensing">Unlicense</a> |
   <a href="#documentation">Documentation</a> |
   <a href="#todo-ᕕᐛᕗ">Todo ᕕ(ᐛ)ᕗ</a> |
 <br/>
@@ -89,30 +89,30 @@ Additionally:
 - `.git/`, dot folders are always ignored.
 - `editor/`, generic 3d editor and viewer.
 - `engine/`, engine runtime.
-- `tools/`, pipeline used to import foreign data.
-- `games/`, games sources.
+- `import/`, asset pipeline that imports foreign data.
+- `games/`, all your game sources here.
 
 ## Download
 
 ## Build
 
 ### AVA as engine:
-- [x] Compile the amalgamated `AVA.c` source file to get a functional game engine.
+- [x] Compile the amalgamated `engine.c` source file to get a functional game engine.
 - [x] Compile your game as a dynamic library and place it near the `AVA` executable.
 - [x] Tip: Rename both executable and dynamic library as desired. Ie, `game.exe` with `game.dll` will work.
 - [x] Tip: Place an `.ico` icon close to the binary if you want to as well.
 ```lisp
-cl      AVA.c                && echo AVA as engine (Windows)
-g++     AVA.c                && echo AVA as engine (Linux)
-clang++ AVA.c                && echo AVA as engine (OSX)
+cl      engine.c                && echo AVA as engine (Windows)
+g++     engine.c                && echo AVA as engine (Linux)
+clang++ engine.c                && echo AVA as engine (OSX)
 ```
 
 ### AVA as library:
-- [x] Compile your game and link amalgamated `AVA.c` source file with it.
+- [x] Compile your game and link amalgamated `engine.c` source file with it.
 ```lisp
-cl      game.c AVA.c         && echo AVA as library (Windows)
-g++     game.c AVA.c         && echo AVA as library (Linux)
-clang++ game.c AVA.c         && echo AVA as library (OSX)
+cl      game.c engine.c         && echo AVA as library (Windows)
+g++     game.c engine.c         && echo AVA as library (Linux)
+clang++ game.c engine.c         && echo AVA as library (OSX)
 ```
 
 ### Redistribution
@@ -122,6 +122,9 @@ clang++ game.c AVA.c         && echo AVA as library (OSX)
 - game.rom/.pak        (ro data storage) | game :)
 - game.ram/.sql        (rw data storage) /
 ```
+
+## Licensing
+- The project is multi-licensed: MIT-0, Zero-BSD or Unlicense. Pick one.
 
 ## Alternatives
 
