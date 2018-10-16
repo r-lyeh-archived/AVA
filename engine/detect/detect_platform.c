@@ -54,16 +54,17 @@
 #define WINDOWS        0
 #define XBOX1          0
 
-// detect build type
-#if defined _DEBUG && defined __OPTIMIZE__
+// detect build type (@todo: check _DEBUG compatibility in non-msvc compilers)
+// we assume that we are on shipping build if asserts are removed (ie, NDEBUG is defined)
+#if defined NDEBUG && defined _DEBUG
 #   undef  DEBUGOPT
 #   define DEBUGOPT    1
-#elif defined _DEBUG
-#   undef  DEBUG
-#   define DEBUG       1
-#else
+#elif defined NDEBUG
 #   undef  RELEASE
 #   define RELEASE     1
+#else
+#   undef  DEBUG
+#   define DEBUG       1
 #endif
 
 // detect compiler

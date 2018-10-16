@@ -29,6 +29,7 @@ project "engine"
 		optimize "On"
 
 	filter "configurations:release"
+		defines { "NDEBUG" }
 		symbols "Off"
 		optimize "On"
 
@@ -51,7 +52,7 @@ project "editor"
 		optimize "On"
 
 	filter "configurations:release"
-		defines {"NDEBUG", "release"}
+		defines {"NDEBUG"}
 		optimize "On"
 
 project "game01"
@@ -74,6 +75,7 @@ project "game01"
 		optimize "On"
 
 	filter "configurations:release"
+		defines {"NDEBUG"}
 		symbols "Off"
 		optimize "On"
 
@@ -97,6 +99,7 @@ project "game02"
 		optimize "On"
 
 	filter "configurations:release"
+		defines {"NDEBUG"}
 		symbols "Off"
 		optimize "On"
 
@@ -120,6 +123,7 @@ project "game03"
 		optimize "On"
 
 	filter "configurations:release"
+		defines {"NDEBUG"}
 		symbols "Off"
 		optimize "On"
 
@@ -150,6 +154,7 @@ project "launch"
 		optimize "On"
 
 	filter "configurations:release"
+		defines {"NDEBUG"}
 		symbols "Off"
 		optimize "On"
 
