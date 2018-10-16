@@ -77,7 +77,7 @@ void console_run2(const char* name, void *arg1, void *arg2 ) {
 char *prompt() {
     static char buffer[512];
     buffer[0] = 0;
-    if( !fgets(buffer, 512, stdin) || feof(stdin) ) {
+    if( feof(stdin) || !fgets(buffer, 512, stdin) ) {
         return 0;
     }
     for( int c = strlen(buffer); c && buffer[c-1] < 32; c = strlen(buffer) ) {
