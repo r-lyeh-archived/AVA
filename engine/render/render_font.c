@@ -264,7 +264,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
     free(atlasData);
 
     // config character spacing
-    uint32_t default_char = 'A';
+    uint32_t default_char = 'W'; // 'A'
     vec3 temp_vtx[4]; vec2 temp_uv[4];
     fillglyph( &temp_vtx[0], &temp_uv[0], f, default_char, &f->spaceX, &f->spaceY );
     if( f->spaceX > f->spaceY ) f->spaceY = f->spaceX;
