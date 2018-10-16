@@ -10,11 +10,16 @@
 #define TEXT_C
 #define TEXTURE_C
 #define UNICODE_C
+#define OPENGL_C
+#define PASS_C
 #endif
 
 #include <stdlib.h>
 
+#include "render_opengl.c"
 #include "render_renderer.c"
+#include "render_pass.c"
+
 #include "render_ddraw.c"
 #include "render_font.c"
 #include "render_mesh.c"

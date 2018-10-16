@@ -4,8 +4,6 @@
 #pragma once
 #define CORE_C
 #define FRAMEWORK_C
-#define AUDIO_C
-#define ASSET_C
 #define MEDIA_C
 #define RENDER_C
 #define SCENE_C
@@ -40,13 +38,21 @@
 #include "time/time.c"
 #include "string/string.c"
 
-
-#include "framework/framework.c"
+#ifdef FRAMEWORK_C
+#pragma once
+#define APP_C
+#define AUDIO_C
+#define INPUT_C
+#define ASSET_C
+#define STORAGE_C
+#endif
+#include "app/app.c"
+#include "audio/audio.c"
+#include "input/input.c"
+//#include "asset/asset.c"
+//#include "storage/storage.c"
 
 #include "media/media.c"
-
-#include "framework/audio/audio.c"
-
 #include "render/render.c"
 #include "scene/scene.c"
 #include "world/world.c"

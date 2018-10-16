@@ -2,9 +2,7 @@
 #define RENDERER_H
 #include <stdbool.h>
 #include <stdint.h>
-#include "../framework/opengl.c"
-#include "../framework/framework.c" // logger, image, network, timer, window, filesys, 
-#include "../framework/render.c"
+#include "render_opengl.c" // opengl, render, logger, image, network, timer, window, filesys, 
 #include "../math/math.c"
 
 typedef struct renderer_t {

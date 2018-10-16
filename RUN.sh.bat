@@ -45,7 +45,7 @@ exit
         if "%1"=="clean" (
             if exist _build   rd /q /s _build   && if exist _build   echo "error cannot clean up _build" && goto error
             if exist _project rd /q /s _project && if exist _project echo "error cannot clean up _project" && goto error
-            echo Clean up && exit /b
+            echo Cleaning up. && exit /b
         )
 
         if "%1"=="fuse" (
@@ -77,14 +77,14 @@ exit
         REM Luajit, %AVAROOT%
         if ""=="" (
             echo [win][set]
-            set AVAROOT="%~dp0%\"
+            REM set AVAROOT="%~dp0%\"
             REM set      path="%path%;%~dp0%\bin\;"
             REM endlocal &&  && set AVAROOT=%AVAROOT%
         )
 
     REM build
 
-        pushd "%AVAROOT%\import\builder"
+        pushd "%~dp0%\import\builder"
 
             REM project generation
             REM premake5.exe codelite
@@ -103,7 +103,7 @@ exit
 
     REM launch
 
-        pushd "%AVAROOT%"
+        pushd "%~dp0%"
 
             if "0"=="%OK%" (
                 color
@@ -117,6 +117,8 @@ exit
             )
 
         popd
+
+        call "%0" clean
 
     REM exit
 

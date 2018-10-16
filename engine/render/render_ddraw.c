@@ -67,7 +67,7 @@ void ddraw_lineEx( float src[3], float dst[3], float col[4] );
 #include "render_renderer.c"
 #include "render_text.c"
 #include "render_font.c"
-#include "../framework/window.c"
+#include "../app/window.c"
 #include "render_ddraw.c"
 
 // find/compute basis/triad/axes from normal

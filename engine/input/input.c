@@ -26,7 +26,7 @@ int key( int key );
 #ifdef INPUT_C
 #pragma once
 
-#include "window.c"
+#include "../app/window.c"
 
 static double mx, my, mb[3], mcursor = 1;
 static int mhas_imgui = 0;

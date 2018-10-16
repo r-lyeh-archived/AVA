@@ -73,9 +73,13 @@ API char *va( const char *fmt, ... );
 #include "string/string.c"
 // } core.c
 
-#include "framework/framework.c"
-#include "framework/audio/audio.c"
-//#include "framework/asset/asset.c"
+// framework.c {
+#include "app/app.c"
+#include "audio/audio.c"
+#include "input/input.c"
+//#include "asset/asset.c"
+//#include "storage/storage.c"
+// } framework.c
 
 #include "media/media.c"
 

@@ -1,6 +1,6 @@
 #ifndef SHADER_H
 #define SHADER_H
-#include "../framework/opengl.c"
+#include "render_opengl.c"
 
 #define OpenGL20 "#version 110\n"
 #define OpenGL21 "#version 120\n"
@@ -178,9 +178,8 @@ void set_uniform_mat4(Uniform u, float m[16]);
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../framework/opengl.c"
-#include "render_shader.c"
-#include "engine.h" // realloc
+#include "render_opengl.c"
+#include "../engine.h" // realloc
 
 static
 void dump_shader_log( const char *source ) {

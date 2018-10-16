@@ -1,7 +1,7 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "opengl.c"
+#include "../render/render.c" // opengl
 #include "3rd/GLFW/glfw3.h"
 
 extern GLFWwindow *window;
@@ -28,7 +28,7 @@ API double *window_get( int variable );
 
 #ifdef WINDOW_C
 #pragma once
-#include "input.c"
+#include "../input/input.c"
 #include "render.c"
 #include <stdio.h>
 #include <stdlib.h>

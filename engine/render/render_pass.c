@@ -6,7 +6,7 @@
 #define GLAD_IMPLEMENTATION
 #endif
 
-#include "opengl.c"
+#include "render_opengl.c"
 #include "../debug/debug_logger.c"
 
 #ifndef GL_TEXTURE_MAX_ANISOTROPY_EXT
