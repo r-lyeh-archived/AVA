@@ -84,6 +84,8 @@ exit
 
     REM build
 
+        call "%0" clean
+
         pushd "%~dp0%\import\builder"
 
             REM project generation
@@ -117,8 +119,6 @@ exit
             )
 
         popd
-
-        call "%0" clean
 
     REM exit
 

@@ -98,22 +98,6 @@ void imgui_theme_framework()
     // use complementary colors: (blue:18,113,155) or (yellow:214,208,68)
     style.Colors[ImGuiCol_TitleBgActive] = ImVec4(18/255.f,113/255.f,155/255.f, 1.00f);
     style.Colors[ImGuiCol_Header] = ImVec4(18/255.f,113/255.f,155/255.f, 0.76f);
-
-
-
-    style.WindowPadding            = ImVec2(6, 4);
-    style.WindowRounding           = 6.0f;
-//    style.ChildWindowRounding      = 0.0f;
-    style.FramePadding             = ImVec2(7, 2);
-    style.FrameRounding            = 4.0f;
-    style.ItemInnerSpacing         = ImVec2(1, 2);
-    style.TouchExtraPadding        = ImVec2(0, 0);
-    style.ScrollbarSize            = 12.0f;
-    style.ScrollbarRounding        = 16.0f;
-    style.GrabMinSize              = 14.0f;
-    style.GrabRounding             = 4.0f;
-
-    style.WindowTitleAlign.x = 0.50f;
 }
 
 void imgui_theme_cinder() { // Geilfus'
@@ -216,7 +200,28 @@ void imgui_theme_cherry() {
     style.Colors[ImGuiCol_TextSelectedBg]        = MED( 0.43f);
     // [...]
     style.Colors[ImGuiCol_ModalWindowDarkening]  = BG( 0.73f);
+}
 
+void imgui_style_framework() {
+    ImGuiStyle& style = ImGui::GetStyle();
+
+#if 0 // fwk
+    style.WindowPadding            = ImVec2(6, 4);
+    style.WindowRounding           = 6.0f;
+//    style.ChildWindowRounding      = 0.0f;
+    style.FramePadding             = ImVec2(7, 2);
+    style.FrameRounding            = 4.0f;
+    style.ItemInnerSpacing         = ImVec2(1, 2);
+    style.TouchExtraPadding        = ImVec2(0, 0);
+    style.ScrollbarSize            = 12.0f;
+    style.ScrollbarRounding        = 16.0f;
+    style.GrabMinSize              = 14.0f;
+    style.GrabRounding             = 4.0f;
+
+    style.WindowTitleAlign.x = 0.50f;
+#endif
+
+#if 1 // cherry
     style.WindowPadding            = ImVec2(6, 4);
     style.WindowRounding           = 0.0f;
     style.FramePadding             = ImVec2(7, 2);
@@ -235,11 +240,8 @@ void imgui_theme_cherry() {
     style.Colors[ImGuiCol_Border] = ImVec4(0.539f, 0.479f, 0.255f, 0.162f);
     style.FrameBorderSize = 0.0f;
     style.WindowBorderSize = 1.0f;
-}
+#endif
 
-void imgui_style_framework() {
-    ImGuiStyle& style = ImGui::GetStyle();
-
-    style.ItemSpacing              = ImVec2(4, 2);
+    style.ItemSpacing              = ImVec2(6, 2);
     style.IndentSpacing            = 18.0f;
 }

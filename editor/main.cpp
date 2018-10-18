@@ -136,6 +136,9 @@ int imgui_main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
+        editor_tick(); // @r-lyeh
+        editor_draw(); // @r-lyeh
+
         // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
@@ -172,9 +175,6 @@ int imgui_main(int, char**)
                 show_another_window = false;
             ImGui::End();
         }
-
-        editor_tick(); // @r-lyeh
-        editor_draw(); // @r-lyeh
 
         // Rendering
         ImGui::Render();
