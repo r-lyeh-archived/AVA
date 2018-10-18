@@ -1,13 +1,13 @@
 #pragma once
 
-void theme_cinder();
-void theme_cherry();
-void theme_framework();
+void imgui_theme_cinder();
+void imgui_theme_cherry();
+void imgui_theme_framework();
 
-void style_framework();
+void imgui_style_framework();
 
 
-void theme_framework()
+void imgui_theme_framework()
 {
     ImGuiStyle& style = ImGui::GetStyle();
 
@@ -116,7 +116,7 @@ void theme_framework()
     style.WindowTitleAlign.x = 0.50f;
 }
 
-void theme_cinder() { // Geilfus'
+void imgui_theme_cinder() { // Geilfus'
     ImGuiStyle& style = ImGui::GetStyle();
 
     style.Colors[ImGuiCol_Text]                  = ImVec4(0.86f, 0.93f, 0.89f, 0.78f);
@@ -164,7 +164,7 @@ void theme_cinder() { // Geilfus'
     style.Colors[ImGuiCol_ModalWindowDarkening]  = ImVec4(0.20f, 0.22f, 0.27f, 0.73f);
 }
 
-void theme_cherry() {
+void imgui_theme_cherry() {
     auto &style = ImGui::GetStyle();
 
 //      cherry colors
@@ -237,7 +237,7 @@ void theme_cherry() {
     style.WindowBorderSize = 1.0f;
 }
 
-void style_framework() {
+void imgui_style_framework() {
     ImGuiStyle& style = ImGui::GetStyle();
 
     style.ItemSpacing              = ImVec2(4, 2);

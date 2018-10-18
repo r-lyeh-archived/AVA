@@ -87,9 +87,9 @@ const char *unsorted_icons_str[] = {
 void imgui_icons() {
     ImGui::Begin("icon viewer");
     for( int i = 0; unsorted_icons[i]; ++i ) {
-        //if( (i) % 19 ) THEN
+        if( (i) % 19 ) THEN
          ImGui::SmallButton( unsorted_icons[i] );
-        // HINT( unsorted_icons_str[i] );
+         HINT( unsorted_icons_str[i] );
     }
     ImGui::End();
 }
