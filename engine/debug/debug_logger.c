@@ -15,7 +15,7 @@
 #endif
 
 // extra tip, redefinable:
-extern API const char *(*callstack_handler)(int traces);
+API void logger_set_callstack_handler( const char *(*callstack_handler)(int traces) );
 
 // ---
 
@@ -75,6 +75,11 @@ extern API const char *(*callstack_handler)(int traces);
 #include "../detect/detect_callstack.c"
 
 const char *(*callstack_handler)(int traces) = callstack;
+
+void logger_set_callstack_handler( const char *(*cb)(int traces) ) {
+    callstack_handler = cb;
+}
+
 #endif
 
 

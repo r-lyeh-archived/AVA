@@ -66,9 +66,6 @@ int init() {
     vfs_import("assets/**");
     void (*ptr)();
     for( int i = 0; i < 128; ++i ) {
-        if( 0 != (ptr = dllquick( "game.dll", "main" ) ) ) {
-            ptr();
-        }
         if( 0 != (ptr = dllquick( va("game%d.dll", i), "main" ) ) ) {
             ptr();
         }
@@ -78,6 +75,12 @@ int init() {
         if( 0 != (ptr = dllquick( va("game%03d.dll", i), "main" ) ) ) {
             ptr();
         }
+    }
+    if( 0 != (ptr = dllquick( "game.dll", "main" ) ) ) {
+        ptr();
+    }
+    if( 0 != (ptr = dllquick( "editor.dll", "main" ) ) ) {
+        ptr();
     }
     return 0;
 }
