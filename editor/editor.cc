@@ -32,6 +32,15 @@ using namespace ImGui;
 #include "imgui/gists/knob.cpp"
 #include "imgui/gists/toggle.cpp"
 
+
+#ifdef GLSL
+#undef GLSL
+#endif
+#include "imgui/gists/TextEditor.h"
+#include "imgui/gists/TextEditor.cpp"
+#include "imgui/gists/TextEditorDemo.cpp"
+
+
 void imgui_dockspace() {
     // config dockspace
     {
@@ -133,6 +142,9 @@ void editor_draw() {
 
     // window space
     demo_windows();
+
+    static int init = (texteditor_demo_init(),1);
+    texteditor_demo_draw();
 
     // content space
     demo_content();
