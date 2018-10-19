@@ -33,3 +33,7 @@ const ImVec4 editor_palette[] = {
     // BASE16_PALETTE(COLOR_MACRO)
 };
 const int editor_palette_max = sizeof(editor_palette) / sizeof(0[editor_palette]);
+
+#define PURPLE editor_palette[3]
+#define GREEN  editor_palette[1]
+#define CYAN   editor_palette[0]
