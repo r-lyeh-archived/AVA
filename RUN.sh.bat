@@ -39,6 +39,13 @@ exit
             exit /b
         )
 
+    REM debug
+
+        if "%1"=="debug" (
+            call "%0"
+            devenv /Run "%~dp0\_build\debug\launch.exe"
+            exit /b
+        )
 
     REM cleanup
 
