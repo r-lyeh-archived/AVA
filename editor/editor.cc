@@ -62,7 +62,13 @@ using namespace ImGui;
 #include "imgui/gists/nodes.h" //v1
 #include "imgui/gists/nodes.cpp" //v1
 
+#define YAP_ENABLE
+#define YAP_IMPL
+#define YAP_IMGUI
 #include "imgui/gists/profiler.cpp"
+
+#include "imgui/gists/orient.h"
+#include "imgui/gists/orient.cpp"
 
 #include <omp.h>
 #define clkms() (omp_get_wtime() * 1000)
@@ -102,49 +108,7 @@ void imgui_dockspace_end() {
     ImGui::End();
 }
 
-void demo_windows() {
-    static char path[256] = "./";
-    if( ImGui::Begin("Browser") ) {
-        if( imgui_browser( path ) ) {
-
-        }
-        ImGui::End();
-    }
-
-    static MemoryEditor mem_edit_1;                                            // store your state somewhere
-    char *mem_block = "oh lala"; size_t mem_block_size = strlen(mem_block);
-    mem_edit_1.DrawWindow("Memory Editor", mem_block, mem_block_size, 0x0000); // create a window and draw memory editor (if you already have a window, use DrawContents())
-}
-
-void demo_content() {
-    //
-    ImGui::Begin("Debug");
-
-        static unsigned bits = 0xC1, hoverIndex = 0;
-        BitField("label1", &bits, &hoverIndex);
-
-        ImGui::PushDisabled();
-        ImGui::Button("Disabled");
-        ImGui::PopDisabled();
-
-        static const char *hints[] = { "ABC", "ABCD", "DEF" };
-        static ComboFilterState s = {0};
-        static char buf[128] = "ABC";
-        ComboFilter("my combofilter", buf, IM_ARRAYSIZE(buf), hints, IM_ARRAYSIZE(hints), s);
-
-        static int ip[4] = {127,0,0,1};
-        ipentry( ip );
-
-        static float v = 0.5f;
-        MyKnob("label2", &v, 0.0f, 1.0f);
-
-        static bool yesno = 0;
-        ToggleButton("label3", &yesno);
-
-    ImGui::End();
-}
-
-void profiler_demo() {
+void profiler2_demo() {
     float msBegin[4] = { 0, 1, 2, 3 };
     float msEnd[4] = { 1, 3, 5, 7 };
     const char *label[4] = { "a", "b", "c", "d" };
@@ -246,57 +210,100 @@ void editor_draw() {
     // dockspace
     imgui_dockspace();
 
-#if 0
-    gizmo_demo();
-#elif 1
+#if 1
     int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
     ImGui::Begin("3d", NULL, flags);
     ImGuizmo::SetDrawlist();
 //    ImGuizmo::BeginFrame(0,0,300,300);
     gizmo_demo2();
     ImGui::End();
+#else
+    gizmo_demo();
 #endif
 
-    // tests
-    imgui_pangram();
-    imgui_icons();
+    // windowed content
+        imgui_pangram();
+        imgui_icons();
+        sequencer_demo();
+        profiler_demo();
 
+        static char path[256] = "./";
+        if( ImGui::Begin("Browser") ) {
+            if( imgui_browser( path ) ) {
 
-    // window space
-    demo_windows();
-    static int init = (texteditor_demo_init(),1); texteditor_demo_draw();
-    spinner_demo();
-    sequencer_demo();
-
-    static ImGui::Nodes nodes_;
-    ImGui::Begin("Nodes");
-    nodes_.ProcessNodes();
-    ImGui::End();
-
-    ImGui::Begin("demo2");
-
-        PlotVar("fps", ImGui::GetIO().Framerate); // if(t>60s) PlotVarFlushOldEntries(), t = 0;
-
-        stats_demo();
-
-        if( 1/*app('load')*/ ) {
-            ImGui::Separator();
-            ImGui::Text("loading");
-            //ImGui::PushStyleColor(vec3(0,0,255));
-            ImGui::ProgressBar(0.5f, ImVec2(-1/*100%*/,2/*px*/), "loading");
-            //ImGui::PopStyleColor();
-
-            ImGui::Separator();
+            }
+            ImGui::End();
         }
 
-        profiler_demo();
-        curve_demo();
-        table_demo();
-        bezier_demo();
-    ImGui::End();
+        static ImGui::Nodes nodes_;
+        ImGui::Begin("Nodes");
+        nodes_.ProcessNodes();
+        ImGui::End();
 
-    // content space
-    demo_content();
+        // alt, monospaced font
+        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+            static int init = (texteditor_demo_init(),1); 
+            texteditor_demo_draw();
+
+            static MemoryEditor mem_edit_1;                                            // store your state somewhere
+            char *mem_block = "oh lala"; size_t mem_block_size = strlen(mem_block) + 1;
+            mem_edit_1.DrawWindow("Memory Editor", mem_block, mem_block_size, 0x0000); // create a window and draw memory editor (if you already have a window, use DrawContents())
+        ImGui::PopFont();
+
+    // floating content
+        ImGui::Begin("demo 1");
+
+            spinner_demo();
+
+            static unsigned bits = 0xC1, hoverIndex = 0;
+            BitField("label1", &bits, &hoverIndex);
+
+            ImGui::PushDisabled();
+            ImGui::Button("Disabled Button 1"); ImGui::SameLine(); ImGui::Button("Button 2");
+            ImGui::PopDisabled();
+
+            static const char *hints[] = { "ABC", "ABCD", "DEF" };
+            static ComboFilterState s = {0};
+            static char buf[128] = "ABC";
+            ComboFilter("my combofilter", buf, IM_ARRAYSIZE(buf), hints, IM_ARRAYSIZE(hints), s);
+
+            static int ip[4] = {127,0,0,1};
+            ipentry( ip );
+
+            static float v = 0.5f;
+            MyKnob("label2", &v, 0.0f, 1.0f);
+
+            static bool yesno = 0;
+            ToggleButton("label3", &yesno);
+
+        ImGui::End();
+
+        ImGui::Begin("demo2");
+
+            PlotVar("fps", ImGui::GetIO().Framerate); // if(t>60s) PlotVarFlushOldEntries(), t = 0;
+
+            stats_demo();
+
+            if( 1/*app('load')*/ ) {
+                ImGui::Separator();
+                ImGui::Text("loading");
+                //ImGui::PushStyleColor(vec3(0,0,255));
+                ImGui::ProgressBar(0.5f, ImVec2(-1/*100%*/,2/*px*/), "loading");
+                //ImGui::PopStyleColor();
+
+                ImGui::Separator();
+            }
+
+            profiler2_demo();
+
+            curve_demo();
+            table_demo();
+
+            orient_demo();
+
+            bezier_demo();
+
+        ImGui::End();
 
     // dockspace space
     // ...

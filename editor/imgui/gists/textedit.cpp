@@ -2735,7 +2735,7 @@ void texteditor_demo_init() {
 	//bpts.insert(47);
 	//ed.SetBreakpoints(bpts);
 
-	ed.SetText("hello\nworld");
+	ed.SetText("puts(\"hello world\");");
 }
 
 void texteditor_demo_draw() {

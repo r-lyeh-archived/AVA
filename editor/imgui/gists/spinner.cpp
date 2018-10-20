@@ -108,13 +108,9 @@ namespace ImGui {
 
 
 void spinner_demo() {
-    ImGui::Begin("Progress Indicators");
+    const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
+    const ImU32 bg = ImGui::GetColorU32(ImGuiCol_Button);
 
-            const ImU32 col = ImGui::GetColorU32(ImGuiCol_ButtonHovered);
-            const ImU32 bg = ImGui::GetColorU32(ImGuiCol_Button);
-
-            ImGui::Spinner("##spinner", 15, 6, col);
-            ImGui::BufferingBar("##buffer_bar", 0.7f, ImVec2(400, 6), bg, col);
-            
-    ImGui::End();
+    ImGui::Spinner("##spinner", 15, 6, col);
+    ImGui::BufferingBar("##buffer_bar", 0.7f, ImVec2(400, 6), bg, col);
 }
