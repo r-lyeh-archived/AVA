@@ -33,7 +33,7 @@ using namespace ImGui;
 #include "imgui/gists/knob.cpp" // fresh ideas here: https://www.g200kg.com/en/webknobman/gallery.php
 #include "imgui/gists/toggle.cpp"
 
-#include "imgui/gists/imgui_browse.cpp"
+#include "imgui/gists/imgui_browser.cpp"
 #include "imgui/gists/imgui_disabled.cpp"
 #include "imgui/gists/imgui_combofilter.cpp"
 #include "imgui/gists/imgui_bezier.cpp"
@@ -70,9 +70,7 @@ using namespace ImGui;
 #include "imgui/gists/orient.h"
 #include "imgui/gists/orient.cpp"
 
-#include <omp.h>
-#define clkms() (omp_get_wtime() * 1000)
-#define cpu_usage() 1
+#include "imgui/gists/imgui_im3d.cpp"
 
 
 void imgui_dockspace() {
@@ -148,21 +146,18 @@ void stats_demo() {
         static float fps_history[60] = {0};
         static float cpu_history[60] = {0};
         static float mem_history[60] = {0};
-        static auto then = 0;
-        auto now = clkms();
-        if( (now - then) > 1000 ) { // every sec
-            then = now;
+        static double left = 0;
+        left -= ImGui::GetIO().DeltaTime;
+        if( left <= 0 ) { // every sec
+            left += 1.0;
             for( int i = 1; i < 60; ++i ) fps_history[i - 1] = fps_history[i];
             fps_history[59] = ImGui::GetIO().Framerate;
             for( int i = 1; i < 60; ++i ) cpu_history[i - 1] = cpu_history[i];
-            cpu_history[59] = cpu_usage();
+            cpu_history[59] = 1.00; //cpu_usage();
             for( int i = 1; i < 60; ++i ) mem_history[i - 1] = mem_history[i];
-            mem_history[59] = 1024;
+            mem_history[59] = 1024; //memory_usage();
         }
-#if 0
-        ImGui::PlotLines("FPS", [](void*data, int idx) { return fps_history[idx]; }, NULL, 60, 0, NULL, 1, app('fps')[0] );
-        ImGui::PlotLines("CPU %", [](void*data, int idx) { return cpu_history[idx]; }, NULL, 60, 0, NULL, 1, 100 );
-#else
+
         char buf[256]; sprintf(buf, "fps:%6.2f cpu:%6.2f%% mem:%d/%d ##PERF", fps_history[59], cpu_history[59], (int)mem_history[59], (int)mem_history[59] );
         const char* label = buf;
         const char* names[] = { "FPS", "CPU", "MEM" };
@@ -185,7 +180,6 @@ void stats_demo() {
             scale_min,
             scale_max,
             graph_size);
-#endif
     }
 }
 
@@ -226,14 +220,9 @@ void editor_draw() {
         imgui_icons();
         sequencer_demo();
         profiler_demo();
+        im3d_demo();
+        browser_demo();
 
-        static char path[256] = "./";
-        if( ImGui::Begin("Browser") ) {
-            if( imgui_browser( path ) ) {
-
-            }
-            ImGui::End();
-        }
 
         static ImGui::Nodes nodes_;
         ImGui::Begin("Nodes");
@@ -252,6 +241,9 @@ void editor_draw() {
 
     // floating content
         ImGui::Begin("demo 1");
+
+            extern bool show_demo_window;
+            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
 
             spinner_demo();
 

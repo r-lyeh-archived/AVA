@@ -8,7 +8,6 @@
 
 #ifndef SHAPE_H
 #define SHAPE_H
-#include <stdint.h>
 
 #ifndef F
 #define F(A,B,C)   A,B,C,
@@ -26,7 +25,7 @@
 #define S(X,Y)     //(float)X,(float)Y,
 #endif
 
-#define SHAPE_ALL(SHAPE) \
+#define SHAPE_XMACRO(SHAPE) \
 SHAPE(cube, \
     { F(0,1,2) F(3,4,5) F(6,7,8) F(9,10,11) F(12,13,14) F(15,16,17) F(18,0,2) F(19,3,5) F(20,6,8) F(21,9,11) F(22,12,14) F(23,15,17) }, \
     { P(1.0,1.0,1.0)N(0.0,0.0,1.0)S(0.50,1.0) P(-1.0,1.0,1.0)N(0.0,0.0,1.0)S(1.0,1.0) P(-1.0,-1.0,1.0)N(0.0,0.0,1.0)S(1.0,0.0) P(-1.0,1.0,1.0)N(-1.0,0.0,0.0)S(0.50,1.0) P(-1.0,1.0,-1.0)N(-1.0,0.0,0.0)S(0.0,1.0) P(-1.0,-1.0,-1.0)N(-1.0,0.0,0.0)S(0.0,0.0) P(1.0,-1.0,-1.0)N(0.0,0.0,-1.0)S(0.0,0.0) P(-1.0,-1.0,-1.0)N(0.0,0.0,-1.0)S(0.50,0.0) P(-1.0,1.0,-1.0)N(0.0,0.0,-1.0)S(0.50,1.0) P(1.0,-1.0,-1.0)N(0.0,-1.0,0.0)S(0.0,0.0) P(1.0,-1.0,1.0)N(0.0,-1.0,0.0)S(0.0,1.0) P(-1.0,-1.0,1.0)N(0.0,-1.0,0.0)S(0.50,1.0) P(-1.0,1.0,-1.0)N(0.0,1.0,0.0)S(1.0,0.0) P(-1.0,1.0,1.0)N(0.0,1.0,0.0)S(1.0,1.0) P(1.0,1.0,1.0)N(0.0,1.0,0.0)S(0.50,1.0) P(1.0,1.0,-1.0)N(1.0,-0.0,0.0)S(0.50,1.0) P(1.0,1.0,1.0)N(1.0,-0.0,0.0)S(1.0,1.0) P(1.0,-1.0,1.0)N(1.0,-0.0,0.0)S(1.0,0.0) P(1.0,-1.0,1.0)N(-0.0,0.0,1.0)S(0.50,0.0) P(-1.0,-1.0,1.0)N(-1.0,0.0,0.0)S(0.50,0.0) P(1.0,1.0,-1.0)N(0.0,0.0,-1.0)S(0.0,1.0) P(-1.0,-1.0,-1.0)N(-0.0,-1.0,-0.0)S(0.50,0.0) P(1.0,1.0,-1.0)N(-0.0,1.0,0.0)S(0.50,0.0) P(1.0,-1.0,-1.0)N(1.0,0.0,0.0)S(0.50,0.0) } \
@@ -130,36 +129,32 @@ SHAPE(cuberound, \
 */
 
 #ifndef SHAPE_DECLARE
-#define SHAPE_DECLARE(name,F,V) \
-    extern const float     shape_##name##_vtx_data[]; \
-    extern const uint32_t  shape_##name##_vtx_bytes;  \
-    extern const uint32_t  shape_##name##_idx_data[]; \
-    extern const uint32_t  shape_##name##_idx_bytes;
+#define SHAPE_DECLARE(prim,F,V) \
+    extern const float shape_##prim##_vertex[]; \
+    extern const int   shape_##prim##_vertex_bytelen; \
+    extern const int   shape_##prim##_vertex_count; \
+    extern const int   shape_##prim##_face[]; \
+    extern const int   shape_##prim##_face_bytelen; \
+    extern const int   shape_##prim##_face_count;
 #endif
 
-#ifndef SHAPE_DEFINE
-#define SHAPE_DEFINE(name,F,V) \
-    const float     shape_##name##_vtx_data[] = V; \
-    const uint32_t  shape_##name##_vtx_bytes = (uint32_t)sizeof(shape_##name##_vtx_data); \
-    const uint32_t  shape_##name##_idx_data[] = F; \
-    const uint32_t  shape_##name##_idx_bytes = (uint32_t)sizeof(shape_##name##_idx_data);
-#endif
-
-SHAPE_ALL(SHAPE_DECLARE)
-
-/*
-#undef S
-#undef N
-#undef P
-#undef Q
-#undef F
-*/
+SHAPE_XMACRO(SHAPE_DECLARE);
 
 #endif
 
 #ifdef SHAPE_C
 #pragma once
 
-SHAPE_ALL(SHAPE_DEFINE)
+#ifndef SHAPE_DEFINE
+#define SHAPE_DEFINE(prim,F,V) \
+    const float shape_##prim##_vertex[] = V; \
+    const int   shape_##prim##_vertex_bytelen = (int)(sizeof(shape_##prim##_vertex)); \
+    const int   shape_##prim##_vertex_count = (int)(sizeof(shape_##prim##_vertex) / (3*sizeof(0[shape_##prim##_vertex]))); \
+    const int   shape_##prim##_face[] = F; \
+    const int   shape_##prim##_face_bytelen = (int)(sizeof(shape_##prim##_face)); \
+    const int   shape_##prim##_face_count = (int)(sizeof(shape_##prim##_face) / (3*sizeof(0[shape_##prim##_face])));
+#endif
+
+SHAPE_XMACRO(SHAPE_DEFINE);
 
 #endif

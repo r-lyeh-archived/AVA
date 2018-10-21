@@ -1,1 +1,3 @@
-@call ..\run.sh.bat
+@pushd ..
+@call make.sh.bat %*
+@popd

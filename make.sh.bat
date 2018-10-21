@@ -39,14 +39,6 @@ exit
             exit /b
         )
 
-    REM debug
-
-        if "%1"=="debug" (
-            call "%0"
-            devenv /Run "%~dp0\_build\debug\launch.exe"
-            exit /b
-        )
-
     REM cleanup
 
         if "%1"=="clean" (
@@ -117,7 +109,14 @@ exit
             if "0"=="%OK%" (
                 color
                 echo ^>^> launch
-                _build\debug\launch.exe %*
+
+                if "%1"=="debug" (
+                    shift
+                    devenv /Run "_build\debug\launch.exe" %*
+                ) else (
+                    _build\debug\launch.exe %*
+                )
+
                 echo ^<^< launch
             ) else (
                 :error

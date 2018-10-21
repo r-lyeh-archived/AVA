@@ -2730,10 +2730,9 @@ void texteditor_demo_init() {
 	ed.SetErrorMarkers(markers);
 
 	// "breakpoint" markers
-	//TextEditor::Breakpoints bpts;
-	//bpts.insert(24);
-	//bpts.insert(47);
-	//ed.SetBreakpoints(bpts);
+	TextEditor::Breakpoints bpts;
+	bpts.insert(1);
+	ed.SetBreakpoints(bpts);
 
 	ed.SetText("puts(\"hello world\");");
 }
