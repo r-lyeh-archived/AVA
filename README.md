@@ -74,15 +74,15 @@ v001_Monkey3_Icarus, v000_YOB_Marrow
 
 ## Getting started
 
-Execute the `RUN.sh.bat` script file to build & run the editor.
+Execute the `make.sh.bat` script file to build & run the editor.
 
 Additionally:
-- `RUN`                        (launch editor)
-- `RUN game [platform]`        (launch game)
-- `RUN make [game] [platform]` (make game.exe executable)
-- `RUN cook [game] [platform]` (cook all raw game assets)
-- `RUN pack [game] [platform]` (pack all cooked game assets into game.pak file)
-- `RUN fuse [game] [platform]` (fuse game.pak and game.exe both together)
+- `make`                        (launch editor)
+- `make game [platform]`        (launch game)
+- `make make [game] [platform]` (make game.exe executable)
+- `make cook [game] [platform]` (cook all raw game assets)
+- `make pack [game] [platform]` (pack all cooked game assets into game.pak file)
+- `make fuse [game] [platform]` (fuse game.pak and game.exe both together)
 
 ## Disk structure
 

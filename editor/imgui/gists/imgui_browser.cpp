@@ -140,3 +140,11 @@ int imgui_browser( char path[256] ) {
     return 0;
 }
 
+void browser_demo() {
+    static char path[256] = "./";
+    ImGui::Begin("Browser");
+        if( imgui_browser( path ) ) {
+
+        }
+    ImGui::End();
+}

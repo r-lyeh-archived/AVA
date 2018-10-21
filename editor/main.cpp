@@ -34,6 +34,8 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
+bool show_demo_window = true;
+
 int imgui_main(int, char**)
 {
     // Setup window
@@ -115,10 +117,10 @@ int imgui_main(int, char**)
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != NULL);
 
-    bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    show_demo_window = false; // @r-lyeh
     clear_color = ImVec4(40/255.f,40/255.f,40/255.f,1.0f); // @r-lyeh
 
     // Main loop
@@ -144,6 +146,7 @@ int imgui_main(int, char**)
             ImGui::ShowDemoWindow(&show_demo_window);
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+        if(0) // @r-lyeh
         {
             static float f = 0.0f;
             static int counter = 0;

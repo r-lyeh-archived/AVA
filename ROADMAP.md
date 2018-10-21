@@ -1,3 +1,15 @@
+## Editor
+- [x] Bring IMGUI DebugDraw 3D back
+- [ ] Bring OSC/UDP messages back
+- [ ] Bring MPEG2/debug recording back
+- [ ] Link with import pipeline
+- [ ] Create editor/licenses.md
+- [ ] Scriptable windows (plus Remote API)
+- [ ] IPC mem sharing
+- [ ] Specify final JSON/Object notation
+- [ ] Object/Hierarchy widget
+- [ ] Property widget
+
 ## Old roadmap
 - [ ] 01 Project structure, build system, makefiles and game loop.
 - [ ] 02 Data pipeline and asset journaling.
@@ -33,66 +45,66 @@
 - [ ] 32 Editor, timeline and data tracks.
 
 ## AVA00 - Project: roadmap, licenses and documentation.
-- [ ] `prj.cc0` : licenses.
-- [ ] `prj.dir` : project structure and initial file set.
+- [x] `prj.cc0` : licenses.
+- [x] `prj.dir` : project structure and initial file set.
 - [ ] `prj.doc` : documentation, conventions and style.
-- [ ] `prj.mak` : makefiles and build system.
+- [x] `prj.mak` : makefiles and build system.
 
 ## AVA01 - Core: runtime, containers and standard library.
-- [ ] `crt` : C runtime and entrypoint.
-- [ ] `crt.abi` : symbol linkage and visibility.
+- [x] `crt` : C runtime and entrypoint.
+- [x] `crt.abi` : symbol linkage and visibility.
 - [ ] `crt.api` : guards, namespaces, enums, macros.
-- [ ] `crt.mem` : memory-mapping.
-- [ ] `crt.bit` : bit packing and endianness.
+- [x] `crt.mem` : memory-mapping.
+- [x] `crt.bit` : bit packing and endianness.
 - [ ] `crt.ios` : io streams.
 ---
 - [ ] `stl` :  standard containers and data structures.
-- [ ] `stl.mem` : memory allocators
+- [x] `stl.mem` : memory allocators
 - [ ] `stl.buf` : fixed buffers.
 - [ ] `stl.deq` : double-ended queue.
 - [ ] `stl.lst` : doubly linked lists.
 - [ ] `stl.map` : associative maps.
 - [ ] `stl.set` : sets.
 - [ ] `stl.var` : variants.
-- [ ] `stl.vec` : dynamic buffers.
-- [ ] `stl.str` : dynamic strings.
+- [x] `stl.vec` : dynamic buffers.
+- [x] `stl.str` : dynamic strings.
 - [ ] `stl.tea` : trees.
 ---
 - [ ] `std:`  standard lib
-- [ ] `std.arg` : arguments and cmdline.
-- [ ] `std.clk` : time and date.
+- [x] `std.arg` : arguments and cmdline.
+- [x] `std.clk` : time and date.
 - [ ] `std.cor` : coroutines and greenlets.
-- [ ] `std.crc` : crc and hashing.
+- [x] `std.crc` : crc and hashing.
 - [ ] `std.def` : definitions, types and constants.
-- [ ] `std.dir` : directories, files and listings.
-- [ ] `std.dlg` : user dialogs.
-- [ ] `std.dll` : dynamic library loading.
-- [ ] `std.dsk` : disk and space.
-- [ ] `std.env` : environment and variables.
-- [ ] `std.err` : errors, asserts and failures.
-- [ ] `std.exp` : expression evaluator.
+- [x] `std.dir` : directories, files and listings.
+- [x] `std.dlg` : user dialogs.
+- [x] `std.dll` : dynamic library loading.
+- [x] `std.dsk` : disk and space.
+- [x] `std.env` : environment and variables.
+- [x] `std.err` : errors, asserts and failures.
+- [x] `std.exp` : expression evaluator.
 - [ ] `std.geo` : geometry.
-- [ ] `std.hlt` : crash handling and reports.
+- [x] `std.hlt` : crash handling and reports.
 - [ ] `std.hot` : hot-patching and api hooks.
 - [ ] `std.kit` : kits and native plugins.
-- [ ] `std.lin` : linear algebra.
+- [x] `std.lin` : linear algebra.
 - [ ] `std.loc` : locales, units and conversions.
-- [ ] `std.log` : logging and traces.
+- [x] `std.log` : logging and traces.
 - [ ] `std.lrp` : lerp and curve interpolators.
-- [ ] `std.mtx` : mutexes and locks.
+- [x] `std.mtx` : mutexes and locks.
 - [ ] `std.num` : numerics, limits and math.
 - [ ] `std.pkg` : packages and dependencies.
-- [ ] `std.rnd` : randomness and entropy.
-- [ ] `std.ser` : serialization.
-- [ ] `std.sym` : symbols, demangling and stacktraces.
-- [ ] `std.thd` : threading and concurrency.
-- [ ] `std.tls` : thread-local storage.
-- [ ] `std.tst` : unit-tests and suites.
-- [ ] `std.tty` : terminal.
+- [x] `std.rnd` : randomness and entropy.
+- [x] `std.ser` : serialization.
+- [x] `std.sym` : symbols, demangling and stacktraces.
+- [x] `std.thd` : threading and concurrency.
+- [x] `std.tls` : thread-local storage.
+- [x] `std.tst` : unit-tests and suites.
+- [x] `std.tty` : terminal.
 - [ ] `std.txt` : text manipulation.
 - [ ] `std.uid` : unique ids.
 - [ ] `std.utf` : utf.
-- [ ] `std.wtf` : compiler, platform and os macro hell.
+- [x] `std.wtf` : compiler, platform and os macro hell.
 
 ## AVA02 - Code: virtual cpu
 - [ ] `cpu` :  virtual cpus, logic machines and modules (c++, dlls, scripts)
