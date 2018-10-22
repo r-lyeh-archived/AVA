@@ -72,6 +72,8 @@ using namespace ImGui;
 
 #include "imgui/gists/imgui_im3d.cpp"
 
+#include "imgui/gists/imgui_property.cpp"
+
 
 void imgui_dockspace() {
     // config dockspace
@@ -244,6 +246,8 @@ void editor_draw() {
 
             extern bool show_demo_window;
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
+
+            property_demo();
 
             spinner_demo();
 

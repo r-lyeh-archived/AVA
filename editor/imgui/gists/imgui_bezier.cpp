@@ -163,6 +163,8 @@ namespace ImGui
 
   void bezier_demo()
   {
+    { static float v[] = { 1.000f, 0.000f, 0.000f, 1.000f }; Bezier("easeInOutExpo",  v ); }
+    return;
     { static float v[] = { 0.000f, 0.000f, 1.000f, 1.000f }; Bezier("easeLinear",     v ); }
     { static float v[] = { 0.470f, 0.000f, 0.745f, 0.715f }; Bezier("easeInSine",     v ); }
     { static float v[] = { 0.390f, 0.575f, 0.565f, 1.000f }; Bezier("easeOutSine",    v ); }

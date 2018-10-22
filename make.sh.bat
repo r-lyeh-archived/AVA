@@ -97,7 +97,7 @@ exit
 
             REM actual build
             set NINJA_STATUS="[%%e] [%%r/%%f]"
-            ninja.exe -v -C ..\..\_project
+            ninja.exe -v -C ..\..\_project && REM debugopt && REM release
             set OK=%ERRORLEVEL%
 
         popd

@@ -762,6 +762,8 @@ void orient_demo() {
     static ImVec3 axis(1,0,0); static float angle = 0;
     static ImVec3 direction(1,0,0);
     ImGui::QuaternionGizmo("Quaternion", quaternion);
+    ImGui::SameLine();
     ImGui::AxisAngleGizmo("AxisAngle", axis, angle);
+    ImGui::SameLine();
     ImGui::DirectionGizmo("Direction", direction);
 }

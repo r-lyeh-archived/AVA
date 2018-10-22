@@ -40,7 +40,7 @@ namespace ImGui
 	template<int n>
 	struct BezierWeights
 	{
-		constexpr BezierWeights() : x_(), y_(), z_(), w_()
+		BezierWeights() : x_(), y_(), z_(), w_()
 		{
 			for (int i = 1; i <= n; ++i)
 			{
@@ -60,7 +60,7 @@ namespace ImGui
 		float w_[n];
 	};
 
-	static constexpr auto bezier_weights_ = BezierWeights<16>();
+	static auto bezier_weights_ = BezierWeights<16>();
 
 	////////////////////////////////////////////////////////////////////////////////
 

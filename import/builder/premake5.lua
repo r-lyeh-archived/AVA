@@ -77,6 +77,7 @@ project "editor"
 
     filter "configurations:release"
         defines {"NDEBUG"}
+        symbols "Off"
         optimize "On"
 
 --[[
