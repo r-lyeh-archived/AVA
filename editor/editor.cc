@@ -72,7 +72,7 @@ using namespace ImGui;
 
 #include "imgui/gists/imgui_im3d.cpp"
 
-#include "imgui/gists/imgui_property.cpp"
+#include "imgui/imgui_property.cpp"
 
 
 void imgui_dockspace() {
