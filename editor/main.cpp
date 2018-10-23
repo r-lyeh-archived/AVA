@@ -91,6 +91,14 @@ int imgui_main(int, char**)
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+    const char *ini[] = { "editor.ini", "editor/editor.ini" };
+    for( int i = 0; i < IM_ARRAYSIZE(ini); ++i ) {
+        auto fexist = [](const char *f) -> bool {
+            FILE *fp = fopen(f, "rb");
+            return fp ? (fclose(fp), 1) : 0;
+        };
+        if( fexist(ini[i]) ) ImGui::GetIO().IniFilename = ini[i];
+    }
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
