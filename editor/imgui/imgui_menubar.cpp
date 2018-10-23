@@ -9,7 +9,7 @@ void imgui_menubar() {
             ON_CLICK POPUP("3D Options", {
                 ImGui::Text("3D Options");
                 ___
-                CHECK("Show wireframe") ON_CLICK { set_render('wire', 1 - *render('wire') ); }
+                CHECK("Show wireframe") ON_CLICK { set_render('wire', 1 - get_render('wire')[0] ); }
                 CHECK("Show backfaces")
                 CHECK("Show ground plane")
                 CHECK("Show bones")
@@ -17,7 +17,7 @@ void imgui_menubar() {
                 CHECK("Show normals")
                 CHECK("Show nodes")
                 CHECK("Show shadows")
-                CHECK("Show textures") ON_CLICK { set_render('texs', 1 - *render('texs') ); }
+                CHECK("Show textures") ON_CLICK { set_render('texs', 1 - get_render('texs')[0] ); }
                 CHECK("Show framebuffers")
                 ___
                 CHECK("Elevation")

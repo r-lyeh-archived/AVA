@@ -10,12 +10,13 @@
 #define LOG(tags, fmt, ...) ( \
     fprintf(stderr, fmt, __VA_ARGS__ ), \
     fprintf(stderr, " (%s:%d) #%s\n", __FILE__, __LINE__, #tags), \
-    fprintf(stderr, "%s", 0[fmt] == '!' && callstack_handler ? callstack_handler(+16) : "" ) \
+    fprintf(stderr, "%s", 0[fmt] == '!' && logger_handle() ? (*logger_handle())(+16) : "" ) \
 )
 #endif
 
-// extra tip, redefinable:
-API void logger_set_callstack_handler( const char *(*callstack_handler)(int traces) );
+// tip: redefinable callstack handler
+typedef const char *(*logger_callstack_handler)(int traces);
+API logger_callstack_handler* logger_handle();
 
 // ---
 
@@ -74,10 +75,10 @@ API void logger_set_callstack_handler( const char *(*callstack_handler)(int trac
 #pragma once
 #include "../detect/detect_callstack.c"
 
-const char *(*callstack_handler)(int traces) = callstack;
+logger_callstack_handler callstack_handler = callstack;
 
-void logger_set_callstack_handler( const char *(*cb)(int traces) ) {
-    callstack_handler = cb;
+logger_callstack_handler *logger_handle() {
+    return &callstack_handler;
 }
 
 #endif

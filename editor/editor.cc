@@ -6,6 +6,9 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+// incl render/set_render
+#include "imgui/imgui_videorec.cpp"
+
 // legacy api stub
 #define IsHovered(rect, id) \
     !!(ImGui::IsMouseHoveringRect(rect.Min, rect.Max) && ImGui::ItemHoverable(rect, id))
@@ -20,8 +23,6 @@
 #include "imgui/imgui_pangram.cpp"
 
 // menubar
-#define render(x) 0
-#define set_render(opt_int, dbl_val)
 #include "imgui/imgui_utils.cpp"
 #include "imgui/imgui_menubar.cpp"
 
@@ -73,6 +74,7 @@ using namespace ImGui;
 #include "imgui/gists/imgui_im3d.cpp"
 
 #include "imgui/imgui_property.cpp"
+
 
 
 void imgui_dockspace() {
