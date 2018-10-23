@@ -6,6 +6,10 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "editor.h"
+int on_predraw();
+int on_postdraw();
+int on_preswap();
+void set_app(int, ...);
 // 
 
 // dear imgui: standalone example application for GLFW + OpenGL 3, using programmable pipeline
@@ -141,6 +145,8 @@ int imgui_main(int, char**)
         // Generally you may always pass all inputs to dear imgui, and hide them from your application based on those two flags.
         glfwPollEvents();
 
+        on_predraw();
+
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -196,6 +202,8 @@ int imgui_main(int, char**)
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        set_app('w', (double)display_w);
+        set_app('h', (double)display_h);
 
         // Update and Render additional Platform Windows
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -205,6 +213,10 @@ int imgui_main(int, char**)
         }
 
         glfwMakeContextCurrent(window);
+
+        on_postdraw();
+        on_preswap();
+
         glfwSwapBuffers(window);
     }
 

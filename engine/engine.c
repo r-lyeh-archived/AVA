@@ -60,6 +60,7 @@
 API int init();
 
 int init() {
+    puts("; engine begin. last rebuilt " __TIME__ " " __DATE__);
     vfs_import("data/**");
     vfs_import("game/**");
     vfs_import("games/**");
@@ -82,6 +83,7 @@ int init() {
     if( 0 != (ptr = dllquick( "editor.dll", "main" ) ) ) {
         ptr();
     }
+    puts("; engine end");
     return 0;
 }
 

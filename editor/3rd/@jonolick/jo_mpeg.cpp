@@ -1,13 +1,14 @@
 /* public domain Simple, Minimalistic, No Allocations MPEG writer - http://jonolick.com
  *
  * Latest revisions:
+ *  1.02b rgbx -> bgrx channel swap && vertical image flip (@r-lyeh)
  *  1.02 (22-03-2017) Fixed AC encoding bug. 
  *                    Fixed color space bug (thx r- lyeh!)
  *  1.01 (18-10-2016) warning fixes
  *  1.00 (25-09-2016) initial release
  *
  * Basic usage:
- *  char *frame = new char[width*height*4]; // 4 component. RGBX format, where X is unused 
+ *  char *frame = new char[width*height*4]; // 4 component. bgrx format, where X is unused 
  *  FILE *fp = fopen("foo.mpg", "wb");
  *  jo_write_mpeg(fp, frame, width, height, 60);  // frame 0
  *  jo_write_mpeg(fp, frame, width, height, 60);  // frame 1
@@ -37,7 +38,7 @@
 // then include jo_mpeg.c from it.
 
 // Returns false on failure
-extern void jo_write_mpeg(FILE *fp, const unsigned char *rgbx, int width, int height, int fps);
+extern void jo_write_mpeg(FILE *fp, const unsigned char *bgrx, int width, int height, int fps);
 
 #endif // JO_INCLUDE_MPEG_H
 
@@ -87,15 +88,15 @@ static void jo_writeBits(jo_bits_t *b, int value, int count) {
     }
 }
 
-static void jo_DCT(float &d0, float &d1, float &d2, float &d3, float &d4, float &d5, float &d6, float &d7) {
-    float tmp0 = d0 + d7;
-    float tmp7 = d0 - d7;
-    float tmp1 = d1 + d6;
-    float tmp6 = d1 - d6;
-    float tmp2 = d2 + d5;
-    float tmp5 = d2 - d5;
-    float tmp3 = d3 + d4;
-    float tmp4 = d3 - d4;
+static void jo_DCT(float *d0, float *d1, float *d2, float *d3, float *d4, float *d5, float *d6, float *d7) {
+    float tmp0 = *d0 + *d7;
+    float tmp7 = *d0 - *d7;
+    float tmp1 = *d1 + *d6;
+    float tmp6 = *d1 - *d6;
+    float tmp2 = *d2 + *d5;
+    float tmp5 = *d2 - *d5;
+    float tmp3 = *d3 + *d4;
+    float tmp4 = *d3 - *d4;
 
     // Even part
     float tmp10 = tmp0 + tmp3;  // phase 2
@@ -103,12 +104,12 @@ static void jo_DCT(float &d0, float &d1, float &d2, float &d3, float &d4, float 
     float tmp11 = tmp1 + tmp2;
     float tmp12 = tmp1 - tmp2;
 
-    d0 = tmp10 + tmp11;         // phase 3
-    d4 = tmp10 - tmp11;
+    *d0 = tmp10 + tmp11;         // phase 3
+    *d4 = tmp10 - tmp11;
 
     float z1 = (tmp12 + tmp13) * 0.707106781f; // c4
-    d2 = tmp13 + z1;        // phase 5
-    d6 = tmp13 - z1;
+    *d2 = tmp13 + z1;        // phase 5
+    *d6 = tmp13 - z1;
 
     // Odd part
     tmp10 = tmp4 + tmp5;        // phase 2
@@ -124,18 +125,18 @@ static void jo_DCT(float &d0, float &d1, float &d2, float &d3, float &d4, float 
     float z11 = tmp7 + z3;      // phase 5
     float z13 = tmp7 - z3;
 
-    d5 = z13 + z2;          // phase 6
-    d3 = z13 - z2;
-    d1 = z11 + z4;
-    d7 = z11 - z4;
+    *d5 = z13 + z2;          // phase 6
+    *d3 = z13 - z2;
+    *d1 = z11 + z4;
+    *d7 = z11 - z4;
 } 
 
 static int jo_processDU(jo_bits_t *bits, float A[64], const unsigned char htdc[9][2], int DC) {
     for(int dataOff=0; dataOff<64; dataOff+=8) {
-        jo_DCT(A[dataOff], A[dataOff+1], A[dataOff+2], A[dataOff+3], A[dataOff+4], A[dataOff+5], A[dataOff+6], A[dataOff+7]);
+        jo_DCT(&A[dataOff], &A[dataOff+1], &A[dataOff+2], &A[dataOff+3], &A[dataOff+4], &A[dataOff+5], &A[dataOff+6], &A[dataOff+7]);
     }
     for(int dataOff=0; dataOff<8; ++dataOff) {
-        jo_DCT(A[dataOff], A[dataOff+8], A[dataOff+16], A[dataOff+24], A[dataOff+32], A[dataOff+40], A[dataOff+48], A[dataOff+56]);
+        jo_DCT(&A[dataOff], &A[dataOff+8], &A[dataOff+16], &A[dataOff+24], &A[dataOff+32], &A[dataOff+40], &A[dataOff+48], &A[dataOff+56]);
     }
     int Q[64];
     for(int i=0; i<64; ++i) {
@@ -189,7 +190,7 @@ static int jo_processDU(jo_bits_t *bits, float A[64], const unsigned char htdc[9
     return Q[0];
 }
 
-void jo_write_mpeg(FILE *fp, const unsigned char *rgbx, int width, int height, int fps) {
+void jo_write_mpeg(FILE *fp, const unsigned char *bgrx, int width, int height, int fps) {
     int lastDCY = 128, lastDCCR = 128, lastDCCB = 128;
     jo_bits_t bits = {fp};
 
@@ -222,8 +223,9 @@ void jo_write_mpeg(FILE *fp, const unsigned char *rgbx, int width, int height, i
                 int x = hblock*16+(i&15);
                 x = x >= width ? width-1 : x;
                 y = y >= height ? height-1 : y;
-                const unsigned char *c = rgbx + y*width*4+x*4;
-                float r = c[0], g = c[1], b = c[2];
+                // const unsigned char *c = bgrx + y*width*4+x*4; // original
+                const unsigned char *c = bgrx + ((height-1)-y)*width*4+x*4; // flipped
+                float b = c[0], g = c[1], r = c[2]; // channel swap
                 Y[i] = (0.299f*r + 0.587f*g + 0.114f*b) * (219.f/255) + 16;
                 CBx[i] = (-0.299f*r - 0.587f*g + 0.886f*b) * (224.f/255) + 128;
                 CRx[i] = (0.701f*r - 0.587f*g - 0.114f*b) * (224.f/255) + 128;
@@ -255,4 +257,3 @@ void jo_write_mpeg(FILE *fp, const unsigned char *rgbx, int width, int height, i
     fwrite("\x00\x00\x01\xb7", 4, 1, fp); // End of Sequence
 }
 #endif
-
