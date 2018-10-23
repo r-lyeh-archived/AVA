@@ -245,35 +245,9 @@ void editor_draw() {
 
     // floating content
         ImGui::Begin("demo 1");
-
-            extern bool show_demo_window;
-            ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-
+            extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
             property_demo();
-
             spinner_demo();
-
-            static unsigned bits = 0xC1, hoverIndex = 0;
-            BitField("label1", &bits, &hoverIndex);
-
-            ImGui::PushDisabled();
-            ImGui::Button("Disabled Button 1"); ImGui::SameLine(); ImGui::Button("Button 2");
-            ImGui::PopDisabled();
-
-            static const char *hints[] = { "ABC", "ABCD", "DEF" };
-            static ComboFilterState s = {0};
-            static char buf[128] = "ABC";
-            ComboFilter("my combofilter", buf, IM_ARRAYSIZE(buf), hints, IM_ARRAYSIZE(hints), s);
-
-            static int ip[4] = {127,0,0,1};
-            ipentry( ip );
-
-            static float v = 0.5f;
-            MyKnob("label2", &v, 0.0f, 1.0f);
-
-            static bool yesno = 0;
-            ToggleButton("label3", &yesno);
-
         ImGui::End();
 
         ImGui::Begin("demo2");
@@ -285,7 +259,7 @@ void editor_draw() {
             if( 1/*app('load')*/ ) {
                 ImGui::Separator();
                 ImGui::Text("loading");
-                //ImGui::PushStyleColor(vec3(0,0,255));
+                //ImGui::PushStyleColor(ImGuiCol_PlotHistogram, (ImVec4)ImColor::HSV(0/7.0f, 0.5f, 0.5f));
                 ImGui::ProgressBar(0.5f, ImVec2(-1/*100%*/,2/*px*/), "loading");
                 //ImGui::PopStyleColor();
 

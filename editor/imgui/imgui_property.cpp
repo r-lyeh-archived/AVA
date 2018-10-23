@@ -20,8 +20,11 @@ enum {
     PROPERTY_ANGLE,     // [x] float [-180..180]
     PROPERTY_BITMASK,   // [ ] int [0..64]
     PROPERTY_PROGRESS,  // [ ] float [0..100]
-    PROPERTY_COLOR3,    // [x] floatx3
-    PROPERTY_COLOR4,    // [ ] floatx4
+    PROPERTY_COLOR3,    // [x] color3
+    PROPERTY_COLOR4,    // [x] color4
+    PROPERTY_VECTOR3,   // [x] vector3
+    PROPERTY_VECTOR4,   // [x] vector4
+
 /*
     PROPERTY_TEXTURE1D,
     PROPERTY_TEXTURE2D,
@@ -41,8 +44,16 @@ union property_data {
     float   color[4][4];  // upto 4 colors
     float   vector[4][4]; // upto 4 vec4s
     float   matrix[16];
-    struct { int item, max_items; const char **items; };
     struct { float value, minv, maxv; const char *format; };
+    struct { unsigned bits, hoverIndex; }; // bitmask
+    int     ip[4];
+    struct { 
+        int max_items; const char **items;
+        union {
+            int item;
+            struct { ComboFilterState cfs; char filtbuf[32]; };
+        };
+    };
 };
 
 struct property_result { // @todo
@@ -89,12 +100,23 @@ struct property {
 
         if( hidden ) return false;
 
+        char *id = info, type = info[2], *name = info+3;
+        if( type == '>' || type == '-' ) {
+            ImGui::PushID(this);
+            if( type == '>' ) {
+                ImGui::CollapsingHeader(info);
+            } else {
+                ImGui::Separator();
+            }
+            ImGui::PopID();
+            return false;
+        }
+
         bool shift = !!ImGui::GetIO().KeyShift;
 
         ImGui::Columns(2);
 
         //static float initial_spacing = 100.f; if( initial_spacing ) ImGui::SetColumnWidth(0, initial_spacing), initial_spacing = 0;
-
         ImGui::PushID(this);
             if( ImGui::Button("R") ) { // ICON_MD_UNDO / ICON_MD_SETTINGS_BACKUP_RESTORE
                 if( shift ) randomized = 1; else data = copy;  // revert/randomize button
@@ -105,7 +127,6 @@ struct property {
                 ImGui::EndTooltip();
             }
         ImGui::SameLine();
-        char *id = info, type = info[2], *name = info+3;
         if( disabled ) ImGui::TextDisabled(name); else ImGui::Text(name);
         show_tooltip();
         ImGui::PopID();
@@ -122,8 +143,8 @@ struct property {
             randomized = 0;
             switch( info[2] ) {
                 default:
-                break; case 'e': data.item = rand() % data.max_items;
-                break; case 'f': data.value = (data.maxv - data.minv ) * (rand() / (float)RAND_MAX) + data.minv;
+                break; case 'l': case 'L': data.item = rand() % data.max_items;
+                break; case 'f': case 'F': data.value = (data.maxv - data.minv ) * (rand() / (float)RAND_MAX) + data.minv;
                 break; case '4': case '3': case '2': case '1':
                 for( int id = 0, end_id = info[2] - '0'; id < end_id; ++id )
                     for( int i = 0; i < 3; ++i ) data.color[id][i] = rand() / (float)RAND_MAX;
@@ -134,22 +155,36 @@ struct property {
         ImGui::PushID(this);
         switch( type ) {
             default:
-            break; case 'e': ret = ImGui::Combo(info, &data.item, data.items, data.max_items);
+            break; case 'l': ret = ImGui::Combo(info, &data.item, data.items, data.max_items);
+            break; case 'L': ret = ComboFilter(info, data.filtbuf, 32, data.items, data.max_items, data.cfs);
             break; case 'f': ret = ImGui::SliderFloat(info, &data.value, data.minv, data.maxv, data.format);
-            break; case '4': case '3': case '2': case '1': {
-                int misc_flags = ImGuiColorEditFlags_AlphaPreview | ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel | ImGuiColorEditFlags_PickerHueWheel;
-                for( int id = 0, end_id = type - '0'; id < end_id; ++id ) {
-                    ImGui::PushID(id); ret |= !!ImGui::ColorEdit3(info, data.color[id], misc_flags); ImGui::PopID();
-                    if( id != end_id - 1 ) ImGui::SameLine();
+            break; case 'F': ret = ImGui::InputFloat(info, &data.value, 0.01f, 1.0f);
+            break; case 'v': ret = ImGui::InputFloat3(info, &data.vector[0][0]);
+            break; case 'V': ret = ImGui::InputFloat4(info, &data.vector[0][0]);
+            break; case 'c': ret = ImGui::ColorEdit3(info, data.color[0], ImGuiColorEditFlags_PickerHueWheel);
+            break; case 'C': ret = ImGui::ColorEdit4(info, data.color[0], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaPreview);
+            break; case 't': ret = ImGui::Checkbox(info, &data.on); // { bool prev = data.on; ToggleButton(info, &data.on); ret = prev != data.on; } /*ImGui::Toggle*/
+            break; case 'b': ret = ImGui::Button("click");
+            break; case 'B': {
+                int i = 0;
+                if( data.on ) {
+                    const ImU32 col = ImGui::GetColorU32(ImGuiCol_FrameBgActive);
+                    ImGui::PushStyleColor(ImGuiCol_Button, col); //(ImVec4)ImColor::HSV(i/7.0f, 0.6f, 0.6f));
+                    ret = ImGui::Button("click"); data.on ^= !!ret;
+                    ImGui::PopStyleColor(1);
+                } else {
+                    ret = ImGui::Button("click"); data.on ^= !!ret;
                 }
+//                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i/7.0f, 0.7f, 0.7f));
+//                ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i/7.0f, 0.8f, 0.8f));
             }
-            break; case 't': { bool prev = data.on; ToggleButton(info, &data.on); ret = prev != data.on; } /*ImGui::Toggle*/
-            break; case 'b': ret = ImGui::Button("on");
-            break; case 'B': ret = ImGui::Button(data.on ? "on" : "off"); data.on ^= !!ret;
             break; case '>': ImGui::CollapsingHeader(info);
             break; case '-': ImGui::Separator();
             break; case 's': ImGui::InputText(info, data.string, IM_ARRAYSIZE(data.string));
             break; case '*': ImGui::InputText(info, data.string, IM_ARRAYSIZE(data.string), ImGuiInputTextFlags_Password | ImGuiInputTextFlags_CharsNoBlank);
+            break; case 'm': BitField(info, &data.bits, &data.hoverIndex); // bitmask
+            break; case 'i': ipentry(data.ip);
+            break; case 'k': MyKnob(""/*info*/, &data.value, 0.0f, 1.0f);
         }
         ImGui::PopID();
 
@@ -204,14 +239,23 @@ property property_delta( const char *info, float default_value ) {
 property property_slider( const char *info, float default_value ) {
     property p = MAKE_PROPERTY(info, 'f');
     p.data.value = default_value;
-    p.data.minv = FLT_MIN/2;
-    p.data.maxv = FLT_MAX/2;
+    p.data.minv = -FLT_MAX/2;
+    p.data.maxv = +FLT_MAX/2;
+    p.data.format = "%f";
+    return p;
+}
+
+property property_float( const char *info, float default_value ) {
+    property p = MAKE_PROPERTY(info, 'F');
+    p.data.value = default_value;
+    p.data.minv = -FLT_MAX;
+    p.data.maxv = +FLT_MAX;
     p.data.format = "%f";
     return p;
 }
 
 property property_list( const char *info, const std::vector<const char *> &labels ) {
-    property p = MAKE_PROPERTY(info, 'e');
+    property p = MAKE_PROPERTY(info, 'l');
     p.data.max_items = (int)labels.size();
     p.data.items = (const char **)malloc( sizeof(char*) * p.data.max_items ); // LEAK
     for( int i = 0; i < p.data.max_items; ++i ) {
@@ -220,8 +264,36 @@ property property_list( const char *info, const std::vector<const char *> &label
     return p;
 }
 
+property property_listfilt( const char *info, const std::vector<const char *> &labels ) {
+    property p = MAKE_PROPERTY(info, 'L');
+    p.data.max_items = (int)labels.size();
+    p.data.items = (const char **)malloc( sizeof(char*) * p.data.max_items ); // LEAK
+    for( int i = 0; i < p.data.max_items; ++i ) {
+        p.data.items[i] = labels[i];
+    }
+    snprintf(p.data.filtbuf, 32, "%s", p.data.items[0]);
+    return p;
+}
+
+property property_vector3( const char *info, float r, float g, float b ) {
+    property p = MAKE_PROPERTY(info, 'v');
+    p.data.vector[0][0] = r;
+    p.data.vector[0][1] = g;
+    p.data.vector[0][2] = b;
+    return p;
+}
+
+property property_vector4( const char *info, float r, float g, float b, float a ) {
+    property p = MAKE_PROPERTY(info, 'V');
+    p.data.vector[0][0] = r;
+    p.data.vector[0][1] = g;
+    p.data.vector[0][2] = b;
+    p.data.vector[0][3] = a;
+    return p;
+}
+
 property property_color3( const char *info, float r, float g, float b ) {
-    property p = MAKE_PROPERTY(info, '1');
+    property p = MAKE_PROPERTY(info, 'c');
     p.data.color[0][0] = r;
     p.data.color[0][1] = g;
     p.data.color[0][2] = b;
@@ -230,7 +302,7 @@ property property_color3( const char *info, float r, float g, float b ) {
 }
 
 property property_color4( const char *info, float r, float g, float b, float a ) {
-    property p = MAKE_PROPERTY(info, '1');
+    property p = MAKE_PROPERTY(info, 'C');
     p.data.color[0][0] = r;
     p.data.color[0][1] = g;
     p.data.color[0][2] = b;
@@ -267,24 +339,55 @@ property property_password( const char *info, const char *default_string ) {
     return p;
 }
 
-void property_demo() {
-    static struct property p0 = property_group( "My widgets" );
-    static struct property p1 = property_angle( ICON_MD_KEYBOARD_ARROW_DOWN " My Angle\nThis is PI", 3.14159f );
-    static struct property p2 = property_list(  ICON_MD_TIMELAPSE   " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} );
-    static struct property p3 = property_list(  ICON_MD_FILE_UPLOAD " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} );
-    static struct property p4 = property_color4( "My Color\nConfigure a color", 0,0,0,0 );
-    static struct property p5 = property_separator( "" );
-    static struct property p6 = property_toggle( "My Toggle\nConfigure a state", 1 );
-    static struct property p7 = property_button( "My Button" );
-    static struct property p8 = property_button2( "My Button 2", 1 );
-    static struct property p9 = property_delta( "My Delta", 0.5f );
-    static struct property pA = property_slider( "My Slider", 0.5f );
-    static struct property pB = property_string( "My String", "abc" );
-    static struct property pC = property_password( "My Password", "abc" );
+property property_bitmask( const char *info, unsigned default_mask ) {
+    property p = MAKE_PROPERTY(info, 'm');
+    p.data.bits = default_mask;
+    return p;
+}
 
-    struct property *ps[] = { &p0, &p1, &p2, &p3, &p4, &p5, &p6, &p7, &p8, &p9, &pA, &pB, &pC };
+property property_ip( const char *info, int ip0, int ip1, int ip2, int ip3 ) {
+    property p = MAKE_PROPERTY(info, 'i');
+    p.data.ip[0] = ip0;
+    p.data.ip[1] = ip1;
+    p.data.ip[2] = ip2;
+    p.data.ip[3] = ip3;
+    return p;
+}
+
+property property_knob( const char *info, float v ) {
+    property p = MAKE_PROPERTY(info, 'k');
+    p.data.value = v;
+    return p;
+}
+
+
+
+
+void property_demo() {
+    static struct property ps[] = {
+        property_group( "My widgets" ),
+        property_angle( ICON_MD_KEYBOARD_ARROW_DOWN " My Angle\nThis is PI", 3.14159f ),
+        property_list( ICON_MD_TIMELAPSE " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
+        property_listfilt( ICON_MD_FILE_UPLOAD " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
+        property_color3( "My Color3\nConfigure a color", 0,0,0 ),
+        property_color4( "My Color4\nConfigure a color", 0,0,0,0 ),
+        property_separator( "" ),
+        property_toggle( "My Toggle\nConfigure a state", 1 ),
+        property_button( "My Button" ),
+        property_button2( "My Button 2", 1 ),
+        property_delta( "My Delta", 0.5f ),
+        property_slider( "My Slider", 0.5f ),
+        property_float( "My Float", 0.5f ),
+        property_string( "My String", "abc" ),
+        property_password( "My Password", "abc" ),
+        property_vector3( "My Vector3", 0,1,2 ),
+        property_vector4( "My Vector4", 0,1,2,3 ),
+        property_bitmask( "My Bitmask", 0xCCCC ),
+        property_ip( "My IP", 127,0,0,1 ),
+        property_knob( "My Knob", 0.5f ),
+    };
     for( auto &p : ps ) {
-        // p->disabled = 1;
-        p->draw();
+        // p.disabled = 1;
+        p.draw();
     }
 }
