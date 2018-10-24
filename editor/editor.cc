@@ -284,7 +284,125 @@ void editor_draw() {
             extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
             static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
             property_demo();
-            spinner_demo();
+
+
+            static GLuint texture_id = 0;
+            if( !texture_id ) {
+                glGenTextures( 1, &texture_id );
+                glBindTexture( GL_TEXTURE_2D, texture_id );
+                // clamping (s,t,r)
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                // border color
+                float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+                glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+                // filtering
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                // #if OPENGL >= 3
+                // glGenerateMipmap(GL_TEXTURE_2D);
+                // #endif
+#if 1
+                // Black/white checkerboard
+                float pixels[] = {
+                    0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,
+                    1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f
+                };
+                int mip = 0, w = 2, h = 2;
+                int texture_fmt = GL_RGB; // incl. compressed formats
+                int image_fmt = GL_RGB, pixel_fmt = GL_FLOAT;
+                glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
+#else
+                int x,y,n;
+                unsigned char *pixels = stbi_load("image.png", &x, &y, &n, 4);
+                int mip = 0, w = x, h = y;
+                int texture_fmt = GL_RGBA; // incl. compressed formats
+                int image_fmt = GL_RGBA, pixel_fmt = GL_UNSIGNED_BYTE;
+                if( pixels) {
+                    glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
+                    stbi_image_free(pixels);
+                }
+#endif
+            }
+
+            if( texture_id ) {
+            /*
+                int w = 1024, h = 768, d = 3;
+                char *pixels = render_consume();
+                if( pixels ) {
+                    //glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, w, h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, pixels);
+                    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+                    glBindTexture( GL_TEXTURE_2D, texture_id );
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+                    render_discard(pixels);
+                }
+            */
+                auto &io = ImGui::GetIO();
+                ImTextureID my_tex_id = (void*)(intptr_t)texture_id;
+                float my_tex_w = 2, my_tex_h = 2;
+    #if 0
+                float aspect_ratio = my_tex_h / my_tex_w;
+                my_tex_w = 256;
+                my_tex_h = my_tex_w * aspect_ratio;
+    #endif
+                ImGui::Text("%.0fx%.0f", my_tex_w, my_tex_h);
+                ImVec2 pos = ImGui::GetCursorScreenPos();
+                ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
+                if (ImGui::IsItemHovered())
+                {
+                    ImGui::BeginTooltip();
+                    float region_sz = 32.0f;
+                    float region_x = io.MousePos.x - pos.x - region_sz * 0.5f; if (region_x < 0.0f) region_x = 0.0f; else if (region_x > my_tex_w - region_sz) region_x = my_tex_w - region_sz;
+                    float region_y = io.MousePos.y - pos.y - region_sz * 0.5f; if (region_y < 0.0f) region_y = 0.0f; else if (region_y > my_tex_h - region_sz) region_y = my_tex_h - region_sz;
+                    float zoom = 4.0f;
+                    ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
+                    ImGui::Text("Max: (%.2f, %.2f)", region_x + region_sz, region_y + region_sz);
+                    ImVec2 uv0 = ImVec2((region_x) / my_tex_w, (region_y) / my_tex_h);
+                    ImVec2 uv1 = ImVec2((region_x + region_sz) / my_tex_w, (region_y + region_sz) / my_tex_h);
+                    ImGui::Image(my_tex_id, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, ImColor(255,255,255,255), ImColor(255,255,255,128));
+                    ImGui::EndTooltip();
+                }
+            }
+
+        ImGui::End();
+
+
+        ImGui::Begin("Texture viewer");
+        {
+            GLuint tc;
+            glGenTextures( 1, &tc );
+            int texture_count = (int)tc;
+            glDeleteTextures( 1, &tc );
+
+            int tex_px = 64;
+            int images_per_line = (ImGui::GetWindowContentRegionWidth() / (tex_px * 1.20));
+            ImVec2 zoom( tex_px * 4, tex_px * 4 );
+            if( images_per_line ) for( int ID = 1; ID <= texture_count; ++ID ) {
+                ImGui::PushID(ID);
+
+                float tex_w = tex_px, tex_h = tex_px;
+                ImTextureID tex_id = (ImTextureID)(int64_t)(ID % (texture_count));
+                ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
+                ImGui::Image(tex_id, ImVec2(tex_w, tex_h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
+                if (ImGui::IsItemHovered()) {
+                    ImGui::BeginTooltip();
+                    float focus_sz = 32.0f;
+                    float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > tex_w - focus_sz) focus_x = tex_w - focus_sz;
+                    float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > tex_h - focus_sz) focus_y = tex_h - focus_sz;
+                    ImGui::Text("Texture #%d", ID);
+                    ImGui::Text("%.0fx%.0f", tex_w, tex_h);
+                    ImGui::Text("Min: (%.2f, %.2f)", focus_x, focus_y);
+                    ImGui::Text("Max: (%.2f, %.2f)", focus_x + focus_sz, focus_y + focus_sz);
+                    ImVec2 uv0 = ImVec2((focus_x) / tex_w, (focus_y) / tex_h);
+                    ImVec2 uv1 = ImVec2((focus_x + focus_sz) / tex_w, (focus_y + focus_sz) / tex_h);
+                    ImGui::Image(tex_id, zoom, uv0, uv1, ImColor(255,255,255,255), ImColor(255,255,255,128));
+                    ImGui::EndTooltip();
+                }
+
+                if ((ID % images_per_line) < (images_per_line-1)) ImGui::SameLine();
+                ImGui::PopID();
+            }
+        }
         ImGui::End();
 
         ImGui::Begin("demo2");
@@ -304,6 +422,7 @@ void editor_draw() {
             }
 
             profiler2_demo();
+            spinner_demo();
 
             curve_demo();
             table_demo();
