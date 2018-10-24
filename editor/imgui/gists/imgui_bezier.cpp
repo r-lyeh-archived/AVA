@@ -43,7 +43,7 @@ namespace ImGui
   float BezierValue( float dt01, float P[4] ) {
     enum { STEPS = 256 };
     ImVec2 Q[4] = { { 0, 0 }, { P[0], P[1] }, { P[2], P[3] }, { 1, 1 } };
-    ImVec2 results[STEPS+1];
+    ImVec2 results[STEPS+1]; 
     bezier_table<STEPS>( Q, results );
     return results[ (int)((dt01 < 0 ? 0 : dt01 > 1 ? 1 : dt01) * STEPS) ].y;
   }
@@ -139,10 +139,19 @@ namespace ImGui
           }
         }
 
+        // draw preview (cycles every 1s)
+        ImVec4 white( GetStyle().Colors[ImGuiCol_Text] );
+        float delta = ((int)(omp_get_wtime() * 1000) % 1000) / 1000.f;
+        int idx = (int)(delta * SMOOTHNESS);
+        float evalx = results[idx].x; // 
+        float evaly = results[idx].y; // ImGui::BezierValue( delta, P );
+        ImVec2 p0 = ImVec2( evaly, 1 - 0 ) * (bb.Max - bb.Min) + bb.Min;
+        //ImVec2 p0 = ImVec2( evalx, 1 - evaly ) * (bb.Max - bb.Min) + bb.Min;
+        DrawList->AddCircleFilled(p0, GRAB_RADIUS, ImColor(white));
+
         // draw lines and grabbers
         float luma = IsItemActive() || IsItemHovered() ? 0.5f : 1.0f;
         ImVec4 pink( 1.00f, 0.00f, 0.75f, luma ), cyan( 0.00f, 0.75f, 1.00f, luma );
-        ImVec4 white( GetStyle().Colors[ImGuiCol_Text] );
         ImVec2 p1 = ImVec2( P[0], 1 - P[1] ) * (bb.Max - bb.Min) + bb.Min;
         ImVec2 p2 = ImVec2( P[2], 1 - P[3] ) * (bb.Max - bb.Min) + bb.Min;
         DrawList->AddLine(ImVec2(bb.Min.x,bb.Max.y), p1, ImColor(white), LINE_WIDTH);
@@ -163,8 +172,6 @@ namespace ImGui
 
   void bezier_demo()
   {
-    { static float v[] = { 1.000f, 0.000f, 0.000f, 1.000f }; Bezier("easeInOutExpo",  v ); }
-    return;
     { static float v[] = { 0.000f, 0.000f, 1.000f, 1.000f }; Bezier("easeLinear",     v ); }
     { static float v[] = { 0.470f, 0.000f, 0.745f, 0.715f }; Bezier("easeInSine",     v ); }
     { static float v[] = { 0.390f, 0.575f, 0.565f, 1.000f }; Bezier("easeOutSine",    v ); }

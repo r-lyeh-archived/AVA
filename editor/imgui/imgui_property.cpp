@@ -1,18 +1,18 @@
-// horizontal widget, composed of:
-// [revert/random][icon][manipulator][text] | with tooltip in whole line
+// horizontal property, composed of:
+// [revert/random][icon][text]||[widget] with tooltip in whole line
 
 enum {
     PROPERTY_GROUP,     // [x] >v
     PROPERTY_SEPARATOR, // [x] ---
     PROPERTY_BUTTON,    // [x] button
-    PROPERTY_BUTTON2,   // [x] button (on/off state) @todo: shading & offset
+    PROPERTY_BUTTON2,   // [x] button (on/off state)
     PROPERTY_TOGGLE,    // [x] bool
     PROPERTY_SLIDERI,   // [ ] int
     PROPERTY_SLIDERF,   // [x] float
     PROPERTY_RANGEI,    // [ ] int[2]
     PROPERTY_RANGEF,    // [ ] float[2]
     PROPERTY_STRING,    // [x] string box
-    PROPERTY_TEXT,      // [ ] text box
+    PROPERTY_TEXT,      // [x] text box
     PROPERTY_TRANSFORM, // [ ] gizmo
     PROPERTY_PASSWORD,  // [x] hidden string box ***
     PROPERTY_DELTA,     // [x] float [0..1]
@@ -40,20 +40,25 @@ enum {
 
 union property_data {
     bool    on;
-    char    string[64];
-    float   color[4][4];  // upto 4 colors
-    float   vector[4][4]; // upto 4 vec4s
-    float   matrix[16];
-    struct { float value, minv, maxv; const char *format; };
-    struct { unsigned bits, hoverIndex; }; // bitmask
     int     ip[4];
+    char    string[64];
+    float   color[4][4];  // up to 4 colors
+    float   vector[4][4]; // up to 4 vec4s
+    float   matrix[16];
+    ImVec4  vector4[4];
+    struct { float value, minv, maxv; const char *format; };
+    struct { unsigned bitmask, bitmaskHoverIndex; };
     struct { 
-        int max_items; const char **items;
         union {
-            int item;
-            struct { ComboFilterState cfs; char filtbuf[32]; };
+            int item; // combo state
+            struct { ComboFilterState cfs; char filtbuf[32]; }; // filtered combo state
         };
+        int max_items; const char **items;
     };
+    ImQuat quaternion;
+    ImVec3 direction;
+    struct { ImVec3 axis; float angle; };
+    struct { char *textbox; size_t textbox_size; };
 };
 
 struct property_result { // @todo
@@ -70,17 +75,16 @@ struct property {
     char *help;
 
     property_data data;
+    property_data copy;
 
     bool hidden;
+    bool copied;
     bool disabled;
     bool randomized;
 
     void (*on_load)();
     void (*on_save)();
     void (*on_random)();
-
-    bool copied;
-    property_data copy;
 
     bool draw() {
         auto show_tooltip = [&]() {
@@ -143,7 +147,8 @@ struct property {
             randomized = 0;
             switch( info[2] ) {
                 default:
-                break; case 'l': case 'L': data.item = rand() % data.max_items;
+                break; case 'l': data.item = rand() % data.max_items;
+                break; case 'L': strcpy(data.filtbuf, data.items[rand() % data.max_items] );
                 break; case 'f': case 'F': data.value = (data.maxv - data.minv ) * (rand() / (float)RAND_MAX) + data.minv;
                 break; case '4': case '3': case '2': case '1':
                 for( int id = 0, end_id = info[2] - '0'; id < end_id; ++id )
@@ -166,25 +171,29 @@ struct property {
             break; case 't': ret = ImGui::Checkbox(info, &data.on); // { bool prev = data.on; ToggleButton(info, &data.on); ret = prev != data.on; } /*ImGui::Toggle*/
             break; case 'b': ret = ImGui::Button("click");
             break; case 'B': {
-                int i = 0;
-                if( data.on ) {
-                    const ImU32 col = ImGui::GetColorU32(ImGuiCol_FrameBgActive);
-                    ImGui::PushStyleColor(ImGuiCol_Button, col); //(ImVec4)ImColor::HSV(i/7.0f, 0.6f, 0.6f));
-                    ret = ImGui::Button("click"); data.on ^= !!ret;
-                    ImGui::PopStyleColor(1);
-                } else {
-                    ret = ImGui::Button("click"); data.on ^= !!ret;
-                }
-//                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(i/7.0f, 0.7f, 0.7f));
-//                ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(i/7.0f, 0.8f, 0.8f));
+                const ImU32 col = ImGui::GetColorU32(data.on ? ImGuiCol_FrameBgActive : ImGuiCol_FrameBg);
+                ImGui::PushStyleColor(ImGuiCol_Button, col);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, col);
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, col);
+                ret = ImGui::Button("click"); data.on ^= !!ret;
+                ImGui::PopStyleColor(3);
             }
             break; case '>': ImGui::CollapsingHeader(info);
             break; case '-': ImGui::Separator();
             break; case 's': ImGui::InputText(info, data.string, IM_ARRAYSIZE(data.string));
             break; case '*': ImGui::InputText(info, data.string, IM_ARRAYSIZE(data.string), ImGuiInputTextFlags_Password | ImGuiInputTextFlags_CharsNoBlank);
-            break; case 'm': BitField(info, &data.bits, &data.hoverIndex); // bitmask
+            break; case 'm': BitField(info, &data.bitmask, &data.bitmaskHoverIndex); // bitmask
             break; case 'i': ipentry(data.ip);
             break; case 'k': MyKnob(""/*info*/, &data.value, 0.0f, 1.0f);
+            break; case 'q': ImGui::QuaternionGizmo(info, data.quaternion);
+                             //ImGui::AxisAngleGizmo("AxisAngle", data.axis, data.angle);
+                             //ImGui::DirectionGizmo("Direction", data.direction);
+            break; case 'z': ImGui::Bezier(info, &data.vector[0][0]);
+                             //float y = ImGui::BezierValue( 0.5f, v ); // x delta in [0..1] range
+            break; case 'x': {
+                ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput /* |ImGuiInputTextFlags_ReadOnly*/ |0;
+                ImGui::InputTextMultiline(info, data.textbox, data.textbox_size, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), flags);
+            }
         }
         ImGui::PopID();
 
@@ -277,36 +286,25 @@ property property_listfilt( const char *info, const std::vector<const char *> &l
 
 property property_vector3( const char *info, float r, float g, float b ) {
     property p = MAKE_PROPERTY(info, 'v');
-    p.data.vector[0][0] = r;
-    p.data.vector[0][1] = g;
-    p.data.vector[0][2] = b;
+    p.data.vector4[0] = ImVec4(r,g,b,0);
     return p;
 }
 
 property property_vector4( const char *info, float r, float g, float b, float a ) {
     property p = MAKE_PROPERTY(info, 'V');
-    p.data.vector[0][0] = r;
-    p.data.vector[0][1] = g;
-    p.data.vector[0][2] = b;
-    p.data.vector[0][3] = a;
+    p.data.vector4[0] = ImVec4(r,g,b,a);
     return p;
 }
 
 property property_color3( const char *info, float r, float g, float b ) {
     property p = MAKE_PROPERTY(info, 'c');
-    p.data.color[0][0] = r;
-    p.data.color[0][1] = g;
-    p.data.color[0][2] = b;
-    p.data.color[0][3] = 1;
+    p.data.vector4[0] = ImVec4(r,g,b,0);
     return p;
 }
 
 property property_color4( const char *info, float r, float g, float b, float a ) {
     property p = MAKE_PROPERTY(info, 'C');
-    p.data.color[0][0] = r;
-    p.data.color[0][1] = g;
-    p.data.color[0][2] = b;
-    p.data.color[0][3] = a;
+    p.data.vector4[0] = ImVec4(r,g,b,a);
     return p;
 }
 
@@ -341,7 +339,7 @@ property property_password( const char *info, const char *default_string ) {
 
 property property_bitmask( const char *info, unsigned default_mask ) {
     property p = MAKE_PROPERTY(info, 'm');
-    p.data.bits = default_mask;
+    p.data.bitmask = default_mask;
     return p;
 }
 
@@ -360,34 +358,68 @@ property property_knob( const char *info, float v ) {
     return p;
 }
 
+property property_quaternion( const char *info, float x, float y, float z, float w ) {
+    property p = MAKE_PROPERTY(info, 'q');
+    p.data.quaternion = ImQuat(x,y,z,w);
+    return p;
+}
+
+property property_bezier( const char *info, float x, float y, float z, float w ) {
+    property p = MAKE_PROPERTY(info, 'z');
+    p.data.vector4[0] = ImVec4(x,y,z,w);
+    return p;
+}
+
+property property_textbox( const char *info, char *buffer ) {
+    property p = MAKE_PROPERTY(info, 'x');
+    p.data.textbox = (char*)malloc(p.data.textbox_size = 16384); // LEAK
+    strcpy(p.data.textbox, buffer);
+    return p;
+}
+
+void property_panel( struct property *ps, int num ) {
+    for( int i = 0; i < num; ++i ) {
+        if( ps[i].info[2] == '>' ) {
+            if( ImGui::CollapsingHeader(ps[i].info+3) ) {
+                for( int j = i+1; j < num; ++j ) {
+                    if( ps[j].info[2] == '>' ) break;
+                    //ps[j].disabled = 1; //test
+                    ps[j].draw();
+                }
+            }
+        }
+    }
+}
 
 
 
 void property_demo() {
     static struct property ps[] = {
-        property_group( "My widgets" ),
-        property_angle( ICON_MD_KEYBOARD_ARROW_DOWN " My Angle\nThis is PI", 3.14159f ),
-        property_list( ICON_MD_TIMELAPSE " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
-        property_listfilt( ICON_MD_FILE_UPLOAD " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
-        property_color3( "My Color3\nConfigure a color", 0,0,0 ),
-        property_color4( "My Color4\nConfigure a color", 0,0,0,0 ),
-        property_separator( "" ),
-        property_toggle( "My Toggle\nConfigure a state", 1 ),
-        property_button( "My Button" ),
-        property_button2( "My Button 2", 1 ),
-        property_delta( "My Delta", 0.5f ),
-        property_slider( "My Slider", 0.5f ),
-        property_float( "My Float", 0.5f ),
-        property_string( "My String", "abc" ),
-        property_password( "My Password", "abc" ),
-        property_vector3( "My Vector3", 0,1,2 ),
-        property_vector4( "My Vector4", 0,1,2,3 ),
-        property_bitmask( "My Bitmask", 0xCCCC ),
-        property_ip( "My IP", 127,0,0,1 ),
-        property_knob( "My Knob", 0.5f ),
+        property_group( "My widgets 1" ),
+            property_angle( ICON_MD_KEYBOARD_ARROW_DOWN " My Angle\nThis is PI", 3.14159f ),
+            property_list( ICON_MD_TIMELAPSE " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
+            property_listfilt( ICON_MD_FILE_UPLOAD " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
+            property_color3( "My Color3\nConfigure a color", 0,0,0 ),
+            property_color4( "My Color4\nConfigure a color", 0,0,0,0 ),
+            property_separator( "" ),
+            property_toggle( "My Toggle\nConfigure a state", 1 ),
+            property_button( "My Button" ),
+            property_button2( "My Button 2", 1 ),
+        property_group( "My widgets 2" ),
+            property_delta( "My Delta", 0.5f ),
+            property_slider( "My Slider", 0.5f ),
+            property_float( "My Float", 0.5f ),
+            property_string( "My String", "abc" ),
+            property_password( "My Password", "abc" ),
+            property_vector3( "My Vector3", 0,1,2 ),
+            property_vector4( "My Vector4", 0,1,2,3 ),
+            property_bitmask( "My Bitmask", 0xCCCC ),
+            property_ip( "My IP", 127,0,0,1 ),
+            property_knob( "My Knob", 0.5f ),
+            property_quaternion( "My Quaternion", 1,0,0,1 ),
+            property_textbox( "My Textbox", "This\nis\nan\neditable\nstring."),
+        property_group( "My widgets 3" ),
+            property_bezier( "My Bezier", 0.390f, 0.575f, 0.565f, 1.000f ),
     };
-    for( auto &p : ps ) {
-        // p.disabled = 1;
-        p.draw();
-    }
+    property_panel( ps, IM_ARRAYSIZE(ps) );
 }

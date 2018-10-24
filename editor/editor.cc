@@ -308,10 +308,6 @@ void editor_draw() {
             curve_demo();
             table_demo();
 
-            orient_demo();
-
-            bezier_demo();
-
         ImGui::End();
 
     // dockspace space
