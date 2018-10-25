@@ -59,6 +59,7 @@ int tinydir( const char *path, std::function<void (const char *fname,bool is_dir
 }
 */
 
+#include <vector>
 #include <sys/stat.h>
 #include <stdint.h>
 #include <time.h>

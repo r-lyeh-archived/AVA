@@ -50,6 +50,8 @@
 #define IsHovered(rect, id) \
     !!(ImGui::IsMouseHoveringRect(rect.Min, rect.Max) && ImGui::ItemHoverable(rect, id))
 
+using namespace ImGui;
+
 #include "imgui/imgui_config.cpp"
 #include "imgui/imgui_fonts.cpp"
 #include "imgui/imgui_palette.cpp"
@@ -58,63 +60,11 @@
 // --
 #include "imgui/imgui_icons.cpp"
 #include "imgui/imgui_pangram.cpp"
-
-// menubar
-#include "imgui/imgui_utils.cpp"
+#include "imgui/imgui_utils.cpp"    // for menubar below
 #include "imgui/imgui_menubar.cpp"
 
-using namespace ImGui;
-
-#include "imgui/gists/bitfield.cpp"
-#include "imgui/gists/hexedit.cpp"
-#include "imgui/gists/ip_entry.cpp"
-#include "imgui/gists/knob.cpp" // fresh ideas here: https://www.g200kg.com/en/webknobman/gallery.php
-#include "imgui/gists/toggle.cpp"
-
-#include "imgui/gists/imgui_browser.cpp"
-#include "imgui/gists/imgui_disabled.cpp"
-#include "imgui/gists/imgui_combofilter.cpp"
-#include "imgui/gists/imgui_bezier.cpp"
-#include "imgui/gists/imgui_curve.cpp"
-
-#include "imgui/gists/spinner.cpp"
-#include "imgui/gists/table.cpp"
-#include "imgui/gists/multiplot.cpp"
-#include "imgui/gists/plotvar.cpp"
-
-#include "imgui/gists/gizmo.h"
-#include "imgui/gists/gizmo.cpp"
-
-#include "imgui/gists/sequencer.h"
-#include "imgui/gists/sequencer.cpp"
-
-#ifdef GLSL
-#undef GLSL
-#endif
-#include "imgui/gists/textedit.h"
-#include "imgui/gists/textedit.cpp"
-
-#ifdef UNREFERENCED_PARAMETER
-#undef UNREFERENCED_PARAMETER
-#endif
-#include "imgui/gists/nodes.h" //v1
-#include "imgui/gists/nodes.cpp" //v1
-
-#define YAP_ENABLE
-#define YAP_IMPL
-#define YAP_IMGUI
-#include "imgui/gists/profiler.cpp"
-
-#include "imgui/gists/orient.h"
-#include "imgui/gists/orient.cpp"
-
-#include "imgui/gists/imgui_im3d.cpp"
-
-#include "imgui/imgui_property.cpp"
-
-#include "imgui/gists/richtext.cpp"
-
-
+#include "imgui/imgui_widgets.cpp" // must be first. widgets, all of them.
+#include "imgui/imgui_property.cpp" // must be last
 
 void imgui_dockspace() {
     // config dockspace
@@ -428,13 +378,17 @@ void editor_draw() {
                 ImGui::Separator();
             }
 
-
-
             profiler2_demo();
             spinner_demo();
 
             curve_demo();
             table_demo();
+
+        ImGui::End();
+
+        ImGui::Begin("Log");
+
+            console_demo();
 
         ImGui::End();
 

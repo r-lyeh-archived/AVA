@@ -202,7 +202,7 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
 
 
     io.Fonts->AddFontDefault(); // just in case none of the above is available at all...
-    io.Fonts->AddFontFromFileTTF("/prj/#AVA/editor/3rd/fonts/Roboto-Bold.ttf", 16.0f); //medium
+    io.Fonts->AddFontFromMemoryCompressedTTF(FONT_EXTRA_ROBOTO_BUF, FONT_EXTRA_ROBOTO_LEN, FONT_EXTRA_ROBOTO_SIZE); //bold
     io.Fonts->Build();
 
     io.Fonts->Fonts[0]->Scale = 1.0f; // 0.9f;

@@ -72,17 +72,15 @@
     X(ICON_MD_G_TRANSLATE) \
     X(ICON_MD_HD)
 
-#define X(i) i ,
+#define ICONS_GLYPHS(i) i ,
 const char *unsorted_icons[] = {
-    UNSORTED_ICONS(X) 0
+    UNSORTED_ICONS(ICONS_GLYPHS) 0
 };
-#undef X
 
-#define X(i) #i ,
+#define ICONS_LABELS(i) #i ,
 const char *unsorted_icons_str[] = {
-    UNSORTED_ICONS(X) 0
+    UNSORTED_ICONS(ICONS_LABELS) 0
 };
-#undef X
 
 void imgui_icons() {
     ImGui::Begin("icon viewer");
