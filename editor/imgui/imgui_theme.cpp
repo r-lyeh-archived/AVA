@@ -224,7 +224,7 @@ void imgui_style_framework() {
 #if 1 // cherry
     style.WindowPadding            = ImVec2(6, 4);
     style.WindowRounding           = 0.0f;
-    style.FramePadding             = ImVec2(7, 2);
+    style.FramePadding             = ImVec2(5/*7*/, 2);
     style.FrameRounding            = 3.0f;
     style.ItemSpacing              = ImVec2(7, 1);
     style.ItemInnerSpacing         = ImVec2(1, 1);

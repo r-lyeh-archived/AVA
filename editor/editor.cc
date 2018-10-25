@@ -112,6 +112,8 @@ using namespace ImGui;
 
 #include "imgui/imgui_property.cpp"
 
+#include "imgui/gists/richtext.cpp"
+
 
 
 void imgui_dockspace() {
@@ -364,6 +366,9 @@ void editor_draw() {
                 }
             }
 
+
+            richtext_demo();
+
         ImGui::End();
 
 
@@ -413,13 +418,17 @@ void editor_draw() {
 
             if( 1/*app('load')*/ ) {
                 ImGui::Separator();
-                ImGui::Text("loading");
+                ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]); // roboto-m-16
+                ImGui::TextColored(ImVec4(1.0f,1.0f,1.0f,1.0f),"loading");
+                ImGui::PopFont();
                 //ImGui::PushStyleColor(ImGuiCol_PlotHistogram, (ImVec4)ImColor::HSV(0/7.0f, 0.5f, 0.5f));
                 ImGui::ProgressBar(0.5f, ImVec2(-1/*100%*/,2/*px*/), "loading");
                 //ImGui::PopStyleColor();
 
                 ImGui::Separator();
             }
+
+
 
             profiler2_demo();
             spinner_demo();

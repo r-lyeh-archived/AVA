@@ -19,29 +19,34 @@
 #include "3rd/@juliettef/IconsMaterialDesignRanges.h"
 
 #include "3rd/fonts/mp1m.c" //   formal style, medium
-#define font_buf  mp1m_compressed_data
-#define font_len  mp1m_compressed_size
-#define font_size 18.f // 21.f
-#define font_chn  1
-#define font_jap  1
-#define font_kor  0
-#define font_cyr  1
-#define font_tha  0
+#define FONT_BUF  mp1m_compressed_data
+#define FONT_LEN  mp1m_compressed_size
+#define FONT_SIZE 18.f // 21.f
+#define FONT_CHN  1
+#define FONT_JAP  1
+#define FONT_KOR  0
+#define FONT_CYR  1
+#define FONT_THA  0
 
-#include "3rd/fonts/ntar.c"   // noto sans cjk (arabic), regular
-#define extra_font_ar_buf     ntar_compressed_data
-#define extra_font_ar_len     ntar_compressed_size
-#define extra_font_ar_size    30.f // 21.f
+#include "3rd/fonts/ntar.c"    // noto sans cjk (arabic), regular
+#define FONT_EXTRA_AR_BUF      ntar_compressed_data
+#define FONT_EXTRA_AR_LEN      ntar_compressed_size
+#define FONT_EXTRA_AR_SIZE     30.f // 21.f
 
-#include "3rd/fonts/ntkr.c"   // noto sans cjk (kr only), regular
-#define extra_font_kr_buf     ntkr_compressed_data
-#define extra_font_kr_len     ntkr_compressed_size
-#define extra_font_kr_size    15.f // 21.f
+#include "3rd/fonts/ntkr.c"    // noto sans cjk (kr only), regular
+#define FONT_EXTRA_KR_BUF      ntkr_compressed_data
+#define FONT_EXTRA_KR_LEN      ntkr_compressed_size
+#define FONT_EXTRA_KR_SIZE     15.f // 21.f
 
-#include "3rd/fonts/mtir.c" // material icons, regular
-#define extra_font_icon_buf   mtir_compressed_data
-#define extra_font_icon_len   mtir_compressed_size
-#define extra_font_icon_size  19.f
+#include "3rd/fonts/mtir.c"    // material icons, regular
+#define FONT_EXTRA_ICON_BUF    mtir_compressed_data
+#define FONT_EXTRA_ICON_LEN    mtir_compressed_size
+#define FONT_EXTRA_ICON_SIZE   19.f
+
+#include "3rd/fonts/rbtb.c"    // roboto, bold
+#define FONT_EXTRA_ROBOTO_BUF  rbtb_compressed_data
+#define FONT_EXTRA_ROBOTO_LEN  rbtb_compressed_size
+#define FONT_EXTRA_ROBOTO_SIZE 16.f
 
 void imgui_fonts() {
     // Load Fonts
@@ -90,7 +95,7 @@ void imgui_fonts() {
 
 cfg->RasterizerMultiply = 1.1f; // increase brightness
 
-    io.Fonts->AddFontFromMemoryCompressedTTF( font_buf, font_len, font_size, cfg, default_ranges ); // io.Fonts->GetGlyphRangesDefault() );
+    io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, default_ranges ); // io.Fonts->GetGlyphRangesDefault() );
     cfg->MergeMode = true;
 
     if( 1 ) {
@@ -98,24 +103,24 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         0x0370, 0x03FF, // Greek and Coptic
         0x10A0, 0x10FF, // Modern Georgian, Svan, and Mingrelian
         0 };
-        io.Fonts->AddFontFromMemoryCompressedTTF( font_buf, font_len, font_size + 1, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE + 1, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
     }
 
     if( 1 ) {
         static const ImWchar ranges[] = {  
         0x0590, 0x05FF, // Hebrew, Yiddish, Ladino, and other Jewish diaspora languages.
         0 };
-        auto *f = io.Fonts->AddFontFromMemoryCompressedTTF( font_buf, font_len, font_size + 2, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
+        auto *f = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE + 2, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
         // f->Scale = 100.f;
     }
 
-    if( font_cyr ) {
+    if( FONT_CYR ) {
         static const ImWchar ranges[] = {  
         0x0400, 0x052F, // Cyrillic + Cyrillic Supplement
         0x2DE0, 0x2DFF, // Cyrillic Extended-A
         0xA640, 0xA69F, // Cyrillic Extended-B
             0 };
-        io.Fonts->AddFontFromMemoryCompressedTTF( font_buf, font_len, font_size, cfg, ranges ); //io.Fonts->GetGlyphRangesCyrillic() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, ranges ); //io.Fonts->GetGlyphRangesCyrillic() );
     }
 
     cfg->OversampleH = 2;
@@ -125,11 +130,11 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         static const ImWchar ranges[] = {  
         0x0600, 0x06FF, // Arabic script, and the Arabic-Indic digits
         0 };
-        auto *f = io.Fonts->AddFontFromMemoryCompressedTTF( extra_font_ar_buf, extra_font_ar_len, extra_font_ar_size, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
+        auto *f = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_EXTRA_AR_BUF, FONT_EXTRA_AR_LEN, FONT_EXTRA_AR_SIZE, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
         // f->Scale = 100.f;
     }
 
-    if( font_jap ) {
+    if( FONT_JAP ) {
 #if 1
         static const ImWchar ranges[] = {  
         0x3000, 0x30FF, // Punctuations, Hiragana, Katakana
@@ -137,12 +142,12 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         0xFF00, 0xFFEF, // Half-width characters
         0 };
 #endif
-        io.Fonts->AddFontFromMemoryCompressedTTF( font_buf, font_len, font_size + 1.5, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE + 1.5, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
     }
 
-    if( font_chn ) {
+    if( FONT_CHN ) {
 #if 0
-        io.Fonts->AddFontFromMemoryCompressedTTF( font_buf, font_len, font_size, cfg, io.Fonts->GetGlyphRangesChinese() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, io.Fonts->GetGlyphRangesChinese() );
 #else
         static const ImWchar ranges[] = {  
             //0x3000, 0x303F, // CJK punctuation
@@ -158,12 +163,12 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         CJK Compatibility Ideographs            F900-FAFF   Duplicates, unifiable variants, corporate characters
         CJK Compatibility Ideographs Supplement 2F800-2FA1F Unifiable variants
         */
-        io.Fonts->AddFontFromMemoryCompressedTTF( font_buf, font_len, font_size + 2, cfg, ranges );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE + 2, cfg, ranges );
 #endif
     }
-    if( 1 ) { // font_kor ) {
+    if( 1 ) { // FONT_KOR ) {
 #if 0
-        io.Fonts->AddFontFromMemoryCompressedTTF( font_buf, font_len, font_size, cfg, io.Fonts->GetGlyphRangesKorean() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, io.Fonts->GetGlyphRangesKorean() );
 #else
         static const ImWchar ranges[] = {
             //0x3000, 0x303F, // CJK punctuation
@@ -171,15 +176,15 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
             0xAC00, 0xD7A4, // Hangul syllabes (0xD7AF?)
               // 0x1100, 0x11FF,
             0 };
-        io.Fonts->AddFontFromMemoryCompressedTTF( extra_font_kr_buf, extra_font_kr_len, extra_font_kr_size, cfg, ranges );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_EXTRA_KR_BUF, FONT_EXTRA_KR_LEN, FONT_EXTRA_KR_SIZE, cfg, ranges );
 #endif
     }
-    if( font_tha ) {
+    if( FONT_THA ) {
         static const ImWchar ranges[] = {  
         0x2010, 0x205E, // Punctuations
         0x0E00, 0x0E7F, // Thai
             0 };
-        io.Fonts->AddFontFromMemoryCompressedTTF( font_buf, font_len, font_size, cfg, ranges ); //io.Fonts->GetGlyphRangesThai() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, ranges ); //io.Fonts->GetGlyphRangesThai() );
     }
 
     cfg->OversampleH = 1;
@@ -192,11 +197,12 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
             0
         }; */
         cfg->MergeMode = true; cfg->PixelSnapH = true; cfg->GlyphOffset.y += 4;
-        auto *icon = io.Fonts->AddFontFromMemoryCompressedTTF( extra_font_icon_buf, extra_font_icon_len, extra_font_icon_size - 3, cfg, IconsMaterialDesignRanges );
+        auto *icon = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_EXTRA_ICON_BUF, FONT_EXTRA_ICON_LEN, FONT_EXTRA_ICON_SIZE - 3, cfg, IconsMaterialDesignRanges );
     }
 
 
     io.Fonts->AddFontDefault(); // just in case none of the above is available at all...
+    io.Fonts->AddFontFromFileTTF("/prj/#AVA/editor/3rd/fonts/Roboto-Bold.ttf", 16.0f); //medium
     io.Fonts->Build();
 
     io.Fonts->Fonts[0]->Scale = 1.0f; // 0.9f;

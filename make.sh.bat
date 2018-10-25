@@ -112,7 +112,7 @@ exit
 
                 if "%1"=="debug" (
                     shift
-                    devenv /Run "_build\debug\launch.exe" %*
+                    start "" devenv /Run "_build\debug\launch.exe" %*
                 ) else (
                     _build\debug\launch.exe %*
                 )
