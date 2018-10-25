@@ -346,29 +346,30 @@ void ddraw_rect(vec2 a, vec2 b) {
 
 // ----------------------------------------------------------------------------
 
-#define INIT(NUM_LINES) do { \
+#define DDRAW_INIT(NUM_LINES) do { \
     int num_vertices = NUM_LINES * 2; \
     if( draw_kind != GL_TRIANGLES || (draw_buf_len + num_vertices >= MAXBUFFER)) { \
         ddraw_flush(); \
     } \
 } while(0)
-#define CALC(min,max,step) ((max + 1 - min) / step)
+#define DDRAW_CALC(min,max,step) ((max + 1 - min) / step)
 
-void LINE( float src[3], float dst[3], float color[4] ) {
+static
+void DDRAW_LINE( float src[3], float dst[3], float color[4] ) {
     ddraw_vertexEx( src, color );
     ddraw_vertexEx( dst ,color );
 }
 
 
 void ddraw_lineEx( float src[3], float dst[3], float col[4] ) {
-    INIT(1);
-    LINE(src, dst, col);
+    DDRAW_INIT(1);
+    DDRAW_LINE(src, dst, col);
 }
 
 /*
 void ddraw_line( float src[3], float dst[3] ) {
-    INIT(1);
-    LINE(src, dst, yellow );
+    DDRAW_INIT(1);
+    DDRAW_LINE(src, dst, yellow );
 }
 */
 
@@ -384,18 +385,18 @@ void ddraw_grid(int hcols, int hrows, float step) {
     float z = 0.0f;
     float x = 0.0f;
 
-    INIT( (cols+rows)*2 + 5 );
+    DDRAW_INIT( (cols+rows)*2 + 5 );
 
     /* Column lines and axis. */
     for (int i = 1; i < cols; ++i) {
         x = -half_size_w + i * step;
 
         if (i != half_cols) {
-            LINE((vec3){ x, 0.0f, -half_size_h }, (vec3){ x, 0.0f, half_size_h }, gray);
+            DDRAW_LINE((vec3){ x, 0.0f, -half_size_h }, (vec3){ x, 0.0f, half_size_h }, gray);
         } else {
             /* Z-axis. */
-            LINE((vec3){ x, 0.0f, 0.0f }, (vec3){ x, 0.0f, half_size_h }, blue);
-            LINE((vec3){ x, 0.0f, -half_size_h }, (vec3){ x, 0.0f, 0.0f }, gray);
+            DDRAW_LINE((vec3){ x, 0.0f, 0.0f }, (vec3){ x, 0.0f, half_size_h }, blue);
+            DDRAW_LINE((vec3){ x, 0.0f, -half_size_h }, (vec3){ x, 0.0f, 0.0f }, gray);
         }
     }
 
@@ -404,49 +405,49 @@ void ddraw_grid(int hcols, int hrows, float step) {
         z = -half_size_h + j * step;
 
         if (j != half_rows) {
-            LINE((vec3){ -half_size_w, 0.0f, z }, (vec3){ half_size_w, 0.0f, z }, gray);
+            DDRAW_LINE((vec3){ -half_size_w, 0.0f, z }, (vec3){ half_size_w, 0.0f, z }, gray);
         } else {
             /* X-axis. */
-            LINE((vec3){ 0.0f, 0.0f, z }, (vec3){ half_size_w, 0.0f, z }, red);
-            LINE((vec3){ -half_size_w, 0.0f, z }, (vec3){ 0.0f, 0.0f, z }, gray);
+            DDRAW_LINE((vec3){ 0.0f, 0.0f, z }, (vec3){ half_size_w, 0.0f, z }, red);
+            DDRAW_LINE((vec3){ -half_size_w, 0.0f, z }, (vec3){ 0.0f, 0.0f, z }, gray);
         }
     }
 
     /* Y-axis */
-    LINE((vec3){ 0.0f, 0.0f, 0.0f }, (vec3){ 0.0f, half_size_w, 0.0f }, green);
+    DDRAW_LINE((vec3){ 0.0f, 0.0f, 0.0f }, (vec3){ 0.0f, half_size_w, 0.0f }, green);
 
     /* Lines around grid. */
-    LINE((vec3){ -half_size_w, 0.0f, half_size_h }, (vec3){ half_size_w, 0.0f, half_size_h }, white);
-    LINE((vec3){ -half_size_w, 0.0f, -half_size_h }, (vec3){ half_size_w, 0.0f, -half_size_h }, white);
+    DDRAW_LINE((vec3){ -half_size_w, 0.0f, half_size_h }, (vec3){ half_size_w, 0.0f, half_size_h }, white);
+    DDRAW_LINE((vec3){ -half_size_w, 0.0f, -half_size_h }, (vec3){ half_size_w, 0.0f, -half_size_h }, white);
 
-    LINE((vec3){ -half_size_w, 0.0f, half_size_h }, (vec3){ -half_size_w, 0.0f, -half_size_h }, white);
-    LINE((vec3){ half_size_w, 0.0f, half_size_h }, (vec3){ half_size_w, 0.0f, -half_size_h }, white);
+    DDRAW_LINE((vec3){ -half_size_w, 0.0f, half_size_h }, (vec3){ -half_size_w, 0.0f, -half_size_h }, white);
+    DDRAW_LINE((vec3){ half_size_w, 0.0f, half_size_h }, (vec3){ half_size_w, 0.0f, -half_size_h }, white);
 }
 
 void ddraw_xzgrid(float mins, float maxs, float y, float step) {
-    INIT( 2 * CALC(mins,maxs,step) );
+    DDRAW_INIT( 2 * DDRAW_CALC(mins,maxs,step) );
     vec3 from, to;
     for( float i = mins; i <= maxs; i += step ) {
         // Horizontal line (along the X)
         vec3set(from, mins, y, i);
         vec3set(to,   maxs, y, i);
-        LINE(from, to, gray);
+        DDRAW_LINE(from, to, gray);
 
         // Vertical line (along the Z)
         vec3set(from, i, y, mins);
         vec3set(to,   i, y, maxs);
-        LINE(from, to, gray);
+        DDRAW_LINE(from, to, gray);
     }
 }
 
 void ddraw_normal(float pos[3], float dir[3], float length) {
-    INIT(1);
+    DDRAW_INIT(1);
     float dst[3] = {pos[0]+dir[0]*length, pos[1]+dir[1]*length, pos[2]+dir[2]*length};
-    LINE(pos, dst, white);
+    DDRAW_LINE(pos, dst, white);
 }
 
 void ddraw_axis(float center[3], float radius) {
-    INIT(3);
+    DDRAW_INIT(3);
     vec3 to;
 
     const float cx = center[0];
@@ -455,19 +456,19 @@ void ddraw_axis(float center[3], float radius) {
 
     // Red line: X to X + radius
     vec3set(to, cx + radius, cy, cz);
-    LINE(center, to, red);
+    DDRAW_LINE(center, to, red);
 
     // Green line: Y to Y + radius
     vec3set(to, cx, cy + radius, cz);
-    LINE(center, to, green);
+    DDRAW_LINE(center, to, green);
 
     // Blue line: Z to Z + radius
     vec3set(to, cx, cy, cz + radius);
-    LINE(center, to, blue);
+    DDRAW_LINE(center, to, blue);
 }
 
 void ddraw_cross(float center[3], float radius) {
-    INIT(6);
+    DDRAW_INIT(6);
     vec3 pos, neg;
 
     const float cx = center[0];
@@ -478,20 +479,20 @@ void ddraw_cross(float center[3], float radius) {
     // Cyan/Red line: X - radius/2 to X + radius/2
     vec3set(pos, cx + hl, cy, cz);
     vec3set(neg, cx - hl, cy, cz);
-    LINE(center, pos, red);
-    LINE(center, neg, cyan);
+    DDRAW_LINE(center, pos, red);
+    DDRAW_LINE(center, neg, cyan);
 
     // Magenta/Green line: Y - radius/2 to Y + radius/2
     vec3set(pos, cx, cy + hl, cz);
     vec3set(neg, cx, cy - hl, cz);
-    LINE(center, pos, green);
-    LINE(center, neg, magenta);
+    DDRAW_LINE(center, pos, green);
+    DDRAW_LINE(center, neg, magenta);
 
     // Yellow/Blue line: Z - radius/2 to Z + radius/2
     vec3set(pos, cx, cy, cz + hl);
     vec3set(neg, cx, cy, cz - hl);
-    LINE(center, pos, blue);
-    LINE(center, neg, yellow);
+    DDRAW_LINE(center, pos, blue);
+    DDRAW_LINE(center, neg, yellow);
 }
 
 
@@ -502,7 +503,7 @@ void ddraw_sphere(vec3 center, float radius) {
     vec3 cache[360 / 15/*stepSize*/];
     vec3 radiusVec;
 
-    INIT( 2 * CALC(stepSize,360,stepSize) * CALC(stepSize, 360, stepSize) );
+    DDRAW_INIT( 2 * DDRAW_CALC(stepSize,360,stepSize) * DDRAW_CALC(stepSize, 360, stepSize) );
 
     vec3set(radiusVec, 0.0f, 0.0f, radius);
 
@@ -525,8 +526,8 @@ void ddraw_sphere(vec3 center, float radius) {
             temp[Y] = center[Y] + cosf(j degrees_) * radius * s;
             temp[Z] = lastPoint[Z];
 
-            LINE(lastPoint, temp, magenta);
-            LINE(lastPoint, cache[n], magenta);
+            DDRAW_LINE(lastPoint, temp, magenta);
+            DDRAW_LINE(lastPoint, cache[n], magenta);
 
             vec3cpy(cache[n], lastPoint);
             vec3cpy(lastPoint, temp);
@@ -537,13 +538,13 @@ void ddraw_sphere(vec3 center, float radius) {
 
 static
 void ddraw_box_(vec3 points[8]) {
-    INIT( 3 * 4 );
+    DDRAW_INIT( 3 * 4 );
     // Build the lines from points using clever indexing tricks:
     // (& 3 is a fancy way of doing % 4, but avoids the expensive modulo operation)
     for( int i = 0; i < 4; ++i ) {
-        LINE(points[i], points[(i + 1) & 3], cyan);
-        LINE(points[4 + i], points[4 + ((i + 1) & 3)], cyan);
-        LINE(points[i], points[4 + i], cyan);
+        DDRAW_LINE(points[i], points[(i + 1) & 3], cyan);
+        DDRAW_LINE(points[4 + i], points[4 + ((i + 1) & 3)], cyan);
+        DDRAW_LINE(points[i], points[4 + i], cyan);
     }
 }
 

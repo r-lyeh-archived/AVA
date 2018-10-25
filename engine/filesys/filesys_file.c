@@ -51,7 +51,7 @@ API char* file_find(const char* name);
 #define stat_             IFDEF(WINDOWS, _stat,                                 ,  stat_t           )
 
 #if WINDOWS
-#define O_RDONLY 00
+#include <fcntl.h> // O_RDONLY(00)
 // mmap() replacement for Windows. Placed into the public domain (Mike Frysinger)
 enum {  PROT_READ = 0x1, PROT_WRITE = 0x2, PROT_EXEC = 0x4,
         MAP_SHARED = 0x01, MAP_PRIVATE = 0x02, MAP_ANON = 0x20, MAP_ANONYMOUS = MAP_ANON };

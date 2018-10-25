@@ -45,12 +45,14 @@
 #define INPUT_C
 #define ASSET_C
 #define STORAGE_C
+#define NETWORK_C
 #endif
 #include "app/app.c"
 #include "audio/audio.c"
 #include "input/input.c"
 //#include "asset/asset.c"
 //#include "storage/storage.c"
+#include "network/network.c"
 
 #include "media/media.c"
 #include "render/render.c"
