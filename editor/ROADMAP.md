@@ -1,0 +1,28 @@
+## Roadmap Editor
+- [x] UI: Dockspace, tabs and custom menu.
+- [x] UI: 3D gizmo.
+- [x] UI: 3D DebugDraw.
+- [x] UI: Most useful widgets.
+- [x] UI: Timeline and data tracks.
+- [x] UI: Property widget.
+- [ ] UI: Object/Hierarchy viewer.
+- [ ] UI: Toolbar (button, on/off buttons), radio buttons (one).
+- [ ] Spec: Specify final JSON/Object notation.
+- [x] Spec: OSC/UDP message sharing.
+- [ ] Spec: IPC mem sharing.
+- [ ] Spec: FILE* sharing.
+- [x] Util: MPEG2/debug recording.
+- [ ] Util: Integrate with versioning tools.
+- [ ] Util: Integrate with import pipeline.
+- [ ] Util: Integrate with export pipeline (oop.json/mp, ecs.json/mp).
+- [ ] Core: World, persistence and serialization.
+- [ ] Core: Objects and dependencies.
+- [ ] Core: Messages and events.
+- [ ] Core: Hitboxes and triggers.
+- [ ] Core: Remote audio
+- [ ] Core: Remote render -> send: render(mat4 vr[2], int quality), recv: render.jpg
+- [ ] Core: Remote input -> send: input(tap1,tap2,mx,my,mb,key[256]), recv: world.diff file
+- [ ] Core: Remote raycasts -> send: ray(p3,dir), recv: ray.hit file
+- [ ] Core: Remote logic -> send: tick(dt), recv: world.diff file
+- [ ] Core: Remote UI -> scripted windows (tick,step,edit,init,quit,draw).
+
