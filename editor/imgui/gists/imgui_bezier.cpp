@@ -141,13 +141,18 @@ namespace ImGui
 
         // draw preview (cycles every 1s)
         ImVec4 white( GetStyle().Colors[ImGuiCol_Text] );
-        float delta = ((int)(omp_get_wtime() * 1000) % 1000) / 1000.f;
-        int idx = (int)(delta * SMOOTHNESS);
-        float evalx = results[idx].x; // 
-        float evaly = results[idx].y; // ImGui::BezierValue( delta, P );
-        ImVec2 p0 = ImVec2( evaly, 1 - 0 ) * (bb.Max - bb.Min) + bb.Min;
-        //ImVec2 p0 = ImVec2( evalx, 1 - evaly ) * (bb.Max - bb.Min) + bb.Min;
-        DrawList->AddCircleFilled(p0, GRAB_RADIUS, ImColor(white));
+        for( int i = 0; i < 3; ++i ) {
+            float delta = ((int)(omp_get_wtime() * 1000) % 1000) / 1000.f; delta += i / 3.f; if( delta > 1 ) delta -= 1;
+            int idx = (int)(delta * SMOOTHNESS);
+            float evalx = results[idx].x; // 
+            float evaly = results[idx].y; // ImGui::BezierValue( delta, P );
+            ImVec2 p0 = ImVec2( evalx, 1 -     0 ) * (bb.Max - bb.Min) + bb.Min;
+            ImVec2 p1 = ImVec2(     0, 1 - evaly ) * (bb.Max - bb.Min) + bb.Min;
+            ImVec2 p2 = ImVec2( evalx, 1 - evaly ) * (bb.Max - bb.Min) + bb.Min;
+            DrawList->AddCircleFilled(p0, GRAB_RADIUS/2, ImColor(white));
+            DrawList->AddCircleFilled(p1, GRAB_RADIUS/2, ImColor(white));
+            DrawList->AddCircleFilled(p2, GRAB_RADIUS/2, ImColor(white));
+        }
 
         // draw lines and grabbers
         float luma = IsItemActive() || IsItemHovered() ? 0.5f : 1.0f;
