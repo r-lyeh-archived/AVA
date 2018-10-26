@@ -317,5 +317,5 @@ static DebugConsole the_console;
 void console_demo() {
     static bool p_open = 1;
     the_console.Draw("Console Window", &p_open);
-    if( rand() < 100 ) PRINTF("Random #%d", rand());
+    if( rand() < 100 ) PRINTF("Random Log #%d", rand());
 }

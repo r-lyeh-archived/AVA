@@ -127,7 +127,7 @@ struct property {
             }
             if( ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
-                ImGui::TextUnformatted("Revert changes. Hold SHIFT to randomize instead.");
+                ImGui::TextUnformatted("Undo changes. Click+SHIFT to randomize instead.");
                 ImGui::EndTooltip();
             }
         ImGui::SameLine();
