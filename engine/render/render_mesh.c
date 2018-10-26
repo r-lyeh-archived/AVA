@@ -208,9 +208,9 @@ void renderable_draw(void *renderable) {
     renderable_t *r = (renderable_t*)renderable;
 
     glBindVertexArray(r->vao);
-    if( r->ibo16 ) glDrawElements(GL_TRIANGLES, r->elementCount, GL_UNSIGNED_SHORT, (char*)0); // with index16
-    if( r->ibo32 ) glDrawElements(GL_TRIANGLES, r->elementCount, GL_UNSIGNED_INT,   (char*)0); // with index32
-    else           glDrawArrays(GL_TRIANGLES, 0, r->elementCount);                             // without index
+    /**/ if( r->ibo16 ) glDrawElements(GL_TRIANGLES, r->elementCount, GL_UNSIGNED_SHORT, (char*)0); // with index16
+    else if( r->ibo32 ) glDrawElements(GL_TRIANGLES, r->elementCount, GL_UNSIGNED_INT,   (char*)0); // with index32
+    else                glDrawArrays(GL_TRIANGLES, 0, r->elementCount);                             // without index
     glBindVertexArray(0);
 }
 
