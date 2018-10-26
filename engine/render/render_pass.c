@@ -16,11 +16,11 @@
 // #include "framework.c" // logger, image, network, timer, window, filesys, 
 
 // local
-void render_init();
-void render_update(int width, int height);
-void render_post(int width, int height);
-void render_capture( int w, int h, int comps, void *pixels );
-void render_quit();
+API void render_init();
+API void render_update(int width, int height);
+API void render_post(int width, int height);
+API void render_capture( int w, int h, int comps, void *pixels );
+API void render_quit();
 
 // remote
 // void vrinit( const char *host, int port );

@@ -15,6 +15,8 @@
 #define GL_CONTEXT_FLAGS 0x821e
 #endif
 
+#define GLAPI API
+
 #endif
 
 /*

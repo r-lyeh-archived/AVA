@@ -5,7 +5,7 @@ require "ninja"
 solution "Project"
     location "../../_project"
     configurations {"debug", "debugopt", "release"}
-    platforms { "x64" } -- "native", "universal64" }
+    platforms { "x64" }
 
 -- dlls
 
@@ -14,32 +14,26 @@ project "engine"
     kind "SharedLib"
     location "../../_project"
     targetdir "../../_build/%{cfg.buildcfg}"
-
 --  files {"../../#sdk/*.c", "../../#sdk/*.cpp", "../../#sdk/*.h", "../../#sdk/*.inl"}
 --  files {"../../src/**.c", "../../src/**.cpp", "../../src/**.h", "../../src/**.inl"}
     files {"../../engine/engine.c"}
     includedirs {"../../engine/"}
     defines {"LINKAGE=EXPORT", "ENGINE_C"}
-
     filter "configurations:debug"
         symbols "On"
-
     filter "configurations:debugopt"
         symbols "On"
         optimize "On"
-
     filter "configurations:release"
-        defines { "NDEBUG" }
+        defines {"NDEBUG"}
         symbols "Off"
         optimize "On"
-
 
 project "editor"
     language "C++"
     kind "SharedLib"
     location "../../_project"
     targetdir "../../_build/%{cfg.buildcfg}"
-
     files {
     "../../editor/**.h*",
     "../../editor/*.c*",
@@ -61,51 +55,34 @@ project "editor"
     }
     -- links {"engine"}
     defines {"ENGINE_C"} -- "LINKAGE=STATIC",
-
     configuration "windows"
         links { "user32", "gdi32" }
-
     configuration "linux"
         links { "pthread" }
-
     filter "configurations:debug"
         symbols "On"
-
     filter "configurations:debugopt"
         symbols "On"
         optimize "On"
-
     filter "configurations:release"
         defines {"NDEBUG"}
         symbols "Off"
         optimize "On"
-
---[[
-    kind "WindowedApp"
-    filter "system:windows"
-        flags {"WinMain"}
---]]
-
 
 project "game01"
     language "C++"
     kind "SharedLib"
     location "../../_project"
     targetdir "../../_build/%{cfg.buildcfg}"
-
     files { "../../games/01/**.c", "../../games/01/**.cpp", "../../games/01/**.cc", "../../games/01/**.cxx", "../../games/01/**.h", "../../games/01/**.hpp", "../../games/01/**.inl"}
-    --removefiles { "../../app/**" }
     includedirs {"../../editor/", "../../engine/"}
     links {"engine"}
     defines {"LINKAGE=IMPORT"}
-
     filter "configurations:debug"
         symbols "On"
-
     filter "configurations:debugopt"
         symbols "On"
         optimize "On"
-
     filter "configurations:release"
         defines {"NDEBUG"}
         symbols "Off"
@@ -116,20 +93,15 @@ project "game02"
     kind "SharedLib"
     location "../../_project"
     targetdir "../../_build/%{cfg.buildcfg}"
-
     files { "../../games/02/**.c", "../../games/02/**.cpp", "../../games/02/**.cc", "../../games/02/**.cxx", "../../games/02/**.h", "../../games/02/**.hpp", "../../games/02/**.inl"}
-    --removefiles { "../../app/**" }
     includedirs {"../../editor/", "../../engine/"}
     links {"engine"}
     defines {"LINKAGE=IMPORT"}
-
     filter "configurations:debug"
         symbols "On"
-
     filter "configurations:debugopt"
         symbols "On"
         optimize "On"
-
     filter "configurations:release"
         defines {"NDEBUG"}
         symbols "Off"
@@ -140,52 +112,58 @@ project "game03"
     kind "SharedLib"
     location "../../_project"
     targetdir "../../_build/%{cfg.buildcfg}"
-
     files { "../../games/03/**.c", "../../games/03/**.cpp", "../../games/03/**.cc", "../../games/03/**.cxx", "../../games/03/**.h", "../../games/03/**.hpp", "../../games/03/**.inl"}
-    --removefiles { "../../app/**" }
     includedirs {"../../editor/", "../../engine/"}
     links {"engine"}
     defines {"LINKAGE=IMPORT"}
-
     filter "configurations:debug"
         symbols "On"
-
     filter "configurations:debugopt"
         symbols "On"
         optimize "On"
-
     filter "configurations:release"
         defines {"NDEBUG"}
         symbols "Off"
         optimize "On"
 
--- apps
+project "game04"
+    language "C++"
+    kind "SharedLib"
+    location "../../_project"
+    targetdir "../../_build/%{cfg.buildcfg}"
+    files { "../../games/04/**.c", "../../games/04/**.cpp", "../../games/04/**.cc", "../../games/04/**.cxx", "../../games/04/**.h", "../../games/04/**.hpp", "../../games/04/**.inl"}
+    includedirs {"../../editor/", "../../engine/"}
+    links {"engine"}
+    defines {"LINKAGE=IMPORT"}
+    filter "configurations:debug"
+        symbols "On"
+    filter "configurations:debugopt"
+        symbols "On"
+        optimize "On"
+    filter "configurations:release"
+        defines {"NDEBUG"}
+        symbols "Off"
+        optimize "On"
 
+-- exes
 
 project "launch"
     language "C++"
     kind "ConsoleApp" --"WindowedApp"
     location "../../_project"
     targetdir "../../_build/%{cfg.buildcfg}"
-
-    files {"../../editor/app/launch/**.c*", "../../editor/app/launch/**.h*" } -- "../../engine/app/launcher/dialog.rc" }
+    files {"../../editor/app/launch/**.c*", "../../editor/app/launch/**.h*" } -- "../../editor/app/launch/dialog.rc" }
     includedirs {"../../engine/"}
-    links {"engine", "game01", "game02", "game03", "editor" }
-    --defines {"LINKAGE=IMPORT"}
-
+    links {"engine", "editor", "game01", "game02", "game03", "game04" }
     configuration "windows"
         links { "user32", "gdi32" }
-
     configuration "linux"
         links { "pthread" }
-
     filter "configurations:debug"
         symbols "On"
-
     filter "configurations:debugopt"
         symbols "On"
         optimize "On"
-
     filter "configurations:release"
         defines {"NDEBUG"}
         symbols "Off"

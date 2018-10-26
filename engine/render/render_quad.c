@@ -1,4 +1,4 @@
-void quad( void *renderable );
+API void quad( void *renderable );
 
 // ----------------------------------------------------------------------------
 

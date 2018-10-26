@@ -62,14 +62,14 @@ enum {
 // etc
 
 
-unsigned texture(const char *pathfile, int flags);
-unsigned texture_mem(image img, int flags);
+API unsigned texture(const char *pathfile, int flags);
+API unsigned texture_mem(image img, int flags);
 
-int texture_width( unsigned id );
-int texture_height( unsigned id );
+API int texture_width( unsigned id );
+API int texture_height( unsigned id );
 
-void texture_bind( unsigned id, unsigned unit );
-void texture_destroy( unsigned *id );
+API void texture_bind( unsigned id, unsigned unit );
+API void texture_destroy( unsigned *id );
 
 
 #endif

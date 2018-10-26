@@ -48,8 +48,8 @@ extern font_t *fonts;
 
 // build font
 
-int font( const char *fontfile, int fontSize, int flags );
-int font_mem( const void *fontData, int fileSize, int fontSize, int flags );
+API int font( const char *fontfile, int fontSize, int flags );
+API int font_mem( const void *fontData, int fileSize, int fontSize, int flags );
 
 #endif
 

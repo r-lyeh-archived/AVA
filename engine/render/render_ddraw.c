@@ -11,27 +11,27 @@
 #endif
 
 // add functions
-void ddraw_aabb(float minbb[3], float maxbb[3]);
-void ddraw_arrow(float from[3], float to[3]);
-void ddraw_axis(float center[3], float radius);
-void ddraw_box(float center[3], float width, float height, float depth); //void ddraw_box_(vec3 points[8]); // instead?
-void ddraw_circle(float center[3], float dir[3], float radius);
-void ddraw_cone(float pos1[3], float pos2[3], float radius);
-void ddraw_cross(float center[3], float radius);
-void ddraw_frustum(float projview_matrix[16]);
-void ddraw_grid(int hcols, int hrows, float step);
-void ddraw_line(float from[3], float to[3]); //void ddraw_lineEx( float src[3], float dst[3], float srccolor[4], float dstcolor[4] );
-void ddraw_normal(float center[3], float dir[3], float radius);
-void ddraw_ring(float center[3], float dir[3], float radius);
-void ddraw_sphere(float center[3], float radius);
-void ddraw_sphere2(float center[3], float radius);
-void ddraw_xzgrid(float mins, float maxs, float y, float step);
+API void ddraw_aabb(float minbb[3], float maxbb[3]);
+API void ddraw_arrow(float from[3], float to[3]);
+API void ddraw_axis(float center[3], float radius);
+API void ddraw_box(float center[3], float width, float height, float depth); //void ddraw_box_(vec3 points[8]); // instead?
+API void ddraw_circle(float center[3], float dir[3], float radius);
+API void ddraw_cone(float pos1[3], float pos2[3], float radius);
+API void ddraw_cross(float center[3], float radius);
+API void ddraw_frustum(float projview_matrix[16]);
+API void ddraw_grid(int hcols, int hrows, float step);
+API void ddraw_line(float from[3], float to[3]); //void ddraw_lineEx( float src[3], float dst[3], float srccolor[4], float dstcolor[4] );
+API void ddraw_normal(float center[3], float dir[3], float radius);
+API void ddraw_ring(float center[3], float dir[3], float radius);
+API void ddraw_sphere(float center[3], float radius);
+API void ddraw_sphere2(float center[3], float radius);
+API void ddraw_xzgrid(float mins, float maxs, float y, float step);
 
- int ddraw_menu( int submenu_id, const char **lines );
-void ddraw_text2d( float center[2], const char *fmt, ... );
-void ddraw_text3d( float center[3], const char *fmt, ... );
-void ddraw_console( const char *fmt, ... );
-void ddraw_render2d( /*int shader, int camera*/ float *projmatrix, float *viewmatrix );
+API  int ddraw_menu( int submenu_id, const char **lines );
+API void ddraw_text2d( float center[2], const char *fmt, ... );
+API void ddraw_text3d( float center[3], const char *fmt, ... );
+API void ddraw_console( const char *fmt, ... );
+API void ddraw_render2d( /*int shader, int camera*/ float *projmatrix, float *viewmatrix );
 
 // void pushScale(x);
 // void popScale();

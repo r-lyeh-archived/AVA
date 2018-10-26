@@ -112,8 +112,8 @@ typedef struct buffer {
     size_t size;
 } buffer;
 
-renderable_t *mesh( void *renderable, int flags, int num_elems, const buffer *buffers );
-renderable_t *mesh_loadfile( void *renderable, const char *filename );
+API renderable_t *mesh( void *renderable, int flags, int num_elems, const buffer *buffers );
+API renderable_t *mesh_loadfile( void *renderable, const char *filename );
 
 #endif
 

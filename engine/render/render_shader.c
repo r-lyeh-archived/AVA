@@ -15,8 +15,8 @@
 #define OpenGL44 "#version 440 core\n"
 
 // shader
-GLuint shader( const char *vert, const char *frag );
-void shader_bind( unsigned shader );
+API GLuint shader( const char *vert, const char *frag );
+API void shader_bind( unsigned shader );
 
 typedef GLuint Shader;
 typedef GLuint Buffer;
@@ -24,14 +24,14 @@ typedef GLuint VAO;
 typedef GLuint Uniform;
 typedef GLuint Attribute;
 
-Attribute get_attribute_location( Shader p, const char *name );
-Uniform get_uniform_location( Shader p, const char *name );
-void set_uniform_int(Uniform u, int i);
-void set_uniform_float(Uniform u, float f);
-void set_uniform_vec2(Uniform u, float v[2]);
-void set_uniform_vec3(Uniform u, float v[3]);
-void set_uniform_vec4(Uniform u, float v[4]);
-void set_uniform_mat4(Uniform u, float m[16]);
+API Attribute get_attribute_location( Shader p, const char *name );
+API Uniform get_uniform_location( Shader p, const char *name );
+API void set_uniform_int(Uniform u, int i);
+API void set_uniform_float(Uniform u, float f);
+API void set_uniform_vec2(Uniform u, float v[2]);
+API void set_uniform_vec3(Uniform u, float v[3]);
+API void set_uniform_vec4(Uniform u, float v[4]);
+API void set_uniform_mat4(Uniform u, float m[16]);
 
 #define GLSL(...) #__VA_ARGS__
 

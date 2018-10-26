@@ -11,7 +11,7 @@
 
 // instantiate text mesh
 
-void text(void *renderable, int font_id, const char *text );
+API void text(void *renderable, int font_id, const char *text );
 
 
 #ifdef RENDER_C

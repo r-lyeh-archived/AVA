@@ -57,6 +57,7 @@
         O_NONBLOCK = 128 // dummy
     };
 
+    static
     int fcntl( int sockfd, int mode, int value ) {
         // get socket status flags
         if( mode == F_GETFL ) {

@@ -15,8 +15,8 @@ typedef struct renderer_t {
 
 typedef renderer_t material_t;
 
-void renderer_enable(void *renderer, float camproj[16]);
-void renderer_destroy(void *renderer);
+API void renderer_enable(void *renderer, float camproj[16]);
+API void renderer_destroy(void *renderer);
 
 // -----------------------------------------------------------------------------
 
@@ -39,15 +39,15 @@ typedef struct renderable_t {
     GLuint hidden; //alpha;
 } renderable_t;
 
-renderable_t*renderable(void *renderable, int flags);
-void renderable_draw(void *renderable);
-void renderable_destroy( void *renderable );
+API renderable_t*renderable(void *renderable, int flags);
+API void renderable_draw(void *renderable);
+API void renderable_destroy( void *renderable );
 
-void draw(void *renderable, float transform[16]);
+API void draw(void *renderable, float transform[16]);
 
 // gpu timer
 
-int64_t gputime();
+API int64_t gputime();
 
 #endif
 

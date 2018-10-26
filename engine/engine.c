@@ -4,9 +4,7 @@
 #pragma once
 #define CORE_C
 #define FRAMEWORK_C
-#define MEDIA_C
 #define RENDER_C
-#define SCENE_C
 #define WORLD_C
 #endif
 
@@ -19,9 +17,9 @@
 #define MATH_C
 #define MEMORY_C
 #define NATIVE_C
-#define OBJECT_C
+//#define OBJECT_C
 #define SERIAL_C
-#define STRUCT_C
+//#define STRUCT_C
 #define TIME_C
 #define STRING_C
 #endif
@@ -54,8 +52,17 @@
 //#include "storage/storage.c"
 #include "network/network.c"
 
-#include "media/media.c"
+#ifdef RENDER_C
+#pragma once
+#endif
 #include "render/render.c"
+
+#ifdef WORLD_C
+#pragma once
+#define MEDIA_C
+#define SCENE_C
+#endif
+#include "media/media.c"
 #include "scene/scene.c"
 #include "world/world.c"
 

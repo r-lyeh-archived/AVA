@@ -2,8 +2,8 @@
 #define UNICODE_H
 #include <stdint.h>
 
-uint32_t* string32( const char *utf8 );
-int strlen32( const uint32_t *utf32 );
+API uint32_t* string32( const char *utf8 );
+API int strlen32( const uint32_t *utf32 );
 
 #endif
 
