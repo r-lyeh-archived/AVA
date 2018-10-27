@@ -240,12 +240,38 @@ int osc__parse(osc_msg *out, int maxmsg, const char *s, const char *e) {
 
 
 void osc_match_tests() {
+    // @mmalex's tests
     assert(  osc__match("/[a-c]/?/[abc]/*/fish*/*food/f*/{foo,bar,baz}","/a/b/c//fishfood/monkeyfood/f/bar") );
     assert( !osc__match("/[a-c]/?/[abc]/*/fish*/*food/f*/{fog,bar,baz}","/a/b/c//fishfood/monkeyfood/f/foo") );
     assert( !osc__match("/[a-c]/?/[abc]/*/fith*/*food/f*/{foo,bar,baz}","/a/b/c//fishfood/monkeyfood/f/foo") );
     assert( !osc__match("/[a-c]/?/[abc]/*/fish*/*good/f*/{foo,bar,baz}","/a/b/c//fishfood/monkeyfood/f/foo") );
     assert( !osc__match("/[a-c]/?/[abc]/*/fish*/*food/g/{foo,bar,baz}","/a/b/c//fishfood/monkeyfood/f/foo") );
     assert(  osc__match("/[fa-cd]/?/[abc]/*/fish*/*food/f*/{foo,bar,baz}","/d/b/c//fishfood/monkeyfood/f/bar") );
+
+    // Julien Pommier's oscpkt tests
+    assert( !osc__match("//bar", "bar"));
+//  assert(  osc__match("//bar", "/bar"));
+//  assert(  osc__match("//bar", "/foo/plop/bar"));
+//  assert(  osc__match("/foo//", "/foo/plop/df/"));
+//  assert(  osc__match("/foo///////bar", "/foo/plop/baz/bar"));
+    assert(  osc__match("*", "bar"));
+    assert(  osc__match("/foo/*", "/foo/bar"));
+//  assert(  osc__match("/{bar,fo}/b[aA]r", "/fo/bar"));
+//  assert( !osc__match("/{bar,fo}/b[aA]r", "/foo/bar"));
+//  assert(  osc__match("/fo{bar,}/ba[e-t]", "/fo/bar"));
+    assert( !osc__match("/fo{bar,}/ba[t-z]", "/fo/bar"));
+//  assert(  osc__match("/f{,ioio,bar}o/?a[!a]", "/fo/bar"));
+    assert(  osc__match("/foo/bar", "/foo/bar"));
+    assert(  osc__match("/f*o/bar", "/foo/bar"));
+    assert(  osc__match("/fo*o/bar", "/foo/bar"));
+//  assert(  osc__match("/*//bar", "/foo/bar"));
+    assert(  osc__match("/*/bar", "/foo/bar"));
+    assert(  osc__match("/*o/bar", "/foo/bar"));
+    assert(  osc__match("/*/*/*/*a***/*/*/*/*/", "/foo/bar/foo/barrrr/foo/bar/foo/barrrr/"));
+    assert( !osc__match("/*/*/*/**/*/*/*/*/q", "/foo/bar/foo/barrrr/foo/bar/foo/barrrr/p"));
+    assert(  osc__match("[-]", "-"));
+//  assert(  osc__match("[a-]", "a"));
+//  assert(  osc__match("[a-]", "-"));
 }
 
 #endif
