@@ -7,6 +7,7 @@
 #define OSCSEND_C
 #define OSCRECV_C
 #define OSCPACK_C
+#define SENDBUF_C
 #endif
 
 #include "network_compat.c"
@@ -17,3 +18,4 @@
 #include "network_oscsend.c"
 #include "network_oscrecv.c"
 #include "network_oscpack.c"
+#include "network_sendbuf.c"

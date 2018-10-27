@@ -41,11 +41,12 @@ int osc__buffer_vl( char *buf, const char *fmt, va_list vl ) {
             break; case 'f':
             { union { float f; uint32_t i; } u; u.f = (float)va_arg(vl, double); u.i = ntohl(u.i); memcpy(buf, &u.i, 4); buf += 4; }
             break; case 'b':
-            { int l = va_arg(vl, int); const char *s = va_arg(vl, const char *); int32_t i = 0;
-              memcpy(buf, s, l); int pad = 4 - (l+3) & ~3; memcpy(buf + l, &i, pad); buf += l + pad; }
+            { uint32_t l = va_arg(vl, uint32_t), ll = ntohl(l); memcpy(buf, &ll, 4); buf += 4; /*}*/
+            /*{*/ const char *s = va_arg(vl, const char *); int32_t i = 0;
+              memcpy(buf, s, l); memcpy(buf + l, &i, 4); buf += l; buf += 3 - (((intptr_t)buf+3) & 3); }
             break; case 's': case 'S':
             { const char *s = va_arg(vl, const char *); int32_t i = 0, l = (int32_t)strlen(s) + 1;
-              memcpy(buf, s, l); int pad = 4 - (l+3) & ~3; memcpy(buf + l, &i, pad); buf += l + pad; }
+              memcpy(buf, s, l); memcpy(buf + l, &i, 4); buf += l; buf += 3 - (((intptr_t)buf+3) & 3); }
         }
     }
     return buf - src;

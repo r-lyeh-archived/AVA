@@ -28,6 +28,8 @@
 /*
 #include "engine.h"
 */
+#define OSCRECV_C
+#include "network/network_oscrecv.c"
 #define SHAPE_C
 #include "render/render_shape.c"
 #define EXPORT __declspec(dllexport)
@@ -178,12 +180,16 @@ void stats_demo() {
 
 // -----------------
 
+int osc_socket;
+
 void editor_init() {
     imgui_config();
     imgui_fonts();
 
     imgui_theme_cherry();
     imgui_style_framework();
+
+    osc_socket = osc_listen("127.0.0.1", "9000");
 }
 
 void editor_tick()
@@ -399,6 +405,59 @@ void editor_draw() {
 
     // overlay space
     // ...
+
+    static char *remoterenderbuffer = 0;
+    if( !remoterenderbuffer ) {
+        int maxsize = 1920 * 1080 * 4;
+        remoterenderbuffer = (char*)realloc( remoterenderbuffer, maxsize );
+        if( remoterenderbuffer ) {
+            memset( remoterenderbuffer, 0, maxsize );
+        }
+    }
+    static GLuint textureid = 0;
+    if( !textureid ) {
+        // textureid = texgen();
+        glGenTextures(1, &textureid);
+    }
+    if( textureid ) {
+        const void *pixels = remoterenderbuffer;
+        // texupdate( textureid, remoterenderbuffer, 256, 256 );
+        glBindTexture( GL_TEXTURE_2D, texture_id );
+        // clamping (s,t,r)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // border color
+        float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+        // filtering
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // #if OPENGL >= 3
+        // glGenerateMipmap(GL_TEXTURE_2D);
+        // #endif
+        int mip = 0, w = 256, h = 256;
+        int texture_fmt = GL_RGB; // incl. compressed formats
+        int image_fmt = GL_RGB, pixel_fmt = GL_UNSIGNED_BYTE;
+        glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
+    }
+
+    osc_update( osc_socket );
+    const osc_msg *first;
+    for( int i = 0, e = osc_count( &first ); i < e; ++i ) {
+        //printf("%d %s\n",i, first[i].pattern );
+        const osc_msg *msg = first + i;
+        //const osc_msg *msg = osc_find("/render/");
+        //if( msg ) {
+            int y = msg->i[0];
+            int size = msg->i[1];
+            const char *data = msg->s[1];
+            memcpy( &remoterenderbuffer[ (0 + y * 256) * 3 ], data, size );
+            //++socket_activity;
+            //++socket_numrecv;
+            //printf("%d %d %p\n", y, size, data);
+        //}
+    }
+
 }
 
 void editor_drop()

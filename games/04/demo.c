@@ -71,7 +71,7 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         window_swap( &pixels );
-        //netsend_buffer( pixels, width, height, 3 );
+        network_sendbuf( pixels, width, height, 3 );
     }
 
     window_destroy();
