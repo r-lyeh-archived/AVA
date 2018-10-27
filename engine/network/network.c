@@ -6,6 +6,7 @@
 #define WEBSERVER_C
 #define OSCSEND_C
 #define OSCRECV_C
+#define OSCPACK_C
 #endif
 
 #include "network_compat.c"
@@ -15,3 +16,4 @@
 #include "network_webserver.c"
 #include "network_oscsend.c"
 #include "network_oscrecv.c"
+#include "network_oscpack.c"
