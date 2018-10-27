@@ -1309,6 +1309,8 @@ GLFWbool _glfwRegisterWindowClassWin32(void)
                               0, 0, LR_DEFAULTSIZE | LR_SHARED);
     }
 
+    #include "win32_issue469.c"
+
     if (!RegisterClassExW(&wc))
     {
         _glfwInputErrorWin32(GLFW_PLATFORM_ERROR,

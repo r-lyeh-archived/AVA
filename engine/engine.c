@@ -69,29 +69,46 @@
 API int init();
 
 int init() {
-    puts("; engine begin. last rebuilt " __TIME__ " " __DATE__);
+    // log early
+    puts("; engine begin. last rebuilt: " __DATE__ " " __TIME__);
+
+    // cwd
+    // if( exist("../debug") && exist("../../games/") ) cwd("../../games/");
+
+    // icon
+
+    // vfs
     vfs_import("data/**");
     vfs_import("game/**");
     vfs_import("games/**");
     vfs_import("assets/**");
-    void (*ptr)();
+
+    // optional editor launch
+    void (*editor)() = dllquick( "editor.dll", "main" );
+    if( editor ) {
+        detach( editor, 0 );
+    }
+
+    // optional game launch
+    void (*game)();
+    if( 0 != (game = dllquick( "game.dll", "main" ) ) ) {
+        game();
+    }
+
+    // optional game launch (ranges #0-128, #00-128, #000-128)
     for( int i = 0; i < 128; ++i ) {
-        if( 0 != (ptr = dllquick( va("game%d.dll", i), "main" ) ) ) {
-            ptr();
+        if( 0 != (game = dllquick( va("game%d.dll", i), "main" ) ) ) {
+            game();
         }
-        if( 0 != (ptr = dllquick( va("game%02d.dll", i), "main" ) ) ) {
-            ptr();
+        if( 0 != (game = dllquick( va("game%02d.dll", i), "main" ) ) ) {
+            game();
         }
-        if( 0 != (ptr = dllquick( va("game%03d.dll", i), "main" ) ) ) {
-            ptr();
+        if( 0 != (game = dllquick( va("game%03d.dll", i), "main" ) ) ) {
+            game();
         }
     }
-    if( 0 != (ptr = dllquick( "game.dll", "main" ) ) ) {
-        ptr();
-    }
-    if( 0 != (ptr = dllquick( "editor.dll", "main" ) ) ) {
-        ptr();
-    }
+
+    // quit
     puts("; engine end");
     return 0;
 }
