@@ -84,7 +84,7 @@ int init() {
     vfs_import("assets/**");
 
     // optional editor launch
-    void (*editor)() = dllquick( "editor.dll", "main" );
+    void (*editor)(void *) = dllquick( "editor.dll", "main" );
     if( editor ) {
         detach( editor, 0 );
     }
