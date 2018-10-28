@@ -33,9 +33,7 @@ void network_sendbuf( void *pixels, int w, int h, int comp ) {
     line = line_b + stride; for( int y = 0; y < h; ++y ) { line -= stride;
 #endif
         {
-            int mtu = stride; // > 512 ? 512 : stride;
-
-            int osclen = osc_pack( oscbuf, "/render/", "ib", y, mtu,line);
+            int osclen = osc_pack( oscbuf, "/render/", "iiib", w,h,y, stride,line);
             bool sent = osc_send( s, oscbuf + 4, osclen - 4 );
             num_sent_packets += sent;
 

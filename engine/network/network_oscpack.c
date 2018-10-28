@@ -9,10 +9,10 @@
 
 #include <stdint.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 API int osc_bundle( char *buf, uint64_t ts );
 API int osc_pack( char *buf, const char *addr, const char *fmt, ... );
-
 
 #ifdef OSCPACK_C
 #pragma once
@@ -81,6 +81,7 @@ int osc_bundle( char *buf, uint64_t ts ) {
 
 #ifdef OSCPACK_DEMO
 #include <assert.h>
+#include "network_oscrecv.c" // osc_debug
 
 #include <stdio.h>
 void hexdump( FILE *fp, const void *ptr, unsigned len, int width ) {
@@ -126,6 +127,8 @@ int main() {
         "\x00\x00\x00\x28\x2f\x66\x6f\x6f\x00\x00\x00\x00\x2c\x69\x69\x73"
         "\x66\x66\x00\x00\x00\x00\x03\xe8\xff\xff\xff\xff\x68\x65\x6c\x6c"
         "\x6f\x00\x00\x00\x3f\x9d\xf3\xb6\x40\xb5\xb2\x2d", l) );
+
+        osc_debug(stdout, buf, l);
     }
 }
 #endif

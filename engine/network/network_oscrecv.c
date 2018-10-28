@@ -8,17 +8,20 @@
 
 #ifndef OSCRECV_H
 #define OSCRECV_H
+#include <stdio.h>
 
 // - create a listening socket.
 // - call every frame. read the udp port and parse all messages found there.
-// - count number of received messages, also return pointer to first item.
+// - return number of received messages, also set arg pointer to first item.
+// - debug raw osc buffer to stream.
 // - find most recent message matching 'addr'.
 
-int osc_listen( const char *mask, const char *port );
-int osc_update(int s); 
-int osc_count(const struct osc_msg **first);
+API int osc_listen( const char *mask, const char *port );
+API int osc_update(int s); 
+API int osc_list(const struct osc_message **first);
+API int osc_debug( FILE *out, const char *inmsg, int len );
 
-const struct osc_msg *osc_find(const char *addr);
+API const struct osc_message *osc_find(const char *addr);
 
 // OSC types from the spec.
 
@@ -45,14 +48,14 @@ enum {
 
 #include <stdint.h>
 
-typedef struct osc_msg {
+typedef struct osc_message {
     const char *pattern;// address in osc message
     const char *types;  // string of characters taken from the OSC types enum
     const char *data;   // pointer to raw osc data
-    int64_t i[4];       // integer interpretation of first 4 params (for blobs & strings, is length)
-    const char *s[4];   // for blobs and strings
-    float f[4];         // floating point interpretation of first 4 params
-} osc_msg;
+    int64_t i[8];       // integer interpretation of first 8 params (for blobs & strings, is length)
+    const char *s[8];   // for blobs and strings
+    float f[8];         // floating point interpretation of first 8 params
+} osc_message;
 
 #endif
 
@@ -70,15 +73,15 @@ typedef struct osc_msg {
 #pragma comment(lib,"ws2_32.lib")
 #define sockaddr_in SOCKADDR_IN
 
-#define OSC_MAX_BUF 65536
-#define OSC_MAX_MESSAGES 1024
+#define OSC_MAX_BUF (8*1024*1024) //65536
+#define OSC_MAX_MESSAGES 4096 //1024
 
-static char buf[OSC_MAX_BUF];
-static struct osc_msg msg[OSC_MAX_MESSAGES];
+static char *buf = 0; // [OSC_MAX_BUF];
+static struct osc_message *msg = 0; //[OSC_MAX_MESSAGES];
 static int bufpos;
 static int msgpos;
 
-int osc__parse(osc_msg *out, int maxmsg, const char *s, const char *e);
+int osc__parse(osc_message *out, int maxmsg, const char *s, const char *e);
 
 int osc__match(const char *pat, const char *addr) {
     for (int n=0;*pat;addr++,pat++) switch (*pat) {
@@ -130,6 +133,10 @@ int osc_listen( const char *mask, const char *port ) {
 }
 
 int osc_update(int fd) {
+    if( !buf ) {
+        buf = (char*)malloc( OSC_MAX_BUF );
+        msg = (struct osc_message*)malloc( OSC_MAX_MESSAGES * sizeof(struct osc_message) );
+    }
     if (fd<0) return 0;
     for (msgpos=0,bufpos=0;msgpos<OSC_MAX_MESSAGES && bufpos<OSC_MAX_BUF-8;) {
         sockaddr_in addr;
@@ -145,12 +152,12 @@ int osc_update(int fd) {
     return 1;
 }
 
-int osc_count(const osc_msg **first) {
+int osc_list(const osc_message **first) {
     *first = msg;
     return msgpos;
 }
 
-const osc_msg *osc_find(const char *addr) { // search in reverse order, so newest wins
+const osc_message *osc_find(const char *addr) { // search in reverse order, so newest wins
     for (int i=msgpos;i-->0;) if (osc__match(msg[i].pattern, addr)) return &msg[i];
     return 0;
 }
@@ -188,7 +195,7 @@ const char *osc__parse_bin(const char **s, const char *e, int *len) {
     if (*s>e) *s=e;
     return rv;
 }
-int osc__parse(osc_msg *out, int maxmsg, const char *s, const char *e) {
+int osc__parse(osc_message *out, int maxmsg, const char *s, const char *e) {
     if (maxmsg<=0 || s>=e) return 0;
     if (*(uint64_t*)s==*(uint64_t*)"#bundle\0") { // bundle is #bundle, uint64_t time, uint32_t length, <osc packet>        
         osc__parse_i64(&s,e); // skip time for now. TODO
@@ -205,7 +212,7 @@ int osc__parse(osc_msg *out, int maxmsg, const char *s, const char *e) {
         return msgcount;
     }
     // single message
-    memset(out,0,sizeof(osc_msg));
+    memset(out,0,sizeof(osc_message));
     out->pattern=osc__parse_str(&s,e);
     if (!out->pattern)
         return 0;
@@ -214,7 +221,7 @@ int osc__parse(osc_msg *out, int maxmsg, const char *s, const char *e) {
         return 0;
     out->types++;
     out->data=s;
-    for (int param=0;param<4;++param) {
+    for (int param=0;param<8;++param) {
         int f2i=0;
         switch (out->types[param]) {
             default: return 1; // done!
@@ -274,6 +281,31 @@ void osc_match_tests() {
 //  assert(  osc__match("[a-]", "-"));
 }
 
+
+int osc_debug(FILE *fp, const char *buf, int len) {
+    osc_message m[16];
+    int nn = osc__parse(m, 16, buf, buf+len);
+
+    for( int n = 0; n < nn; ++n ) {
+        fprintf(fp, "%s [%s]", m[n].pattern, m[n].types);
+        // @todo #bundle @%lld
+
+        for(int i = 0; m[n].types[i]; ++i) {
+            char f = m[n].types[i];
+            /**/ if (f == 'T' || f == 'F' || f == 'N') fprintf( fp, ",%s", (f=='T'?"True":f=='F'?"False":"Null"));
+            else if (f == 'h' || f == 't') fprintf( fp, ",%lld", m[n].i[i]);
+            else if (f == 'f' || f == 'd') fprintf( fp, ",%f", m[n].f[i]);
+            else if (f == 'i' || f == 'c' || f == 'r' || f == 'm' ) fprintf( fp, ",%d", (int)m[n].i[i]);
+            else if (f == 's' || f == 'S' ) fprintf( fp, ",%s", m[n].s[i]);
+            else if (f == 'b') fprintf( fp, ",%d bytes", (int)m[n].i[i]);
+            else fprintf(fp, ",%s", "?");
+        }
+
+        fprintf(fp, "%s\n", "");
+    }
+    return 1;
+}
+
 #endif
 
 
@@ -290,9 +322,9 @@ int main() {
         Sleep(100);
         osc_update(fd);
 
-        const osc_msg *begin;
-        for( int it = 0, end = osc_count(&begin); it < end; ++it ) {
-            const osc_msg *msg = begin + it;
+        const osc_message *begin;
+        for( int it = 0, end = osc_list(&begin); it < end; ++it ) {
+            const osc_message *msg = begin + it;
             printf("> %s\n", msg->pattern);
         }
     }
@@ -309,7 +341,7 @@ namespace ImOsc {
         // of XY pads, the Z coordinate of accelerometers, and so on. This syntax is not necessary in the Osc*
         // 'lower level' functions, its just a hack to let the ImOsc:: ImGui-ish interface to avoid an extra parameter.
         int chan=0; if (*addr>='0' && *addr<='3') chan=*addr++-'0';
-        if (const osc_msg *msg=osc_find(addr)) return &msg->f[chan];
+        if (const osc_message *msg=osc_find(addr)) return &msg->f[chan];
         return 0;
     }
     bool SliderFloat(const char *osc_addr, const char* label, float* v, float v_min, float v_max, const char* display_format = "%.3f", float power = 1.0f) {
