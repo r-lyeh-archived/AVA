@@ -32,7 +32,7 @@ int osc_open( const char *host, const char *port ) {
 
     struct udp_socket u = {0};
     struct addrinfo hints = {0};
-    hints.ai_family = AF_UNSPEC;
+    hints.ai_family = AF_UNSPEC; // select ip4 or ip6. explicit: ip4->AF_INET ip6->AF_INET6
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_protocol = 0;
     hints.ai_flags = AI_ADDRCONFIG;
@@ -53,8 +53,19 @@ int osc_open( const char *host, const char *port ) {
 }
 
 int osc_send( int s, const char *msg, int msg_len ) {
+    int sent;
     struct udp_socket *u = &udp_list[ s ];
-    int sent = sendto(u->fd, msg, msg_len, 0, u->addr->ai_addr, u->addr->ai_addrlen);
+    for( ;; ) {
+        int res = sendto(u->fd, msg, msg_len, 0, u->addr->ai_addr, u->addr->ai_addrlen);
+#ifdef _WIN32
+        if (res == -1 && WSAGetLastError() == WSAEINTR) continue;
+        else sent = res;
+#else
+        if (res == -1 && errno == EINTR) continue;
+        else sent = res;
+#endif
+        break;
+    }
     return sent;
 }
 
@@ -68,6 +79,7 @@ int osc_close( int s ) {
 
 
 #ifdef OSCSEND_DEMO
+#include <omp.h>
 
 int main( int argc, char **argv ) {
 
@@ -78,10 +90,24 @@ int main( int argc, char **argv ) {
     const char *oscaddr = argv[1]; 
     const char *ip = argc > 2 ? argv[2]  : "127.0.0.1";
     const char *port = argc > 3 ? argv[3] : "9000";
-    printf("sending to %s:%s%s%s, ctrl-z to quit\n", ip, port, oscaddr[0] == '/' ? "" : "/", oscaddr);
 
     int fd = osc_open(ip, port);
     if( fd > 0 ) {
+        printf("benchmarking...");
+        double t = -omp_get_wtime();
+        #ifndef N
+        #define N 1
+        #endif
+        char buf[1024];
+        enum { M = 1000*1000 };
+        for( int i = 0; i < N*M; ++i) {
+            osc_send(fd, buf, 1024);
+        }
+        t += omp_get_wtime();
+        printf("%dM pkts sent in %5.2fs, %5.2fM pkt/s, %5.2fMB/s\n", N, t, (N*M)/t, ((N*M)*1024ULL/t)/1024/1024);
+    }
+    if( fd > 0 ) {
+        printf("sending to %s:%s%s%s, ctrl-z to quit\n", ip, port, oscaddr[0] == '/' ? "" : "/", oscaddr);
         printf("/");
         for( char prompt[256]; !feof(stdin) && fgets(prompt, 256, stdin); ) {
             char *no_cr = strchr(prompt, '\r'); if(no_cr) *no_cr = 0;

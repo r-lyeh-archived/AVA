@@ -81,7 +81,6 @@ int osc_bundle( char *buf, uint64_t ts ) {
 
 #ifdef OSCPACK_DEMO
 #include <assert.h>
-#include "network_oscrecv.c" // osc_debug
 
 #include <stdio.h>
 void hexdump( FILE *fp, const void *ptr, unsigned len, int width ) {
@@ -99,12 +98,12 @@ void hexdump( FILE *fp, const void *ptr, unsigned len, int width ) {
 }
 
 int main() {
-    // OSC message (skip 4 bytes)
+    // OSC message (4-bytes skipped)
     {
         char buf[4096];
         int l = osc_pack(buf, "/foo", "iisff", 1000, -1, "hello", 1.234f, 5.678f);
         //use as: udp_send(socket, buf+4, l-4);
-        hexdump(stdout, buf, l, 16);
+        hexdump(stdout, buf+4, l-4, 16);
     }
 
     // OSC bundle
@@ -127,8 +126,6 @@ int main() {
         "\x00\x00\x00\x28\x2f\x66\x6f\x6f\x00\x00\x00\x00\x2c\x69\x69\x73"
         "\x66\x66\x00\x00\x00\x00\x03\xe8\xff\xff\xff\xff\x68\x65\x6c\x6c"
         "\x6f\x00\x00\x00\x3f\x9d\xf3\xb6\x40\xb5\xb2\x2d", l) );
-
-        osc_debug(stdout, buf, l);
     }
 }
 #endif

@@ -74,7 +74,7 @@ typedef struct osc_message {
 #define sockaddr_in SOCKADDR_IN
 
 #define OSC_MAX_BUF (8*1024*1024) //65536
-#define OSC_MAX_MESSAGES 4096 //1024
+#define OSC_MAX_MESSAGES 65536 //1024
 
 static char *buf = 0; // [OSC_MAX_BUF];
 static struct osc_message *msg = 0; //[OSC_MAX_MESSAGES];

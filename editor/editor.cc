@@ -25,9 +25,12 @@
 #endif
 #include <math.h>
 
+#include <thread>
+
 /*
 #include "engine.h"
 */
+#define API
 #define OSCRECV_C
 #include "network/network_oscrecv.c"
 #define SHAPE_C
@@ -67,6 +70,40 @@ using namespace ImGui;
 
 #include "imgui/imgui_widgets.cpp" // must be first. widgets, all of them.
 #include "imgui/imgui_property.cpp" // must be last
+
+
+void image_widget( intptr_t texture_id, float w, float h, bool zoom = true, bool caption = false ) {
+    auto &io = ImGui::GetIO();
+
+    if( caption ) {
+        ImGui::Text("%.0fx%.0f", 2, 2);
+        ImGui::SameLine();
+    }
+
+    ImTextureID id = (void*)texture_id;
+#if 0
+    float aspect_ratio = h / (float)w;
+    my_tex_w = 256;
+    my_tex_h = my_tex_w * aspect_ratio;
+#endif
+    ImVec2 pos = ImGui::GetCursorScreenPos();
+    ImGui::Image(id, ImVec2(w, h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
+    if (zoom && ImGui::IsItemHovered())
+    {
+        ImGui::BeginTooltip();
+        float region_sz = 32.0f;
+        float region_x = io.MousePos.x - pos.x - region_sz * 0.5f; if (region_x < 0.0f) region_x = 0.0f; else if (region_x > w - region_sz) region_x = w - region_sz;
+        float region_y = io.MousePos.y - pos.y - region_sz * 0.5f; if (region_y < 0.0f) region_y = 0.0f; else if (region_y > h - region_sz) region_y = h - region_sz;
+        float zoom = 4.0f;
+        ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
+        ImGui::Text("Max: (%.2f, %.2f)", region_x + region_sz, region_y + region_sz);
+        ImVec2 uv0 = ImVec2((region_x) / w, (region_y) / h);
+        ImVec2 uv1 = ImVec2((region_x + region_sz) / w, (region_y + region_sz) / h);
+        ImGui::Image(id, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, ImColor(255,255,255,255), ImColor(255,255,255,128));
+        ImGui::EndTooltip();
+    }
+}
+
 
 void imgui_dockspace() {
     // config dockspace
@@ -195,218 +232,16 @@ void editor_init() {
 void editor_tick()
 {}
 
+#define WITH_MAINMENU 1
+#define WITH_DOCKING  1
+#define WITH_SCENE3D  1
+#define WITH_TOOLS    1
+#define WITH_PANELS   1
+
 void editor_draw() {
-    // menu bar
-    imgui_menubar();
-
-    // dockspace
-    imgui_dockspace();
-
-#if 1
-    int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
-    ImGui::Begin("3d", NULL, flags);
-    ImGuizmo::SetDrawlist();
-//    ImGuizmo::BeginFrame(0,0,300,300);
-    gizmo_demo2();
-    ImGui::End();
-#else
-    gizmo_demo();
-#endif
-
-    // windowed content
-        imgui_pangram();
-        imgui_icons();
-        sequencer_demo();
-        profiler_demo();
-        im3d_demo();
-        browser_demo();
-
-
-        static ImGui::Nodes nodes_;
-        ImGui::Begin("Nodes");
-        nodes_.ProcessNodes();
-        ImGui::End();
-
-        // alt, monospaced font
-        ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
-            static int init = (texteditor_demo_init(),1); 
-            texteditor_demo_draw();
-
-            static MemoryEditor mem_edit_1;                                            // store your state somewhere
-            char *mem_block = "oh lala"; size_t mem_block_size = strlen(mem_block) + 1;
-            mem_edit_1.DrawWindow("Memory Editor", mem_block, mem_block_size, 0x0000); // create a window and draw memory editor (if you already have a window, use DrawContents())
-        ImGui::PopFont();
-
-    // floating content
-        ImGui::Begin("demo 1");
-            extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
-            static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
-            property_demo();
-
-
-            static GLuint texture_id = 0;
-            if( !texture_id ) {
-                glGenTextures( 1, &texture_id );
-                glBindTexture( GL_TEXTURE_2D, texture_id );
-                // clamping (s,t,r)
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                // border color
-                float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-                glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-                // filtering
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                // #if OPENGL >= 3
-                // glGenerateMipmap(GL_TEXTURE_2D);
-                // #endif
-#if 1
-                // Black/white checkerboard
-                float pixels[] = {
-                    0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,
-                    1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f
-                };
-                int mip = 0, w = 2, h = 2;
-                int texture_fmt = GL_RGB; // incl. compressed formats
-                int image_fmt = GL_RGB, pixel_fmt = GL_FLOAT;
-                glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
-#else
-                int x,y,n;
-                unsigned char *pixels = stbi_load("image.png", &x, &y, &n, 4);
-                int mip = 0, w = x, h = y;
-                int texture_fmt = GL_RGBA; // incl. compressed formats
-                int image_fmt = GL_RGBA, pixel_fmt = GL_UNSIGNED_BYTE;
-                if( pixels) {
-                    glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
-                    stbi_image_free(pixels);
-                }
-#endif
-            }
-
-            if( texture_id ) {
-            /*
-                int w = 1024, h = 768, d = 3;
-                char *pixels = render_consume();
-                if( pixels ) {
-                    //glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, w, h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, pixels);
-                    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
-                    glBindTexture( GL_TEXTURE_2D, texture_id );
-                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-                    render_discard(pixels);
-                }
-            */
-                auto &io = ImGui::GetIO();
-                ImTextureID my_tex_id = (void*)(intptr_t)texture_id;
-                float my_tex_w = 2, my_tex_h = 2;
-    #if 0
-                float aspect_ratio = my_tex_h / my_tex_w;
-                my_tex_w = 256;
-                my_tex_h = my_tex_w * aspect_ratio;
-    #endif
-                ImGui::Text("%.0fx%.0f", my_tex_w, my_tex_h);
-                ImVec2 pos = ImGui::GetCursorScreenPos();
-                ImGui::Image(my_tex_id, ImVec2(my_tex_w, my_tex_h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
-                if (ImGui::IsItemHovered())
-                {
-                    ImGui::BeginTooltip();
-                    float region_sz = 32.0f;
-                    float region_x = io.MousePos.x - pos.x - region_sz * 0.5f; if (region_x < 0.0f) region_x = 0.0f; else if (region_x > my_tex_w - region_sz) region_x = my_tex_w - region_sz;
-                    float region_y = io.MousePos.y - pos.y - region_sz * 0.5f; if (region_y < 0.0f) region_y = 0.0f; else if (region_y > my_tex_h - region_sz) region_y = my_tex_h - region_sz;
-                    float zoom = 4.0f;
-                    ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
-                    ImGui::Text("Max: (%.2f, %.2f)", region_x + region_sz, region_y + region_sz);
-                    ImVec2 uv0 = ImVec2((region_x) / my_tex_w, (region_y) / my_tex_h);
-                    ImVec2 uv1 = ImVec2((region_x + region_sz) / my_tex_w, (region_y + region_sz) / my_tex_h);
-                    ImGui::Image(my_tex_id, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, ImColor(255,255,255,255), ImColor(255,255,255,128));
-                    ImGui::EndTooltip();
-                }
-            }
-
-
-            richtext_demo();
-
-        ImGui::End();
-
-
-        ImGui::Begin("Texture viewer");
-        {
-            GLuint tc;
-            glGenTextures( 1, &tc );
-            int texture_count = (int)tc;
-            glDeleteTextures( 1, &tc );
-
-            int tex_px = 64;
-            int images_per_line = (ImGui::GetWindowContentRegionWidth() / (tex_px * 1.20));
-            ImVec2 zoom( tex_px * 4, tex_px * 4 );
-            if( images_per_line ) for( int ID = 1; ID <= texture_count; ++ID ) {
-                ImGui::PushID(ID);
-
-                float tex_w = tex_px, tex_h = tex_px;
-                ImTextureID tex_id = (ImTextureID)(int64_t)(ID % (texture_count));
-                ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
-                ImGui::Image(tex_id, ImVec2(tex_w, tex_h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
-                if (ImGui::IsItemHovered()) {
-                    ImGui::BeginTooltip();
-                    float focus_sz = 32.0f;
-                    float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > tex_w - focus_sz) focus_x = tex_w - focus_sz;
-                    float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > tex_h - focus_sz) focus_y = tex_h - focus_sz;
-                    ImGui::Text("Texture #%d", ID);
-                    ImGui::Text("%.0fx%.0f", tex_w, tex_h);
-                    ImGui::Text("Min: (%.2f, %.2f)", focus_x, focus_y);
-                    ImGui::Text("Max: (%.2f, %.2f)", focus_x + focus_sz, focus_y + focus_sz);
-                    ImVec2 uv0 = ImVec2((focus_x) / tex_w, (focus_y) / tex_h);
-                    ImVec2 uv1 = ImVec2((focus_x + focus_sz) / tex_w, (focus_y + focus_sz) / tex_h);
-                    ImGui::Image(tex_id, zoom, uv0, uv1, ImColor(255,255,255,255), ImColor(255,255,255,128));
-                    ImGui::EndTooltip();
-                }
-
-                if ((ID % images_per_line) < (images_per_line-1)) ImGui::SameLine();
-                ImGui::PopID();
-            }
-        }
-        ImGui::End();
-
-        ImGui::Begin("demo2");
-
-            PlotVar("fps", ImGui::GetIO().Framerate); // if(t>60s) PlotVarFlushOldEntries(), t = 0;
-
-            stats_demo();
-
-            if( 1/*app('load')*/ ) {
-                ImGui::Separator();
-                ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]); // roboto-m-16
-                ImGui::TextColored(ImVec4(1.0f,1.0f,1.0f,1.0f),"loading");
-                ImGui::PopFont();
-                //ImGui::PushStyleColor(ImGuiCol_PlotHistogram, (ImVec4)ImColor::HSV(0/7.0f, 0.5f, 0.5f));
-                ImGui::ProgressBar(0.5f, ImVec2(-1/*100%*/,2/*px*/), "loading");
-                //ImGui::PopStyleColor();
-
-                ImGui::Separator();
-            }
-
-            profiler2_demo();
-            spinner_demo();
-
-            curve_demo();
-            table_demo();
-
-        ImGui::End();
-
-        ImGui::Begin("Log");
-
-            console_demo();
-
-        ImGui::End();
-
-    // dockspace space
-    // ...
-
-    imgui_dockspace_end();
-
-    // overlay space
-    // ...
 
     static char *remoterenderbuffer = 0;
+    static int remoterenderbuffer_w = 256, remoterenderbuffer_h = 256;
     if( !remoterenderbuffer ) {
         int maxsize = 1920 * 1080 * 4;
         remoterenderbuffer = (char*)realloc( remoterenderbuffer, maxsize );
@@ -414,50 +249,270 @@ void editor_draw() {
             memset( remoterenderbuffer, 0, maxsize );
         }
     }
-    static GLuint textureid = 0;
-    if( !textureid ) {
-        // textureid = texgen();
-        glGenTextures(1, &textureid);
-    }
-    if( textureid ) {
-        const void *pixels = remoterenderbuffer;
-        // texupdate( textureid, remoterenderbuffer, 256, 256 );
-        glBindTexture( GL_TEXTURE_2D, texture_id );
-        // clamping (s,t,r)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        // border color
-        float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-        // filtering
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // #if OPENGL >= 3
-        // glGenerateMipmap(GL_TEXTURE_2D);
-        // #endif
-        int mip = 0, w = 256, h = 256;
-        int texture_fmt = GL_RGB; // incl. compressed formats
-        int image_fmt = GL_RGB, pixel_fmt = GL_UNSIGNED_BYTE;
-        glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
-    }
-
-    osc_update( osc_socket );
-    const osc_msg *first;
-    for( int i = 0, e = osc_count( &first ); i < e; ++i ) {
-        //printf("%d %s\n",i, first[i].pattern );
-        const osc_msg *msg = first + i;
-        //const osc_msg *msg = osc_find("/render/");
-        //if( msg ) {
-            int y = msg->i[0];
-            int size = msg->i[1];
-            const char *data = msg->s[1];
-            memcpy( &remoterenderbuffer[ (0 + y * 256) * 3 ], data, size );
-            //++socket_activity;
-            //++socket_numrecv;
-            //printf("%d %d %p\n", y, size, data);
-        //}
+    auto network_update = [&]() {
+        // @todo clear mem when remote viewport changes
+        // update osc server
+        osc_update( osc_socket );
+        // render framebuffer into remotebuffer
+        const osc_message *list;
+        for( int i = 0, e = osc_list( &list ); i < e; ++i ) {
+            //printf("%d %s\n",i, list[i].pattern );
+            const osc_message *msg = list+i;
+            //const osc_message *msg = osc_find("/render/");
+            //if( msg ) {
+                auto is_pow2 = []( uint32_t v ) {
+                    return !((~(~0U>>1)|v)&v -1); // from SO
+                };
+                auto next_pow2 = []( uint32_t v ) {
+                    v--;
+                    v |= v >> 1;
+                    v |= v >> 2;
+                    v |= v >> 4;
+                    v |= v >> 8;
+                    v |= v >> 16;
+                    return ++v;
+                };
+                int w = msg->i[0]; w = is_pow2(w) ? w : next_pow2(w);
+                int h = msg->i[1]; h = is_pow2(h) ? h : next_pow2(h);
+                int y = msg->i[2];
+                int size = msg->i[3];
+                const char *data = msg->s[3];
+                remoterenderbuffer_w = w;
+                remoterenderbuffer_h = h;
+                memcpy( &remoterenderbuffer[ (0 + y * w) * 3 ], data, size );
+                //++socket_activity;
+                //++socket_numrecv;
+                //printf("%d %d %p\n", y, size, data);
+            //}
+        }
+        Sleep(1); //std::this_thread::yield();
+    };
+    static bool threaded = 0; if( !threaded ) { threaded = 1;
+        std::thread( [&]() { for(;;) network_update(); } ).detach();
     }
 
+
+#if WITH_MAINMENU
+    imgui_menubar();
+#endif
+
+#if WITH_DOCKING
+    imgui_dockspace();
+#endif
+
+#if WITH_SCENE3D
+    #if 1
+    int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
+    ImGui::Begin("3d", NULL, flags);
+    ImGuizmo::SetDrawlist();
+    //    ImGuizmo::BeginFrame(0,0,300,300);
+    gizmo_demo2();
+    ImGui::End();
+    #else
+    gizmo_demo();
+    #endif
+#endif
+
+#if WITH_TOOLS
+    imgui_pangram();
+    imgui_icons();
+    sequencer_demo();
+    profiler_demo();
+    im3d_demo();
+    browser_demo();
+
+    static ImGui::Nodes nodes_;
+    ImGui::Begin("Nodes");
+    nodes_.ProcessNodes();
+    ImGui::End();
+
+    // alt, monospaced font
+    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[1]);
+        static int init = (texteditor_demo_init(),1); 
+        texteditor_demo_draw();
+
+        static MemoryEditor mem_edit_1;
+        char *mem_block = "oh lala"; size_t mem_block_size = strlen(mem_block) + 1;
+        mem_edit_1.DrawWindow("Memory Editor", mem_block, mem_block_size, 0x0000); // create a window and draw memory editor (if you already have a window, use DrawContents())
+    ImGui::PopFont();
+
+    ImGui::Begin("Log");
+        console_demo();
+    ImGui::End();
+#endif
+
+#if WITH_PANELS
+    ImGui::Begin("demo2");
+
+        PlotVar("fps", ImGui::GetIO().Framerate); // if(t>60s) PlotVarFlushOldEntries(), t = 0;
+
+        stats_demo();
+
+        if( 1/*app('load')*/ ) {
+            ImGui::Separator();
+            ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[2]); // roboto-m-16
+            ImGui::TextColored(ImVec4(1.0f,1.0f,1.0f,1.0f),"loading");
+            ImGui::PopFont();
+            //ImGui::PushStyleColor(ImGuiCol_PlotHistogram, (ImVec4)ImColor::HSV(0/7.0f, 0.5f, 0.5f));
+            ImGui::ProgressBar(0.5f, ImVec2(-1/*100%*/,2/*px*/), "loading");
+            //ImGui::PopStyleColor();
+
+            ImGui::Separator();
+        }
+
+        profiler2_demo();
+        spinner_demo();
+
+        curve_demo();
+        table_demo();
+
+    ImGui::End();
+
+// floating content
+    ImGui::Begin("remote view");
+        // remote id viewer
+        static GLuint remote_id = 0;
+        if( !remote_id ) {
+            // remote_id = texgen();
+            glGenTextures(1, &remote_id);
+        }
+        if( remote_id ) {
+            const void *pixels = remoterenderbuffer;
+            // texupdate( remote_id, remoterenderbuffer, 256, 256 );
+            glBindTexture( GL_TEXTURE_2D, remote_id );
+            // clamping (s,t,r)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            // border color
+            float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+            // filtering
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            // #if OPENGL >= 3
+            // glGenerateMipmap(GL_TEXTURE_2D);
+            // #endif
+            int mip = 0, w = remoterenderbuffer_w, h = remoterenderbuffer_h;
+            int texture_fmt = GL_RGB; // incl. compressed formats
+            int image_fmt = GL_RGB, pixel_fmt = GL_UNSIGNED_BYTE;
+            glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
+        }
+        image_widget( remote_id, remoterenderbuffer_w, remoterenderbuffer_h, false );
+    ImGui::End();
+
+    ImGui::Begin("demo 1");
+        extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
+        static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
+        property_demo();
+
+        static GLuint texture_id = 0;
+        if( !texture_id ) {
+            glGenTextures( 1, &texture_id );
+            glBindTexture( GL_TEXTURE_2D, texture_id );
+            // clamping (s,t,r)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            // border color
+            float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+            // filtering
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            // #if OPENGL >= 3
+            // glGenerateMipmap(GL_TEXTURE_2D);
+            // #endif
+#if 1
+            // Black/white checkerboard
+            float pixels[] = {
+                0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,
+                1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f
+            };
+            int mip = 0, w = 2, h = 2;
+            int texture_fmt = GL_RGB; // incl. compressed formats
+            int image_fmt = GL_RGB, pixel_fmt = GL_FLOAT;
+            glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
+#else
+            int x,y,n;
+            unsigned char *pixels = stbi_load("image.png", &x, &y, &n, 4);
+            int mip = 0, w = x, h = y;
+            int texture_fmt = GL_RGBA; // incl. compressed formats
+            int image_fmt = GL_RGBA, pixel_fmt = GL_UNSIGNED_BYTE;
+            if( pixels) {
+                glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
+                stbi_image_free(pixels);
+            }
+#endif
+        }
+        if( texture_id ) {
+            image_widget( texture_id, 2, 2, true );
+        /*
+            int w = 1024, h = 768, d = 3;
+            char *pixels = render_consume();
+            if( pixels ) {
+                //glTexSubImage2D (GL_TEXTURE_2D, 0, 0, 0, w, h, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, pixels);
+                //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+                glBindTexture( GL_TEXTURE_2D, texture_id );
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+                render_discard(pixels);
+            }
+        */
+        }
+
+        richtext_demo();
+
+    ImGui::End();
+#endif
+
+    ImGui::Begin("Texture viewer");
+    {
+        GLuint tc;
+        glGenTextures( 1, &tc );
+        int texture_count = (int)tc;
+        glDeleteTextures( 1, &tc );
+
+        int tex_px = 64;
+        int images_per_line = (ImGui::GetWindowContentRegionWidth() / (tex_px * 1.20));
+        ImVec2 zoom( tex_px * 4, tex_px * 4 );
+        if( images_per_line ) for( int ID = 1; ID <= texture_count; ++ID ) {
+            ImGui::PushID(ID);
+
+            float tex_w = tex_px, tex_h = tex_px;
+            image_widget( ID % texture_count, tex_w, tex_h, true );
+/*
+            ImTextureID tex_id = (ImTextureID)(int64_t)(ID % (texture_count));
+            ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
+            ImGui::Image(tex_id, ImVec2(tex_w, tex_h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
+            if (ImGui::IsItemHovered()) {
+                ImGui::BeginTooltip();
+                float focus_sz = 32.0f;
+                float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > tex_w - focus_sz) focus_x = tex_w - focus_sz;
+                float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > tex_h - focus_sz) focus_y = tex_h - focus_sz;
+                ImGui::Text("Texture #%d", ID);
+                ImGui::Text("%.0fx%.0f", tex_w, tex_h);
+                ImGui::Text("Min: (%.2f, %.2f)", focus_x, focus_y);
+                ImGui::Text("Max: (%.2f, %.2f)", focus_x + focus_sz, focus_y + focus_sz);
+                ImVec2 uv0 = ImVec2((focus_x) / tex_w, (focus_y) / tex_h);
+                ImVec2 uv1 = ImVec2((focus_x + focus_sz) / tex_w, (focus_y + focus_sz) / tex_h);
+                ImGui::Image(tex_id, zoom, uv0, uv1, ImColor(255,255,255,255), ImColor(255,255,255,128));
+                ImGui::EndTooltip();
+            }
+*/
+            if ((ID % images_per_line) < (images_per_line-1)) ImGui::SameLine();
+            ImGui::PopID();
+        }
+    }
+    ImGui::End();
+
+
+#if WITH_DOCKING
+    // dockspace space
+    // ...
+
+    imgui_dockspace_end();
+#endif
+
+    // overlay space
+    // ...
 }
 
 void editor_drop()
