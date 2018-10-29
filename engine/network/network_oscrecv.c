@@ -142,13 +142,18 @@ int osc_update(int fd) {
         sockaddr_in addr;
         int addrlen = sizeof(addr);
         int n=recvfrom(fd,buf+bufpos,OSC_MAX_BUF-bufpos-1,0,(struct sockaddr*)&addr,&addrlen); 
+#ifdef _WIN32
+        if (n == -1 && WSAGetLastError() == WSAEINTR) continue;
+#else
+        if (n == -1 && errno == EINTR) continue;
+#endif
         if (n<=0)  // TODO - look at what the error was
             return 0;
-        char *s=buf+bufpos; 
+        char *s=buf+bufpos;
         s[n]=0; // null terminate packet always, for easier c handling
         msgpos+=osc__parse(msg+msgpos,OSC_MAX_MESSAGES-msgpos,s,s+n);    
-        bufpos+=n+1;                
-    }   
+        bufpos+=n+1;
+    }
     return 1;
 }
 

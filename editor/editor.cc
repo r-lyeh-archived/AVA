@@ -1,107 +1,56 @@
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
-// About OpenGL function loaders: modern OpenGL doesn't have a standard header file and requires individual function pointers to be loaded manually. 
-// Helper libraries are often used for this purpose! Here we are supporting a few common ones: gl3w, glew, glad.
-// You may use another loader/header of your choice (glext, glLoadGen, etc.), or chose to manually implement your own.
-#if defined(IMGUI_IMPL_OPENGL_LOADER_GL3W)
-#include <GL/gl3w.h>    // Initialize with gl3wInit()
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLEW)
-#include <GL/glew.h>    // Initialize with glewInit()
-#elif defined(IMGUI_IMPL_OPENGL_LOADER_GLAD)
-#include <glad/glad.h>  // Initialize with gladLoadGL()
-#else
-#include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
-#endif
-#ifdef max
-#undef max
-#endif
-#ifdef min
-#undef min
-#endif
-#include <algorithm>
-#ifndef _USE_MATH_DEFINES
-#define _USE_MATH_DEFINES
-#endif
-#include <math.h>
+// include opengl, imgui and all widgets.
+#include "imgui/imgui.cpp"
 
 #include <thread>
 
-/*
-#include "engine.h"
-*/
-#define API
-#define OSCRECV_C
-#include "network/network_oscrecv.c"
-#define SHAPE_C
-#include "render/render_shape.c"
-#define EXPORT __declspec(dllexport)
-#include <assert.h>
-#define ASSERT assert
-#include <stdint.h>
-#define GL(...) __VA_ARGS__
+#define WITH_MAINMENU 1
+#define WITH_DOCKING  1
+#define WITH_SCENE3D  1
+#define WITH_TOOLS    1
+#define WITH_PANELS   1
 
 
-#ifndef IMGUI_DEFINE_MATH_OPERATORS
-#define IMGUI_DEFINE_MATH_OPERATORS
-#endif
-#include "imgui.h"
-#include "imgui_internal.h"
-
-// incl render/set_render
-#include "imgui/imgui_videorec.cpp"
-
-// legacy api stub
-#define IsHovered(rect, id) \
-    !!(ImGui::IsMouseHoveringRect(rect.Min, rect.Max) && ImGui::ItemHoverable(rect, id))
-
-using namespace ImGui;
-
-#include "imgui/imgui_config.cpp"
-#include "imgui/imgui_fonts.cpp"
-#include "imgui/imgui_palette.cpp"
-#include "imgui/imgui_theme.cpp"
-#include "imgui/imgui_dsl.cpp"
-// --
-#include "imgui/imgui_icons.cpp"
-#include "imgui/imgui_pangram.cpp"
-#include "imgui/imgui_utils.cpp"    // for menubar below
-#include "imgui/imgui_menubar.cpp"
-
-#include "imgui/imgui_widgets.cpp" // must be first. widgets, all of them.
-#include "imgui/imgui_property.cpp" // must be last
-
-
-void image_widget( intptr_t texture_id, float w, float h, bool zoom = true, bool caption = false ) {
-    auto &io = ImGui::GetIO();
-
-    if( caption ) {
-        ImGui::Text("%.0fx%.0f", 2, 2);
-        ImGui::SameLine();
+GLuint texturegen() {
+    GLuint texture_id;
+    glGenTextures( 1, &texture_id );
+    glBindTexture( GL_TEXTURE_2D, texture_id );
+    // clamping (s,t,r)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // border color
+    float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+    // filtering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // #if OPENGL >= 3
+    // glGenerateMipmap(GL_TEXTURE_2D);
+    // #endif
+#if 1
+    // Black/white checkerboard
+    float pixels[] = {
+        0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f
+    };
+    int mip = 0, w = 2, h = 2;
+    int texture_fmt = GL_RGB; // incl. compressed formats
+    int image_fmt = GL_RGB, pixel_fmt = GL_FLOAT;
+    glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
+#else
+    int x,y,n;
+    unsigned char *pixels = stbi_load("image.png", &x, &y, &n, 4);
+    int mip = 0, w = x, h = y;
+    int texture_fmt = GL_RGBA; // incl. compressed formats
+    int image_fmt = GL_RGBA, pixel_fmt = GL_UNSIGNED_BYTE;
+    if( pixels) {
+        glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
+        stbi_image_free(pixels);
     }
-
-    ImTextureID id = (void*)texture_id;
-#if 0
-    float aspect_ratio = h / (float)w;
-    my_tex_w = 256;
-    my_tex_h = my_tex_w * aspect_ratio;
 #endif
-    ImVec2 pos = ImGui::GetCursorScreenPos();
-    ImGui::Image(id, ImVec2(w, h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
-    if (zoom && ImGui::IsItemHovered())
-    {
-        ImGui::BeginTooltip();
-        float region_sz = 32.0f;
-        float region_x = io.MousePos.x - pos.x - region_sz * 0.5f; if (region_x < 0.0f) region_x = 0.0f; else if (region_x > w - region_sz) region_x = w - region_sz;
-        float region_y = io.MousePos.y - pos.y - region_sz * 0.5f; if (region_y < 0.0f) region_y = 0.0f; else if (region_y > h - region_sz) region_y = h - region_sz;
-        float zoom = 4.0f;
-        ImGui::Text("Min: (%.2f, %.2f)", region_x, region_y);
-        ImGui::Text("Max: (%.2f, %.2f)", region_x + region_sz, region_y + region_sz);
-        ImVec2 uv0 = ImVec2((region_x) / w, (region_y) / h);
-        ImVec2 uv1 = ImVec2((region_x + region_sz) / w, (region_y + region_sz) / h);
-        ImGui::Image(id, ImVec2(region_sz * zoom, region_sz * zoom), uv0, uv1, ImColor(255,255,255,255), ImColor(255,255,255,128));
-        ImGui::EndTooltip();
-    }
+    return texture_id;
+}
+
+void textureset() {
 }
 
 
@@ -217,6 +166,15 @@ void stats_demo() {
 
 // -----------------
 
+struct remote_render {
+    // virtual framebuffer
+    char *buffer[2];
+    int width, height, frame;
+    // opengl
+    GLuint texture_id;
+} R = { {0,0}, 256, 256, 0, 0 };
+
+
 int osc_socket;
 
 void editor_init() {
@@ -232,63 +190,55 @@ void editor_init() {
 void editor_tick()
 {}
 
-#define WITH_MAINMENU 1
-#define WITH_DOCKING  1
-#define WITH_SCENE3D  1
-#define WITH_TOOLS    1
-#define WITH_PANELS   1
-
 void editor_draw() {
 
-    static char *remoterenderbuffer = 0;
-    static int remoterenderbuffer_w = 256, remoterenderbuffer_h = 256;
-    if( !remoterenderbuffer ) {
-        int maxsize = 1920 * 1080 * 4;
-        remoterenderbuffer = (char*)realloc( remoterenderbuffer, maxsize );
-        if( remoterenderbuffer ) {
-            memset( remoterenderbuffer, 0, maxsize );
-        }
+    if( !R.buffer[0] ) {
+        R.buffer[0] = (char*)calloc( 1, 1920 * 1080 * 4 );
+        R.buffer[1] = (char*)calloc( 1, 1920 * 1080 * 4 );
     }
+    auto is_pow2 = []( uint32_t v ) {
+        return !((~(~0U>>1)|v)&v -1); // from SO
+    };
+    auto next_pow2 = []( uint32_t v ) {
+        v--;
+        v |= v >> 1;
+        v |= v >> 2;
+        v |= v >> 4;
+        v |= v >> 8;
+        v |= v >> 16;
+        return ++v;
+    };
     auto network_update = [&]() {
         // @todo clear mem when remote viewport changes
         // update osc server
         osc_update( osc_socket );
         // render framebuffer into remotebuffer
         const osc_message *list;
-        for( int i = 0, e = osc_list( &list ); i < e; ++i ) {
-            //printf("%d %s\n",i, list[i].pattern );
+        int i = 0, e = osc_list( &list );
+        for( ; i < e; ++i ) {
             const osc_message *msg = list+i;
             //const osc_message *msg = osc_find("/render/");
             //if( msg ) {
-                auto is_pow2 = []( uint32_t v ) {
-                    return !((~(~0U>>1)|v)&v -1); // from SO
-                };
-                auto next_pow2 = []( uint32_t v ) {
-                    v--;
-                    v |= v >> 1;
-                    v |= v >> 2;
-                    v |= v >> 4;
-                    v |= v >> 8;
-                    v |= v >> 16;
-                    return ++v;
-                };
                 int w = msg->i[0]; w = is_pow2(w) ? w : next_pow2(w);
                 int h = msg->i[1]; h = is_pow2(h) ? h : next_pow2(h);
                 int y = msg->i[2];
                 int size = msg->i[3];
                 const char *data = msg->s[3];
-                remoterenderbuffer_w = w;
-                remoterenderbuffer_h = h;
-                memcpy( &remoterenderbuffer[ (0 + y * w) * 3 ], data, size );
-                //++socket_activity;
+                R.width = w;
+                R.height = h;
+                memcpy( &R.buffer[R.frame][ (0 + y * w) * 3 ], data, size );
                 //++socket_numrecv;
-                //printf("%d %d %p\n", y, size, data);
+                //++socket_activity;
             //}
         }
-        Sleep(1); //std::this_thread::yield();
     };
     static bool threaded = 0; if( !threaded ) { threaded = 1;
-        std::thread( [&]() { for(;;) network_update(); } ).detach();
+        std::thread( [&]() {
+            for(;;) {
+                network_update();
+                Sleep(0); // (0);
+            }
+        } ).detach();
     }
 
 
@@ -377,8 +327,7 @@ void editor_draw() {
             glGenTextures(1, &remote_id);
         }
         if( remote_id ) {
-            const void *pixels = remoterenderbuffer;
-            // texupdate( remote_id, remoterenderbuffer, 256, 256 );
+            // texupdate( remote_id, R.buffer, 256, 256 );
             glBindTexture( GL_TEXTURE_2D, remote_id );
             // clamping (s,t,r)
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -392,12 +341,13 @@ void editor_draw() {
             // #if OPENGL >= 3
             // glGenerateMipmap(GL_TEXTURE_2D);
             // #endif
-            int mip = 0, w = remoterenderbuffer_w, h = remoterenderbuffer_h;
+            void *pixels = R.buffer[R.frame];
+            int mip = 0, w = R.width, h = R.height;
             int texture_fmt = GL_RGB; // incl. compressed formats
             int image_fmt = GL_RGB, pixel_fmt = GL_UNSIGNED_BYTE;
             glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
         }
-        image_widget( remote_id, remoterenderbuffer_w, remoterenderbuffer_h, false );
+        imgui_texture( remote_id, R.width, R.height, false );
     ImGui::End();
 
     ImGui::Begin("demo 1");
@@ -407,44 +357,10 @@ void editor_draw() {
 
         static GLuint texture_id = 0;
         if( !texture_id ) {
-            glGenTextures( 1, &texture_id );
-            glBindTexture( GL_TEXTURE_2D, texture_id );
-            // clamping (s,t,r)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            // border color
-            float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-            // filtering
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            // #if OPENGL >= 3
-            // glGenerateMipmap(GL_TEXTURE_2D);
-            // #endif
-#if 1
-            // Black/white checkerboard
-            float pixels[] = {
-                0.0f, 0.0f, 0.0f,   1.0f, 1.0f, 1.0f,
-                1.0f, 1.0f, 1.0f,   0.0f, 0.0f, 0.0f
-            };
-            int mip = 0, w = 2, h = 2;
-            int texture_fmt = GL_RGB; // incl. compressed formats
-            int image_fmt = GL_RGB, pixel_fmt = GL_FLOAT;
-            glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
-#else
-            int x,y,n;
-            unsigned char *pixels = stbi_load("image.png", &x, &y, &n, 4);
-            int mip = 0, w = x, h = y;
-            int texture_fmt = GL_RGBA; // incl. compressed formats
-            int image_fmt = GL_RGBA, pixel_fmt = GL_UNSIGNED_BYTE;
-            if( pixels) {
-                glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
-                stbi_image_free(pixels);
-            }
-#endif
+            texture_id = texturegen();
         }
         if( texture_id ) {
-            image_widget( texture_id, 2, 2, true );
+            imgui_texture( texture_id, 2, 2, true );
         /*
             int w = 1024, h = 768, d = 3;
             char *pixels = render_consume();
@@ -476,28 +392,11 @@ void editor_draw() {
         if( images_per_line ) for( int ID = 1; ID <= texture_count; ++ID ) {
             ImGui::PushID(ID);
 
-            float tex_w = tex_px, tex_h = tex_px;
-            image_widget( ID % texture_count, tex_w, tex_h, true );
-/*
-            ImTextureID tex_id = (ImTextureID)(int64_t)(ID % (texture_count));
-            ImVec2 tex_screen_pos = ImGui::GetCursorScreenPos();
-            ImGui::Image(tex_id, ImVec2(tex_w, tex_h), ImVec2(0,0), ImVec2(1,1), ImColor(255,255,255,255), ImColor(255,255,255,128));
-            if (ImGui::IsItemHovered()) {
-                ImGui::BeginTooltip();
-                float focus_sz = 32.0f;
-                float focus_x = ImGui::GetMousePos().x - tex_screen_pos.x - focus_sz * 0.5f; if (focus_x < 0.0f) focus_x = 0.0f; else if (focus_x > tex_w - focus_sz) focus_x = tex_w - focus_sz;
-                float focus_y = ImGui::GetMousePos().y - tex_screen_pos.y - focus_sz * 0.5f; if (focus_y < 0.0f) focus_y = 0.0f; else if (focus_y > tex_h - focus_sz) focus_y = tex_h - focus_sz;
-                ImGui::Text("Texture #%d", ID);
-                ImGui::Text("%.0fx%.0f", tex_w, tex_h);
-                ImGui::Text("Min: (%.2f, %.2f)", focus_x, focus_y);
-                ImGui::Text("Max: (%.2f, %.2f)", focus_x + focus_sz, focus_y + focus_sz);
-                ImVec2 uv0 = ImVec2((focus_x) / tex_w, (focus_y) / tex_h);
-                ImVec2 uv1 = ImVec2((focus_x + focus_sz) / tex_w, (focus_y + focus_sz) / tex_h);
-                ImGui::Image(tex_id, zoom, uv0, uv1, ImColor(255,255,255,255), ImColor(255,255,255,128));
-                ImGui::EndTooltip();
+            imgui_texture( ID % texture_count, tex_px, tex_px, true );
+
+            if ((ID % images_per_line) < (images_per_line-1)) {
+                ImGui::SameLine();
             }
-*/
-            if ((ID % images_per_line) < (images_per_line-1)) ImGui::SameLine();
             ImGui::PopID();
         }
     }
@@ -517,6 +416,9 @@ void editor_draw() {
 
 void editor_drop()
 {}
+
+
+
 
 int imgui_main(int, char**);
 

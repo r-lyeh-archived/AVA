@@ -59,6 +59,7 @@ union property_data {
     ImVec3 direction;
     struct { ImVec3 axis; float angle; };
     struct { char *textbox; size_t textbox_size; };
+    struct { uintptr_t image_id; float image_w, image_h; };
 };
 
 struct property_result { // @todo
@@ -81,20 +82,69 @@ struct property {
     bool copied;
     bool disabled;
     bool randomized;
+    bool untitled;
 
     void (*on_load)();
     void (*on_save)();
     void (*on_random)();
 
     bool draw() {
-        auto show_tooltip = [&]() {
-            if (help && ImGui::IsItemHovered()) {
+        auto render_tooltip = [&](const char *text) {
+            if (text && ImGui::IsItemHovered()) {
                 ImGui::BeginTooltip();
                 ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-                ImGui::TextUnformatted(help);
+                ImGui::TextUnformatted(text);
                 ImGui::PopTextWrapPos();
                 ImGui::EndTooltip();
             }
+        };
+
+        int ret = 0;
+        char *id = info, type = info[2], *name = info+3;
+
+        auto render_widget = [&]() {
+            ImGui::PushID(this);
+            switch( type ) {
+                default:
+                break; case 'l': ret = ImGui::Combo(info, &data.item, data.items, data.max_items);
+                break; case 'L': ret = ComboFilter(info, data.filtbuf, 32, data.items, data.max_items, data.cfs);
+                break; case 'f': ret = ImGui::SliderFloat(info, &data.value, data.minv, data.maxv, data.format);
+                break; case 'F': ret = ImGui::InputFloat(info, &data.value, 0.01f, 1.0f);
+                break; case 'v': ret = ImGui::InputFloat3(info, &data.vector[0][0]);
+                break; case 'V': ret = ImGui::InputFloat4(info, &data.vector[0][0]);
+                break; case 'c': ret = ImGui::ColorEdit3(info, data.color[0], ImGuiColorEditFlags_PickerHueWheel);
+                break; case 'C': ret = ImGui::ColorEdit4(info, data.color[0], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaPreview);
+                break; case 't': ret = ImGui::Checkbox(info, &data.on); // { bool prev = data.on; ToggleButton(info, &data.on); ret = prev != data.on; } /*ImGui::Toggle*/
+                break; case 'b': ret = ImGui::Button("click");
+                break; case 'B': {
+                    const ImU32 col = ImGui::GetColorU32(data.on ? ImGuiCol_FrameBgActive : ImGuiCol_FrameBg);
+                    ImGui::PushStyleColor(ImGuiCol_Button, col);
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, col);
+                    ImGui::PushStyleColor(ImGuiCol_ButtonActive, col);
+                    ret = ImGui::Button("click"); data.on ^= !!ret;
+                    ImGui::PopStyleColor(3);
+                }
+                break; case '>': ImGui::CollapsingHeader(info);
+                break; case '-': ImGui::Separator();
+                break; case 's': ImGui::InputText(info, data.string, IM_ARRAYSIZE(data.string));
+                break; case '*': ImGui::InputText(info, data.string, IM_ARRAYSIZE(data.string), ImGuiInputTextFlags_Password | ImGuiInputTextFlags_CharsNoBlank);
+                break; case 'm': BitField(info, &data.bitmask, &data.bitmaskHoverIndex); // bitmask
+                break; case 'I': ipentry(data.ip);
+                break; case 'k': MyKnob(""/*info*/, &data.value, 0.0f, 1.0f);
+                break; case 'q': ImGui::QuaternionGizmo(info, data.quaternion);
+                                 //ImGui::AxisAngleGizmo("AxisAngle", data.axis, data.angle);
+                                 //ImGui::DirectionGizmo("Direction", data.direction);
+                break; case 'z': ImGui::Bezier(info, &data.vector[0][0]);
+                                 //float y = ImGui::BezierValue( 0.5f, v ); // x delta in [0..1] range
+                break; case 'x': {
+                    ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput /* |ImGuiInputTextFlags_ReadOnly*/ |0;
+                    ImGui::InputTextMultiline(info, data.textbox, data.textbox_size, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), flags);
+                }
+                break; case 'i': {
+                    imgui_texture( data.image_id, data.image_w, data.image_h );
+                }
+            }
+            ImGui::PopID();
         };
 
         if( !copied ) {
@@ -104,7 +154,6 @@ struct property {
 
         if( hidden ) return false;
 
-        char *id = info, type = info[2], *name = info+3;
         if( type == '>' || type == '-' ) {
             ImGui::PushID(this);
             if( type == '>' ) {
@@ -116,12 +165,17 @@ struct property {
             return false;
         }
 
-        bool shift = !!ImGui::GetIO().KeyShift;
+        if( untitled ) {
+            render_widget();
+            render_tooltip(name);
+            return ret;
+        }
 
         ImGui::Columns(2);
 
         //static float initial_spacing = 100.f; if( initial_spacing ) ImGui::SetColumnWidth(0, initial_spacing), initial_spacing = 0;
         ImGui::PushID(this);
+            bool shift = !!ImGui::GetIO().KeyShift;
             if( ImGui::Button("R") ) { // ICON_MD_UNDO / ICON_MD_SETTINGS_BACKUP_RESTORE
                 if( shift ) randomized = 1; else data = copy;  // revert/randomize button
             }
@@ -132,7 +186,7 @@ struct property {
             }
         ImGui::SameLine();
         if( disabled ) ImGui::TextDisabled(name); else ImGui::Text(name);
-        show_tooltip();
+        render_tooltip(help);
         ImGui::PopID();
 
         ImGui::NextColumn();
@@ -156,51 +210,12 @@ struct property {
             }
         }
 
-        int ret = 0;
-        ImGui::PushID(this);
-        switch( type ) {
-            default:
-            break; case 'l': ret = ImGui::Combo(info, &data.item, data.items, data.max_items);
-            break; case 'L': ret = ComboFilter(info, data.filtbuf, 32, data.items, data.max_items, data.cfs);
-            break; case 'f': ret = ImGui::SliderFloat(info, &data.value, data.minv, data.maxv, data.format);
-            break; case 'F': ret = ImGui::InputFloat(info, &data.value, 0.01f, 1.0f);
-            break; case 'v': ret = ImGui::InputFloat3(info, &data.vector[0][0]);
-            break; case 'V': ret = ImGui::InputFloat4(info, &data.vector[0][0]);
-            break; case 'c': ret = ImGui::ColorEdit3(info, data.color[0], ImGuiColorEditFlags_PickerHueWheel);
-            break; case 'C': ret = ImGui::ColorEdit4(info, data.color[0], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaPreview);
-            break; case 't': ret = ImGui::Checkbox(info, &data.on); // { bool prev = data.on; ToggleButton(info, &data.on); ret = prev != data.on; } /*ImGui::Toggle*/
-            break; case 'b': ret = ImGui::Button("click");
-            break; case 'B': {
-                const ImU32 col = ImGui::GetColorU32(data.on ? ImGuiCol_FrameBgActive : ImGuiCol_FrameBg);
-                ImGui::PushStyleColor(ImGuiCol_Button, col);
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, col);
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, col);
-                ret = ImGui::Button("click"); data.on ^= !!ret;
-                ImGui::PopStyleColor(3);
-            }
-            break; case '>': ImGui::CollapsingHeader(info);
-            break; case '-': ImGui::Separator();
-            break; case 's': ImGui::InputText(info, data.string, IM_ARRAYSIZE(data.string));
-            break; case '*': ImGui::InputText(info, data.string, IM_ARRAYSIZE(data.string), ImGuiInputTextFlags_Password | ImGuiInputTextFlags_CharsNoBlank);
-            break; case 'm': BitField(info, &data.bitmask, &data.bitmaskHoverIndex); // bitmask
-            break; case 'i': ipentry(data.ip);
-            break; case 'k': MyKnob(""/*info*/, &data.value, 0.0f, 1.0f);
-            break; case 'q': ImGui::QuaternionGizmo(info, data.quaternion);
-                             //ImGui::AxisAngleGizmo("AxisAngle", data.axis, data.angle);
-                             //ImGui::DirectionGizmo("Direction", data.direction);
-            break; case 'z': ImGui::Bezier(info, &data.vector[0][0]);
-                             //float y = ImGui::BezierValue( 0.5f, v ); // x delta in [0..1] range
-            break; case 'x': {
-                ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput /* |ImGuiInputTextFlags_ReadOnly*/ |0;
-                ImGui::InputTextMultiline(info, data.textbox, data.textbox_size, ImVec2(-1.0f, ImGui::GetTextLineHeight() * 16), flags);
-            }
-        }
-        ImGui::PopID();
+        render_widget();
 
         ImGui::PopItemWidth();
 
         ImGui::Columns(1);
-        show_tooltip();
+        render_tooltip(help);
 
         if( disabled ) ImGui::PopDisabled();
 
@@ -344,7 +359,7 @@ property property_bitmask( const char *info, unsigned default_mask ) {
 }
 
 property property_ip( const char *info, int ip0, int ip1, int ip2, int ip3 ) {
-    property p = MAKE_PROPERTY(info, 'i');
+    property p = MAKE_PROPERTY(info, 'I');
     p.data.ip[0] = ip0;
     p.data.ip[1] = ip1;
     p.data.ip[2] = ip2;
@@ -374,6 +389,14 @@ property property_textbox( const char *info, char *buffer ) {
     property p = MAKE_PROPERTY(info, 'x');
     p.data.textbox = (char*)malloc(p.data.textbox_size = 16384); // LEAK
     strcpy(p.data.textbox, buffer);
+    return p;
+}
+
+property property_image( const char *info, uintptr_t id, float w, float h ) {
+    property p = MAKE_PROPERTY(info, 'i');
+    p.data.image_id = id;
+    p.data.image_w = w;
+    p.data.image_h = h;
     return p;
 }
 
@@ -420,6 +443,7 @@ void property_demo() {
             property_textbox( "My Textbox", "This\nis\nan\neditable\nstring."),
         property_group( "My widgets 3" ),
             property_bezier( "My Bezier", 0.390f, 0.575f, 0.565f, 1.000f ),
+            property_image( "My Image", 1, 32, 32),
     };
     property_panel( ps, IM_ARRAYSIZE(ps) );
 }

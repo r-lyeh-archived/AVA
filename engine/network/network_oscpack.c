@@ -61,7 +61,7 @@ int osc__buffer( char *buf, const char *fmt, ... ) {
 }
 
 int osc_pack( char *buf, const char *addr, const char *fmt, ... ) {
-    char tmp[4096];
+    char tmp[8192];
     va_list vl;
     va_start(vl, fmt);
     int l2 = osc__buffer_vl(tmp, fmt, vl);
