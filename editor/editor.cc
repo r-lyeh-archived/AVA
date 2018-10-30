@@ -1,13 +1,60 @@
 // include opengl, imgui and all widgets.
 #include "imgui/imgui.cpp"
 
+#include <timeapi.h> // timeBeginPeriod, timeEndPeriod
 #include <thread>
+#include <chrono>
 
 #define WITH_MAINMENU 1
 #define WITH_DOCKING  1
 #define WITH_SCENE3D  1
 #define WITH_TOOLS    1
 #define WITH_PANELS   1
+
+
+#if 1 // Oskar Dahlberg
+#include <Windows.h>
+//static NTSTATUS(__stdcall *NtDelayExecution)(BOOL Alertable, PLARGE_INTEGER DelayInterval) = (NTSTATUS(__stdcall*)(BOOL, PLARGE_INTEGER)) GetProcAddress(GetModuleHandle("ntdll.dll"), "NtDelayExecution");
+//static NTSTATUS(__stdcall *ZwSetTimerResolution)(IN ULONG RequestedResolution, IN BOOLEAN Set, OUT PULONG ActualResolution) = (NTSTATUS(__stdcall*)(ULONG, BOOLEAN, PULONG)) GetProcAddress(GetModuleHandle("ntdll.dll"), "ZwSetTimerResolution");
+static int32_t(*NtDelayExecution)(BOOL Alertable, PLARGE_INTEGER DelayInterval) = (int32_t (__cdecl *)(BOOL,PLARGE_INTEGER))GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtDelayExecution");
+static int32_t(*ZwSetTimerResolution)(IN ULONG RequestedResolution, IN BOOLEAN Set, OUT PULONG ActualResolution) = (int32_t (__cdecl *)(ULONG,BOOLEAN,PULONG))GetProcAddress(GetModuleHandleA("ntdll.dll"), "ZwSetTimerResolution");
+static void SleepShort(float milliseconds) {
+    static bool once = true;
+    if (once) {
+        ULONG actualResolution;
+        ZwSetTimerResolution(1, true, &actualResolution);
+        once = false;
+    }
+    LARGE_INTEGER interval;
+    interval.QuadPart = -1 * (int)(milliseconds * 10000.0f);
+    NtDelayExecution(false, &interval);
+}
+#endif
+
+// Emil Gustafsson
+int usleep(unsigned long usec) {
+    struct timeval tv;
+    fd_set dummy;
+    SOCKET s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    FD_ZERO(&dummy);
+    FD_SET(s, &dummy);
+    tv.tv_sec = usec/1000000L;
+    tv.tv_usec = usec%1000000L;
+    int r = select(0, 0, 0, &dummy, &tv); /* return bool: 0 == select() */
+    closesocket(s);
+    return r;
+}
+
+// Adi Shavit
+void usleep2(__int64 usec) {
+    HANDLE timer; 
+    LARGE_INTEGER ft; 
+    ft.QuadPart = -(10*usec); // Convert to 100 nanosecond interval, negative value indicates relative time
+    timer = CreateWaitableTimer(NULL, TRUE, NULL); 
+    SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0); 
+    WaitForSingleObject(timer, INFINITE); 
+    CloseHandle(timer); 
+}
 
 
 GLuint texturegen() {
@@ -190,6 +237,100 @@ void editor_init() {
 void editor_tick()
 {}
 
+
+uint8_t *mkpal332() {
+/*
+    An uniform palette RGB332 palette:
+    - Switched from RGB 6x6x6 216-color cube to a RGB 8x8x4 256-color cube.
+    - Added three (full 256 ramp) gamma corrected tables for each R,G,B channel.
+    - Balanced R,G,B values into better eye-looking values.
+    - Compensated B component against R,G ones to give true grays.
+
+    - [ref] http://en.wikipedia.org/wiki/List_of_palettes
+    - [ref] http://www.compuphase.com/unifpal.htm
+*/
+
+    struct {
+        float r,g,b;
+    } palette[256];
+
+    const float GAMMA_DIV =                       2.0;
+    const float GAMMA_RED =                       ((0.299 - 0.114) / GAMMA_DIV);
+    const float GAMMA_GREEN =                     ((0.587 - 0.114) / GAMMA_DIV);
+    const float GAMMA_BLUE =                      ((0.1141 - 0.114) / GAMMA_DIV);
+    const float GAMMA_STEPS =                     256;
+
+    const float COMPONENT_INTERPOLATION =         0.86;
+    const float COMPONENT_RED_BRIGHTNESS =        0.299;
+    const float COMPONENT_GREEN_BRIGHTNESS =      0.587;
+    const float COMPONENT_BLUE_BRIGHTNESS =       0.114;
+
+    int i,r,g,b,entry;
+
+    struct { unsigned char r,g,b; } gamma[256];
+
+    // create custom gamma tables
+
+    for( int i = 0; i < GAMMA_STEPS; i++ ) {
+        gamma[i].r=(unsigned char)(255.0*pow( ((i * 256.0)/(GAMMA_STEPS-1)) /255.0, 1.0 - GAMMA_RED));
+        gamma[i].g=(unsigned char)(255.0*pow( ((i * 256.0)/(GAMMA_STEPS-1)) /255.0, 1.0 - GAMMA_GREEN));
+        gamma[i].b=(unsigned char)(255.0*pow( ((i * 256.0)/(GAMMA_STEPS-1)) /255.0, 1.0 - GAMMA_BLUE));
+    }
+
+    // create custom colour tables
+
+    for( int i = 0; i < 256; i++ ) {
+        int r = (i >> 5) & 0x7;
+        int g = (i >> 2) & 0x7;
+        int b = (i >> 0) & 0x3;
+
+        //make a pure RGB332 colour
+        palette[i].r = (r * 255.0) / 7.0;
+        palette[i].g = (g * 255.0) / 7.0;
+        palette[i].b = (b * 255.0) / 3.0;
+
+        //fix blue component to give a few true greys
+        palette[i].b = (b * 255.0) / 3.5;   //(2^3 / 2^2) = 2 -> 7.0 / 2 = 3.5
+
+        //soft and blend components in non greys colours
+        if((palette[i].r != palette[i].g) || (palette[i].g != palette[i].b) || (palette[i].r != palette[i].b)) {
+            float r1 = palette[i].r;
+            float g1 = palette[i].g;
+            float b1 = palette[i].b;
+
+            float media = (r1 * COMPONENT_RED_BRIGHTNESS + g1 * COMPONENT_GREEN_BRIGHTNESS + b1 * COMPONENT_BLUE_BRIGHTNESS);
+            if(!media) media = 1.0;
+
+            float mediar = ((r1) * (COMPONENT_INTERPOLATION) + ((g1 * b1) / media) * (1.0 - COMPONENT_INTERPOLATION) );
+            float mediag = ((g1) * (COMPONENT_INTERPOLATION) + ((r1 * b1) / media) * (1.0 - COMPONENT_INTERPOLATION) );
+            float mediab = ((b1) * (COMPONENT_INTERPOLATION) + ((r1 * g1) / media) * (1.0 - COMPONENT_INTERPOLATION) );
+
+            //apply gamma
+            palette[i].r = gamma[(int)mediar].r;
+            palette[i].g = gamma[(int)mediag].g;
+            palette[i].b = gamma[(int)mediab].b;
+        }
+    }
+
+    // make #255 colour a pure white
+    //palette[255].r = palette[255].g = palette[255].b = 255.0;
+
+    // make #255 colour (slighty white) more pure
+    palette[255].r = (palette[255].r + 255.0) / 2.0;
+    palette[255].g = (palette[255].g + 255.0) / 2.0;
+    palette[255].b = (palette[255].b + 255.0) / 2.0;
+
+    static uint8_t rgb332[256*3];
+    for( int i = 0; i < 256; ++i ) {
+        rgb332[i*3+0] = (uint8_t)palette[i].r;
+        rgb332[i*3+1] = (uint8_t)palette[i].g;
+        rgb332[i*3+2] = (uint8_t)palette[i].b;
+    }
+
+    return rgb332;
+}
+
+
 void editor_draw() {
 
     if( !R.buffer[0] ) {
@@ -209,9 +350,9 @@ void editor_draw() {
         return ++v;
     };
     auto network_update = [&]() {
-        // @todo clear mem when remote viewport changes
         // update osc server
         osc_update( osc_socket );
+
         // render framebuffer into remotebuffer
         const osc_message *list;
         int i = 0, e = osc_list( &list );
@@ -219,6 +360,7 @@ void editor_draw() {
             const osc_message *msg = list+i;
             //const osc_message *msg = osc_find("/render/");
             //if( msg ) {
+                // @todo clear mem when remote viewport changes
                 int w = msg->i[0]; w = is_pow2(w) ? w : next_pow2(w);
                 int h = msg->i[1]; h = is_pow2(h) ? h : next_pow2(h);
                 int y = msg->i[2];
@@ -226,17 +368,41 @@ void editor_draw() {
                 const char *data = msg->s[3];
                 R.width = w;
                 R.height = h;
-                memcpy( &R.buffer[R.frame][ (0 + y * w) * 3 ], data, size );
+                // RGB888: memcpy( &R.buffer[R.frame][ (0 + y * w) * 3 ], data, size );
+                // RGB332 {
+                char *buf = &R.buffer[R.frame][ (0 + y * w) * 3 ];
+                for( int x = 0; x < msg->i[0]; ++x ) {
+                    unsigned char p = data[x];
+                    *buf++ = ((p & 0xE0) >> 5) << 5;
+                    *buf++ = ((p & 0x1C) >> 2) << 5;
+                    *buf++ = ((p & 0x03) >> 0) << 6;
+                    // static uint8_t *palette = mkpal332();
+                    // *buf++ = palette[p*3+0];
+                    // *buf++ = palette[p*3+1];
+                    // *buf++ = palette[p*3+2];
+                }
+                // } RGB332
                 //++socket_numrecv;
                 //++socket_activity;
             //}
         }
+        //if(e) printf( "%d,", (int)list[0].i[2] );
+        return e;
     };
     static bool threaded = 0; if( !threaded ) { threaded = 1;
+        // SetThreadAffinityMask(GetCurrentThread(), 1);
         std::thread( [&]() {
             for(;;) {
-                network_update();
-                Sleep(0); // (0);
+                while( network_update() > 0 ) {
+
+                }
+                // Sleep(0);
+                // Sleep(1);
+                // std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+                // timeBeginPeriod(1); Sleep(1); timeEndPeriod(1);
+                // usleep(1);
+                // usleep2(1);
+                SleepShort(1); // 0.25f);
             }
         } ).detach();
     }

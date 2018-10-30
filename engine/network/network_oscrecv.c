@@ -74,7 +74,7 @@ typedef struct osc_message {
 #define sockaddr_in SOCKADDR_IN
 
 #define OSC_MAX_BUF (8*1024*1024) //65536
-#define OSC_MAX_MESSAGES 65536 //1024
+#define OSC_MAX_MESSAGES 64 //1024 //65536 //1024
 
 static char *buf = 0; // [OSC_MAX_BUF];
 static struct osc_message *msg = 0; //[OSC_MAX_MESSAGES];
@@ -143,9 +143,9 @@ int osc_update(int fd) {
         int addrlen = sizeof(addr);
         int n=recvfrom(fd,buf+bufpos,OSC_MAX_BUF-bufpos-1,0,(struct sockaddr*)&addr,&addrlen); 
 #ifdef _WIN32
-        if (n == -1 && WSAGetLastError() == WSAEINTR) continue;
+        //if (n == -1 && WSAGetLastError() == WSAEINTR) continue;
 #else
-        if (n == -1 && errno == EINTR) continue;
+        //if (n == -1 && errno == EINTR) continue;
 #endif
         if (n<=0)  // TODO - look at what the error was
             return 0;
