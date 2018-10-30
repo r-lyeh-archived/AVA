@@ -351,7 +351,7 @@ void editor_draw() {
     };
     auto network_update = [&]() {
         // update osc server
-        osc_update( osc_socket );
+        osc_update( osc_socket, -1 ); // 16/*ms*/ );
 
         // render framebuffer into remotebuffer
         const osc_message *list;
@@ -368,20 +368,21 @@ void editor_draw() {
                 const char *data = msg->s[3];
                 R.width = w;
                 R.height = h;
-                // RGB888: memcpy( &R.buffer[R.frame][ (0 + y * w) * 3 ], data, size );
-                // RGB332 {
                 char *buf = &R.buffer[R.frame][ (0 + y * w) * 3 ];
-                for( int x = 0; x < msg->i[0]; ++x ) {
+                int rgb = 242;
+                if( rgb == 888 ) memcpy( &R.buffer[R.frame][ (0 + y * w) * 3 ], data, size );
+                if( rgb == 332 ) for( int x = 0; x < msg->i[0]; ++x ) {
                     unsigned char p = data[x];
                     *buf++ = ((p & 0xE0) >> 5) << 5;
                     *buf++ = ((p & 0x1C) >> 2) << 5;
                     *buf++ = ((p & 0x03) >> 0) << 6;
-                    // static uint8_t *palette = mkpal332();
-                    // *buf++ = palette[p*3+0];
-                    // *buf++ = palette[p*3+1];
-                    // *buf++ = palette[p*3+2];
                 }
-                // } RGB332
+                if( rgb == 242 ) for( int x = 0; x < msg->i[0]; ++x ) {
+                    unsigned char p = data[x];
+                    *buf++ = ((p & 0xC0) >> 6) << 6;
+                    *buf++ = ((p & 0x3E) >> 2) << 4;
+                    *buf++ = ((p & 0x03) >> 0) << 6;
+                }
                 //++socket_numrecv;
                 //++socket_activity;
             //}
@@ -397,12 +398,12 @@ void editor_draw() {
 
                 }
                 // Sleep(0);
-                // Sleep(1);
+                Sleep(1);
                 // std::this_thread::sleep_for(std::chrono::nanoseconds(1));
                 // timeBeginPeriod(1); Sleep(1); timeEndPeriod(1);
                 // usleep(1);
                 // usleep2(1);
-                SleepShort(1); // 0.25f);
+                // SleepShort(1); // 0.25f);
             }
         } ).detach();
     }

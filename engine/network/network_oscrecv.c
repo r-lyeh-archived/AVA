@@ -17,7 +17,7 @@
 // - find most recent message matching 'addr'.
 
 API int osc_listen( const char *mask, const char *port );
-API int osc_update(int s); 
+API int osc_update(int s, int timeout_ms); 
 API int osc_list(const struct osc_message **first);
 API int osc_debug( FILE *out, const char *inmsg, int len );
 
@@ -74,7 +74,7 @@ typedef struct osc_message {
 #define sockaddr_in SOCKADDR_IN
 
 #define OSC_MAX_BUF (8*1024*1024) //65536
-#define OSC_MAX_MESSAGES 64 //1024 //65536 //1024
+#define OSC_MAX_MESSAGES 65536 //1024
 
 static char *buf = 0; // [OSC_MAX_BUF];
 static struct osc_message *msg = 0; //[OSC_MAX_MESSAGES];
@@ -132,23 +132,50 @@ int osc_listen( const char *mask, const char *port ) {
     return fd;
 }
 
-int osc_update(int fd) {
+int osc_update(int fd, int timeout_ms /*= -1*/) {
     if( !buf ) {
         buf = (char*)malloc( OSC_MAX_BUF );
         msg = (struct osc_message*)malloc( OSC_MAX_MESSAGES * sizeof(struct osc_message) );
     }
-    if (fd<0) return 0;
+    if(fd<0) return 0;
+
+    /* check if something is available */
+    if( timeout_ms >= 0 ) {
+        struct timeval tv = {0};
+        tv.tv_sec = timeout_ms / 1000;
+        tv.tv_usec = (timeout_ms % 1000) * 1000;
+
+        fd_set readset;
+        FD_ZERO(&readset);
+        FD_SET(fd, &readset);
+        int ret = select( fd+1, &readset, 0, 0, &tv );
+        if (ret <= 0) { // error, or timeout
+            return 0;
+        }
+    }
+
     for (msgpos=0,bufpos=0;msgpos<OSC_MAX_MESSAGES && bufpos<OSC_MAX_BUF-8;) {
         sockaddr_in addr;
         int addrlen = sizeof(addr);
         int n=recvfrom(fd,buf+bufpos,OSC_MAX_BUF-bufpos-1,0,(struct sockaddr*)&addr,&addrlen); 
+        if( n <= 0 ) {
 #ifdef _WIN32
-        //if (n == -1 && WSAGetLastError() == WSAEINTR) continue;
+            //if (n == -1 && WSAGetLastError() == WSAEINTR) continue;
+            if( WSAGetLastError() != WSAEINTR && /*WSAGetLastError() != WSAEWOULDBLOCK &&*/
+                WSAGetLastError() != WSAECONNRESET && WSAGetLastError() != WSAECONNREFUSED ) {
+                // error: %d, WSAGetLastError();
+                return 0;
+            }
 #else
-        //if (n == -1 && errno == EINTR) continue;
+            //if (n == -1 && errno == EINTR) continue;
+            if( errno != EAGAIN && errno != EINTR && /*errno != EWOULDBLOCK &&*/
+                errno != ECONNRESET && errno != ECONNREFUSED ) {
+                // error: %s, strerror(errno));
+                return 0;
+            }
 #endif
-        if (n<=0)  // TODO - look at what the error was
-            return 0;
+            continue;
+        }
         char *s=buf+bufpos;
         s[n]=0; // null terminate packet always, for easier c handling
         msgpos+=osc__parse(msg+msgpos,OSC_MAX_MESSAGES-msgpos,s,s+n);    
