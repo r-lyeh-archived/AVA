@@ -4,9 +4,9 @@
 enum {
     PROPERTY_GROUP,     // [x] >v
     PROPERTY_SEPARATOR, // [x] ---
+    PROPERTY_CHECKBOX,  // [x] bool
     PROPERTY_BUTTON,    // [x] button
-    PROPERTY_BUTTON2,   // [x] button (on/off state)
-    PROPERTY_TOGGLE,    // [x] bool
+    PROPERTY_TOGGLE,    // [x] button (on/off state)
     PROPERTY_SLIDERI,   // [ ] int
     PROPERTY_SLIDERF,   // [x] float
     PROPERTY_RANGEI,    // [ ] int[2]
@@ -114,16 +114,16 @@ struct property {
                 break; case 'V': ret = ImGui::InputFloat4(info, &data.vector[0][0]);
                 break; case 'c': ret = ImGui::ColorEdit3(info, data.color[0], ImGuiColorEditFlags_PickerHueWheel);
                 break; case 'C': ret = ImGui::ColorEdit4(info, data.color[0], ImGuiColorEditFlags_PickerHueWheel | ImGuiColorEditFlags_AlphaPreview);
-                break; case 't': ret = ImGui::Checkbox(info, &data.on); // { bool prev = data.on; ToggleButton(info, &data.on); ret = prev != data.on; } /*ImGui::Toggle*/
-                break; case 'b': ret = ImGui::Button("click");
-                break; case 'B': {
+                break; case 'h': ret = ImGui::Checkbox("", &data.on); // { bool prev = data.on; ToggleButton(info, &data.on); ret = prev != data.on; } /*ImGui::Toggle*/
+                break; case 'g': {
                     const ImU32 col = ImGui::GetColorU32(data.on ? ImGuiCol_FrameBgActive : ImGuiCol_FrameBg);
                     ImGui::PushStyleColor(ImGuiCol_Button, col);
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, col);
                     ImGui::PushStyleColor(ImGuiCol_ButtonActive, col);
-                    ret = ImGui::Button("click"); data.on ^= !!ret;
+                    ret = ImGui::Button(name); data.on ^= !!ret;
                     ImGui::PopStyleColor(3);
                 }
+                break; case 'b': ret = ImGui::Button(name);
                 break; case '>': ImGui::CollapsingHeader(info);
                 break; case '-': ImGui::Separator();
                 break; case 's': ImGui::InputText(info, data.string, IM_ARRAYSIZE(data.string));
@@ -323,20 +323,20 @@ property property_color4( const char *info, float r, float g, float b, float a )
     return p;
 }
 
+property property_checkbox( const char *info, bool on ) {
+    property p = MAKE_PROPERTY(info, 'h');
+    p.data.on = on;
+    return p;
+}
+
 property property_toggle( const char *info, bool on ) {
-    property p = MAKE_PROPERTY(info, 't');
+    property p = MAKE_PROPERTY(info, 'g');
     p.data.on = on;
     return p;
 }
 
 property property_button( const char *info ) {
     property p = MAKE_PROPERTY(info, 'b');
-    return p;
-}
-
-property property_button2( const char *info, bool on ) {
-    property p = MAKE_PROPERTY(info, 'B');
-    p.data.on = on;
     return p;
 }
 
@@ -426,8 +426,8 @@ void property_demo() {
             property_color4( "My Color4\nConfigure a color", 0,0,0,0 ),
             property_separator( "" ),
             property_toggle( "My Toggle\nConfigure a state", 1 ),
+            property_checkbox( "My Checkbox", 1 ),
             property_button( "My Button" ),
-            property_button2( "My Button 2", 1 ),
         property_group( "My widgets 2" ),
             property_delta( "My Delta", 0.5f ),
             property_slider( "My Slider", 0.5f ),
