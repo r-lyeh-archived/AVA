@@ -148,6 +148,8 @@ void trap_gl() {
 
 
 /*static*/ GLFWwindow *window = 0;
+/*static*/ char *title = "";
+
 void window_destroy(void) {
     render_quit();
     if(window) {
@@ -168,7 +170,6 @@ int window_create( float zoom, int flags ) {
         //atexit(window_destroy);
     }
 
-    const char *title = "";
 #ifdef _MSC_VER
     int arg0len = strlen( __argv[0] );
     if( arg0len > 4 ) {
@@ -315,6 +316,25 @@ void window_swap( void **pixels ) {
         *pixels = (unsigned char *)realloc(*pixels, 4 * w * h);
         render_capture(w,h,3,*pixels);
     }
+
+    static double frames = 0, begin = FLT_MAX, fps = 0, prev_frame = 0;
+    double now = glfwGetTime();
+    if( begin > now ) {
+        begin = now;
+        frames = 0;
+    }
+    if( (now - begin) >= 0.25f ) {
+        fps = frames * (1.f / (now - begin));
+    }
+    if( (now - begin) > 1 ) {
+        begin = now + ((now - begin) - 1);
+        frames = 0;
+    }
+    char buf[128];
+    sprintf(buf, "%s%s%2dfps %5.2fms", title, title[0] ? " " : "", (int)fps, (now - prev_frame) * 1000.f);
+    glfwSetWindowTitle(window, buf);
+    ++frames;
+    prev_frame = now;
 }
 
 
