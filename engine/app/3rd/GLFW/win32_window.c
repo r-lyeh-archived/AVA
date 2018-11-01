@@ -1309,7 +1309,7 @@ GLFWbool _glfwRegisterWindowClassWin32(void)
                               0, 0, LR_DEFAULTSIZE | LR_SHARED);
     }
 
-    #include "win32_issue469.c"
+    #include "win32_issue469.c" // @r-lyeh, see issues 469 & 927
 
     if (!RegisterClassExW(&wc))
     {
@@ -1317,6 +1317,9 @@ GLFWbool _glfwRegisterWindowClassWin32(void)
                              "Win32: Failed to register window class");
         return GLFW_FALSE;
     }
+
+    #include "win32_issue469.c" // @r-lyeh, see issues 469 & 927
+        return GLFW_FALSE;
 
     return GLFW_TRUE;
 }
