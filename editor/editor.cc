@@ -361,27 +361,61 @@ void editor_draw() {
             //const osc_message *msg = osc_find("/render/");
             //if( msg ) {
                 // @todo clear mem when remote viewport changes
-                int w = msg->i[0]; w = is_pow2(w) ? w : next_pow2(w);
-                int h = msg->i[1]; h = is_pow2(h) ? h : next_pow2(h);
-                int y = msg->i[2];
-                int size = msg->i[3];
-                const char *data = msg->s[3];
+                // iii i b: w,h,fmt, y, blob
+                int ow = msg->i[0]; int w = is_pow2(ow) ? ow : next_pow2(ow);
+                int oh = msg->i[1]; int h = is_pow2(oh) ? oh : next_pow2(oh);
+                int format = msg->i[2];
+                int y = msg->i[3];
+                int size = msg->i[4];
+                const char *data = msg->s[4];
                 R.width = w;
                 R.height = h;
                 char *buf = &R.buffer[R.frame][ (0 + y * w) * 3 ];
-                int rgb = 242;
-                if( rgb == 888 ) memcpy( &R.buffer[R.frame][ (0 + y * w) * 3 ], data, size );
-                if( rgb == 332 ) for( int x = 0; x < msg->i[0]; ++x ) {
+                if( format == 888 ) memcpy( &R.buffer[R.frame][ (0 + y * w) * 3 ], data, ow*3 );
+                if( format == 332 ) for( int x = 0; x < ow; ++x ) {
                     unsigned char p = data[x];
-                    *buf++ = ((p & 0xE0) >> 5) << 5;
-                    *buf++ = ((p & 0x1C) >> 2) << 5;
-                    *buf++ = ((p & 0x03) >> 0) << 6;
+                    *buf++ = ((p & 0xE0)     );
+                    *buf++ = ((p & 0x1C) << 3);
+                    *buf++ = ((p       ) << 6);
                 }
-                if( rgb == 242 ) for( int x = 0; x < msg->i[0]; ++x ) {
+                if( format == 242 ) for( int x = 0; x < ow; ++x ) {
                     unsigned char p = data[x];
-                    *buf++ = ((p & 0xC0) >> 6) << 6;
-                    *buf++ = ((p & 0x3E) >> 2) << 4;
-                    *buf++ = ((p & 0x03) >> 0) << 6;
+                    *buf++ = ((p & 0xC0)     );
+                    *buf++ = ((p & 0x3C) << 2);
+                    *buf++ = ((p       ) << 6);
+                }
+                if( format == 7755 ) for( int x = 0; x < ow / 2; ++x ) {
+                    // Y0Y1CoCg 7:7:5:5 (24 bits, 2 pixels)
+                    // 76543210 76543210 76543210
+                    // YYYYYYYY YYYYYYCC CCCCCCCC
+                    // 00000001 111111oo oooggggg
+                    const uint8_t *d = (const uint8_t *)(&data[x*3]);
+                    uint32_t y0 = ((d[0]>>1));
+                    uint32_t y1 = ((d[0]&1)<<6)|(d[1]>>2);
+                    uint32_t co = ((d[1]&3)<<3)|(d[2]>>5);
+                    uint32_t cg = ((d[2]&31));
+                    // dequantize
+                    y0 = y0 * 2;
+                    y1 = y1 * 2;
+                    co = co * 8;
+                    cg = cg * 8;
+                    // 
+                    co += 128;
+                    cg += 128;
+                    // reconstruct first r,g,b triplet
+                    uint32_t r0 = y0 + co - cg;
+                    uint32_t g0 = y0      + cg;
+                    uint32_t b0 = y0 - co - cg;
+                    *buf++ = (uint8_t)r0;
+                    *buf++ = (uint8_t)g0;
+                    *buf++ = (uint8_t)b0;
+                    // reconstruct second r,g,b triplet
+                    uint32_t r1 = y1 + co - cg;
+                    uint32_t g1 = y1      + cg;
+                    uint32_t b1 = y1 - co - cg;
+                    *buf++ = (uint8_t)r1;
+                    *buf++ = (uint8_t)g1;
+                    *buf++ = (uint8_t)b1;
                 }
                 //++socket_numrecv;
                 //++socket_activity;
