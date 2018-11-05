@@ -25,4 +25,4 @@
 - [ ] Core: Remote raycasts -> send: ray(p3,dir), recv: ray.hit file
 - [ ] Core: Remote logic -> send: tick(dt), recv: world.diff file
 - [ ] Core: Remote UI -> scripted windows (tick,step,edit,init,quit,draw).
-
+- [ ] Prefabs: Scenegraph + cameras, lights, models, skeletons, splines, materials, attributes, LOD groups.

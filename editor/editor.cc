@@ -551,6 +551,10 @@ void editor_draw() {
         imgui_texture( remote_id, R.width, R.height, false );
     ImGui::End();
 
+    ImGui::Begin("toolbar demo 1");
+        toolbar_demo();
+    ImGui::End();
+
     ImGui::Begin("demo 1");
         extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
         static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
