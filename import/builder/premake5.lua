@@ -13,7 +13,7 @@ project "engine"
     language "C++"
     kind "SharedLib"
     location "../../_project"
-    targetdir "../../_build/%{cfg.buildcfg}"
+    targetdir "../../_%{cfg.buildcfg}"
 --  files {"../../#sdk/*.c", "../../#sdk/*.cpp", "../../#sdk/*.h", "../../#sdk/*.inl"}
 --  files {"../../src/**.c", "../../src/**.cpp", "../../src/**.h", "../../src/**.inl"}
     files {"../../engine/engine.c"}
@@ -33,7 +33,7 @@ project "editor"
     language "C++"
     kind "SharedLib"
     location "../../_project"
-    targetdir "../../_build/%{cfg.buildcfg}"
+    targetdir "../../_%{cfg.buildcfg}"
     files {
     "../../editor/**.h*",
     "../../editor/*.c*",
@@ -73,7 +73,7 @@ project "game01"
     language "C++"
     kind "SharedLib"
     location "../../_project"
-    targetdir "../../_build/%{cfg.buildcfg}"
+    targetdir "../../_%{cfg.buildcfg}"
     files { "../../games/01/**.c", "../../games/01/**.cpp", "../../games/01/**.cc", "../../games/01/**.cxx", "../../games/01/**.h", "../../games/01/**.hpp", "../../games/01/**.inl"}
     includedirs {"../../editor/", "../../engine/"}
     links {"engine"}
@@ -92,7 +92,7 @@ project "game02"
     language "C++"
     kind "SharedLib"
     location "../../_project"
-    targetdir "../../_build/%{cfg.buildcfg}"
+    targetdir "../../_%{cfg.buildcfg}"
     files { "../../games/02/**.c", "../../games/02/**.cpp", "../../games/02/**.cc", "../../games/02/**.cxx", "../../games/02/**.h", "../../games/02/**.hpp", "../../games/02/**.inl"}
     includedirs {"../../editor/", "../../engine/"}
     links {"engine"}
@@ -111,7 +111,7 @@ project "game03"
     language "C++"
     kind "SharedLib"
     location "../../_project"
-    targetdir "../../_build/%{cfg.buildcfg}"
+    targetdir "../../_%{cfg.buildcfg}"
     files { "../../games/03/**.c", "../../games/03/**.cpp", "../../games/03/**.cc", "../../games/03/**.cxx", "../../games/03/**.h", "../../games/03/**.hpp", "../../games/03/**.inl"}
     includedirs {"../../editor/", "../../engine/"}
     links {"engine"}
@@ -130,7 +130,7 @@ project "game04"
     language "C++"
     kind "SharedLib"
     location "../../_project"
-    targetdir "../../_build/%{cfg.buildcfg}"
+    targetdir "../../_%{cfg.buildcfg}"
     files { "../../games/04/**.c", "../../games/04/**.cpp", "../../games/04/**.cc", "../../games/04/**.cxx", "../../games/04/**.h", "../../games/04/**.hpp", "../../games/04/**.inl"}
     includedirs {"../../editor/", "../../engine/"}
     links {"engine"}
@@ -151,7 +151,7 @@ project "launch"
     language "C++"
     kind "ConsoleApp" --"WindowedApp"
     location "../../_project"
-    targetdir "../../_build/%{cfg.buildcfg}"
+    targetdir "../../_%{cfg.buildcfg}"
     files {"../../editor/app/launch/**.c*", "../../editor/app/launch/**.h*" } -- "../../editor/app/launch/dialog.rc" }
     includedirs {"../../engine/"}
     links {"engine", "editor", "game01", "game02", "game03", "game04" }

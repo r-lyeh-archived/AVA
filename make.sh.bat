@@ -42,8 +42,10 @@ exit
     REM cleanup
 
         if "%1"=="clean" (
-            if exist _build   rd /q /s _build   && if exist _build   echo "error cannot clean up _build" && goto error
-            if exist _project rd /q /s _project && if exist _project echo "error cannot clean up _project" && goto error
+            if exist _debug    rd /q /s _debug    && if exist _debug    echo "error cannot clean up _debug"    && goto error
+            if exist _debugopt rd /q /s _debugopt && if exist _debugopt echo "error cannot clean up _debugopt" && goto error
+            if exist _release  rd /q /s _release  && if exist _release  echo "error cannot clean up _build"    && goto error
+            if exist _project  rd /q /s _project  && if exist _project  echo "error cannot clean up _project"  && goto error
             echo Cleaning up. && exit /b
         )
 
@@ -112,9 +114,9 @@ exit
 
                 if "%1"=="debug" (
                     shift
-                    start "" devenv /Run "_build\debug\launch.exe" %*
+                    start "" devenv /Run "_debug\launch.exe" %*
                 ) else (
-                    _build\debug\launch.exe %*
+                    _debug\launch.exe %*
                 )
 
                 echo ^<^< launch
