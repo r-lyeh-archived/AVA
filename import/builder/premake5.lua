@@ -18,7 +18,7 @@ project "engine"
 --  files {"../../src/**.c", "../../src/**.cpp", "../../src/**.h", "../../src/**.inl"}
     files {"../../engine/engine.c"}
     includedirs {"../../engine/"}
-    defines {"LINKAGE=EXPORT", "ENGINE_C"}
+    defines {"LINKAGE=EXPORT", "ENGINE_C", '_GLFW_WNDCLASSNAME=L\\"ENGINE\\"'}
     filter "configurations:debug"
         symbols "On"
     filter "configurations:debugopt"
