@@ -7,13 +7,14 @@
 
 #define WITH_MAINMENU 1
 #define WITH_DOCKING  1
-#define WITH_SCENE3D  1
+#define WITH_SCENE    1
 #define WITH_TOOLS    1
 #define WITH_PANELS   1
 
 
-#if 1 // Oskar Dahlberg
+#if 1 
 #include <Windows.h>
+// Oskar Dahlberg
 //static NTSTATUS(__stdcall *NtDelayExecution)(BOOL Alertable, PLARGE_INTEGER DelayInterval) = (NTSTATUS(__stdcall*)(BOOL, PLARGE_INTEGER)) GetProcAddress(GetModuleHandle("ntdll.dll"), "NtDelayExecution");
 //static NTSTATUS(__stdcall *ZwSetTimerResolution)(IN ULONG RequestedResolution, IN BOOLEAN Set, OUT PULONG ActualResolution) = (NTSTATUS(__stdcall*)(ULONG, BOOLEAN, PULONG)) GetProcAddress(GetModuleHandle("ntdll.dll"), "ZwSetTimerResolution");
 static int32_t(*NtDelayExecution)(BOOL Alertable, PLARGE_INTEGER DelayInterval) = (int32_t (__cdecl *)(BOOL,PLARGE_INTEGER))GetProcAddress(GetModuleHandleA("ntdll.dll"), "NtDelayExecution");
@@ -29,8 +30,6 @@ static void SleepShort(float milliseconds) {
     interval.QuadPart = -1 * (int)(milliseconds * 10000.0f);
     NtDelayExecution(false, &interval);
 }
-#endif
-
 // Emil Gustafsson
 int usleep(unsigned long usec) {
     struct timeval tv;
@@ -44,7 +43,6 @@ int usleep(unsigned long usec) {
     closesocket(s);
     return r;
 }
-
 // Adi Shavit
 void usleep2(__int64 usec) {
     HANDLE timer; 
@@ -55,6 +53,7 @@ void usleep2(__int64 usec) {
     WaitForSingleObject(timer, INFINITE); 
     CloseHandle(timer); 
 }
+#endif
 
 
 GLuint texturegen() {
@@ -237,118 +236,24 @@ void editor_init() {
 void editor_tick()
 {}
 
-
-uint8_t *mkpal332() {
-/*
-    An uniform palette RGB332 palette:
-    - Switched from RGB 6x6x6 216-color cube to a RGB 8x8x4 256-color cube.
-    - Added three (full 256 ramp) gamma corrected tables for each R,G,B channel.
-    - Balanced R,G,B values into better eye-looking values.
-    - Compensated B component against R,G ones to give true grays.
-
-    - [ref] http://en.wikipedia.org/wiki/List_of_palettes
-    - [ref] http://www.compuphase.com/unifpal.htm
-*/
-
-    struct {
-        float r,g,b;
-    } palette[256];
-
-    const float GAMMA_DIV =                       2.0;
-    const float GAMMA_RED =                       ((0.299 - 0.114) / GAMMA_DIV);
-    const float GAMMA_GREEN =                     ((0.587 - 0.114) / GAMMA_DIV);
-    const float GAMMA_BLUE =                      ((0.1141 - 0.114) / GAMMA_DIV);
-    const float GAMMA_STEPS =                     256;
-
-    const float COMPONENT_INTERPOLATION =         0.86;
-    const float COMPONENT_RED_BRIGHTNESS =        0.299;
-    const float COMPONENT_GREEN_BRIGHTNESS =      0.587;
-    const float COMPONENT_BLUE_BRIGHTNESS =       0.114;
-
-    int i,r,g,b,entry;
-
-    struct { unsigned char r,g,b; } gamma[256];
-
-    // create custom gamma tables
-
-    for( int i = 0; i < GAMMA_STEPS; i++ ) {
-        gamma[i].r=(unsigned char)(255.0*pow( ((i * 256.0)/(GAMMA_STEPS-1)) /255.0, 1.0 - GAMMA_RED));
-        gamma[i].g=(unsigned char)(255.0*pow( ((i * 256.0)/(GAMMA_STEPS-1)) /255.0, 1.0 - GAMMA_GREEN));
-        gamma[i].b=(unsigned char)(255.0*pow( ((i * 256.0)/(GAMMA_STEPS-1)) /255.0, 1.0 - GAMMA_BLUE));
-    }
-
-    // create custom colour tables
-
-    for( int i = 0; i < 256; i++ ) {
-        int r = (i >> 5) & 0x7;
-        int g = (i >> 2) & 0x7;
-        int b = (i >> 0) & 0x3;
-
-        //make a pure RGB332 colour
-        palette[i].r = (r * 255.0) / 7.0;
-        palette[i].g = (g * 255.0) / 7.0;
-        palette[i].b = (b * 255.0) / 3.0;
-
-        //fix blue component to give a few true greys
-        palette[i].b = (b * 255.0) / 3.5;   //(2^3 / 2^2) = 2 -> 7.0 / 2 = 3.5
-
-        //soft and blend components in non greys colours
-        if((palette[i].r != palette[i].g) || (palette[i].g != palette[i].b) || (palette[i].r != palette[i].b)) {
-            float r1 = palette[i].r;
-            float g1 = palette[i].g;
-            float b1 = palette[i].b;
-
-            float media = (r1 * COMPONENT_RED_BRIGHTNESS + g1 * COMPONENT_GREEN_BRIGHTNESS + b1 * COMPONENT_BLUE_BRIGHTNESS);
-            if(!media) media = 1.0;
-
-            float mediar = ((r1) * (COMPONENT_INTERPOLATION) + ((g1 * b1) / media) * (1.0 - COMPONENT_INTERPOLATION) );
-            float mediag = ((g1) * (COMPONENT_INTERPOLATION) + ((r1 * b1) / media) * (1.0 - COMPONENT_INTERPOLATION) );
-            float mediab = ((b1) * (COMPONENT_INTERPOLATION) + ((r1 * g1) / media) * (1.0 - COMPONENT_INTERPOLATION) );
-
-            //apply gamma
-            palette[i].r = gamma[(int)mediar].r;
-            palette[i].g = gamma[(int)mediag].g;
-            palette[i].b = gamma[(int)mediab].b;
-        }
-    }
-
-    // make #255 colour a pure white
-    //palette[255].r = palette[255].g = palette[255].b = 255.0;
-
-    // make #255 colour (slighty white) more pure
-    palette[255].r = (palette[255].r + 255.0) / 2.0;
-    palette[255].g = (palette[255].g + 255.0) / 2.0;
-    palette[255].b = (palette[255].b + 255.0) / 2.0;
-
-    static uint8_t rgb332[256*3];
-    for( int i = 0; i < 256; ++i ) {
-        rgb332[i*3+0] = (uint8_t)palette[i].r;
-        rgb332[i*3+1] = (uint8_t)palette[i].g;
-        rgb332[i*3+2] = (uint8_t)palette[i].b;
-    }
-
-    return rgb332;
-}
-
-
 void editor_draw() {
 
+
+#if WITH_MAINMENU
+    imgui_menubar();
+#endif
+
+#if WITH_DOCKING
+    imgui_dockspace();
+#endif
+
+#if WITH_SCENE
+
+    // update network buffers
     if( !R.buffer[0] ) {
         R.buffer[0] = (char*)calloc( 1, 1920 * 1080 * 4 );
         R.buffer[1] = (char*)calloc( 1, 1920 * 1080 * 4 );
     }
-    auto is_pow2 = []( uint32_t v ) {
-        return !((~(~0U>>1)|v)&v -1); // from SO
-    };
-    auto next_pow2 = []( uint32_t v ) {
-        v--;
-        v |= v >> 1;
-        v |= v >> 2;
-        v |= v >> 4;
-        v |= v >> 8;
-        v |= v >> 16;
-        return ++v;
-    };
     auto network_update = [&]() {
         // update osc server
         osc_update( osc_socket, -1 ); // 16/*ms*/ );
@@ -362,6 +267,18 @@ void editor_draw() {
             //if( msg ) {
                 // @todo clear mem when remote viewport changes
                 // iii i b: w,h,fmt, y, blob
+                auto is_pow2 = []( uint32_t v ) {
+                    return !((~(~0U>>1)|v)&v -1); // from SO
+                };
+                auto next_pow2 = []( uint32_t v ) {
+                    v--;
+                    v |= v >> 1;
+                    v |= v >> 2;
+                    v |= v >> 4;
+                    v |= v >> 8;
+                    v |= v >> 16;
+                    return ++v;
+                };
                 int ow = msg->i[0]; int w = is_pow2(ow) ? ow : next_pow2(ow);
                 int oh = msg->i[1]; int h = is_pow2(oh) ? oh : next_pow2(oh);
                 int format = msg->i[2];
@@ -424,40 +341,90 @@ void editor_draw() {
         //if(e) printf( "%d,", (int)list[0].i[2] );
         return e;
     };
-    static bool threaded = 0; if( !threaded ) { threaded = 1;
-        // SetThreadAffinityMask(GetCurrentThread(), 1);
-        std::thread( [&]() {
-            for(;;) {
-                while( network_update() > 0 ) {
+    static bool threaded = (std::thread( [&]() { for(;;) { while( network_update() > 0 ); Sleep(1); } } ).detach(), 1 );
+    // Sleep(0);
+    // std::this_thread::sleep_for(std::chrono::nanoseconds(1));
+    // timeBeginPeriod(1); Sleep(1); timeEndPeriod(1);
+    // usleep(1);
+    // usleep2(1);
+    // SleepShort(0.5f);
 
-                }
-                // Sleep(0);
-                Sleep(1);
-                // std::this_thread::sleep_for(std::chrono::nanoseconds(1));
-                // timeBeginPeriod(1); Sleep(1); timeEndPeriod(1);
-                // usleep(1);
-                // usleep2(1);
-                // SleepShort(1); // 0.25f);
-            }
-        } ).detach();
+    // update remoteview id texture
+    static GLuint remote_id = 0;
+    if( !remote_id ) {
+        // remote_id = texgen();
+        glGenTextures(1, &remote_id);
+    }
+    if( remote_id ) {
+        // texupdate( remote_id, R.buffer, 256, 256 );
+        glBindTexture( GL_TEXTURE_2D, remote_id );
+        // clamping (s,t,r)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // border color
+        float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+        // filtering
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // #if OPENGL >= 3
+        // glGenerateMipmap(GL_TEXTURE_2D);
+        // #endif
+        void *pixels = R.buffer[R.frame];
+        int mip = 0, w = R.width, h = R.height;
+        int texture_fmt = GL_RGB; // incl. compressed formats
+        int image_fmt = GL_RGB, pixel_fmt = GL_UNSIGNED_BYTE;
+        glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
     }
 
-
-#if WITH_MAINMENU
-    imgui_menubar();
-#endif
-
-#if WITH_DOCKING
-    imgui_dockspace();
-#endif
-
-#if WITH_SCENE3D
-    #if 1
+    #if 1 
     int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
-    ImGui::Begin("3d", NULL, flags);
-    ImGuizmo::SetDrawlist();
-    //    ImGuizmo::BeginFrame(0,0,300,300);
-    gizmo_demo2();
+    ImGui::Begin("Viewport", NULL, flags);
+        ImVec2 cpos = ImGui::GetCursorPos();
+        // layer #0 (remoteview)
+        ImGui::SetCursorPos(cpos);
+        imgui_texture( remote_id, R.width, R.height, false );
+        // layer #1 (debugdraw)
+        ImGui::SetCursorPos(cpos);
+        {
+            using namespace im3d;
+            static Camera cam = { {0, 0, 90}, {0,0,0} };
+            static Viewport vp; vp.yfovdeg = 70;
+            static bool rotate[3] = {1,1,0};
+
+            static int selected = 0; // cube
+            static Mesh *prims[] = {
+                #define SHAPE_NEW_MESH(prim,a,b) new Mesh(#prim,shape_##prim##_face_count,shape_##prim##_vertex_count,shape_##prim##_face,shape_##prim##_vertex),
+                SHAPE_XMACRO(SHAPE_NEW_MESH)
+            };
+
+            auto xy = ImGui::GetWindowPos(); // ImGui::GetCursorPos(); // 
+            auto wh = ImVec2( R.width, R.height ); // ImGui::GetWindowSize(); // 
+            vp.x = xy.x, vp.y = xy.y, vp.w = wh.x, vp.h = wh.y;
+
+            Mesh &prim = *prims[selected];
+            Render( cam, &vp, 1, &prim );
+            vec3_set( prim.Rotation, X(prim.Rotation) + 0.5f * rotate[0], Y(prim.Rotation) + 0.5f * rotate[1], Z(prim.Rotation) + 0.5f * rotate[2] );
+
+            if(0)
+            {
+                static Mesh cb = Mesh("cube", shape_cube_face_count, shape_cube_vertex_count, shape_cube_face, shape_cube_vertex);
+
+                vec3_set( cb.Position,  X(prim.midpoint) - X(cb.midpoint), Y(prim.midpoint) - Y(cb.midpoint), Z(prim.midpoint) - Z(cb.midpoint) );
+                vec3_cpy( cb.Rotation, prim.Rotation );
+                vec3_set( cb.Scale,  prim.extent[0]/2, prim.extent[1]/2, prim.extent[2]/2 );
+
+                Render(cam, &vp, 1, &cb );
+            }
+
+            char buf[128];
+            sprintf(buf, "%s, vp: %f,%f %f,%f", prim.Name, vp.x, vp.y, vp.w, vp.h);
+            ImGui::TextDisabled( buf );
+        }
+        // layer #2 (gizmo)
+        ImGui::SetCursorPos(cpos);
+        ImGuizmo::SetDrawlist();
+        gizmo_demo2();
     ImGui::End();
     #else
     gizmo_demo();
@@ -469,7 +436,6 @@ void editor_draw() {
     imgui_icons();
     sequencer_demo();
     profiler_demo();
-    im3d_demo();
     browser_demo();
 
     static ImGui::Nodes nodes_;
@@ -520,38 +486,7 @@ void editor_draw() {
     ImGui::End();
 
 // floating content
-    ImGui::Begin("remote view");
-        // remote id viewer
-        static GLuint remote_id = 0;
-        if( !remote_id ) {
-            // remote_id = texgen();
-            glGenTextures(1, &remote_id);
-        }
-        if( remote_id ) {
-            // texupdate( remote_id, R.buffer, 256, 256 );
-            glBindTexture( GL_TEXTURE_2D, remote_id );
-            // clamping (s,t,r)
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-            // border color
-            float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
-            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-            // filtering
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            // #if OPENGL >= 3
-            // glGenerateMipmap(GL_TEXTURE_2D);
-            // #endif
-            void *pixels = R.buffer[R.frame];
-            int mip = 0, w = R.width, h = R.height;
-            int texture_fmt = GL_RGB; // incl. compressed formats
-            int image_fmt = GL_RGB, pixel_fmt = GL_UNSIGNED_BYTE;
-            glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
-        }
-        imgui_texture( remote_id, R.width, R.height, false );
-    ImGui::End();
-
-    ImGui::Begin("toolbar demo 1");
+    ImGui::Begin("toolbar demo 1", NULL, ImGuiWindowFlags_NoTitleBar);
         toolbar_demo();
     ImGui::End();
 

@@ -170,8 +170,11 @@ namespace im3d {
         X(p2) = ( X(point) * vp->w + vp->w / 2.0f ) + vp->x;
         Y(p2) = (-Y(point) * vp->h + vp->h / 2.0f ) + vp->y;
     }
+
+    const ImU32 red = IM_COL32(255,0,0,64), purple = IM_COL32(128,0,128,128);
+
     // re-compute each vertex projection
-    void Render(Camera camera, const Viewport *vp, int num_meshes, Mesh *meshes, bool is_aabb = 0)
+    void Render(Camera camera, const Viewport *vp, int num_meshes, Mesh *meshes, ImU32 color = purple)
     {
         vec3 up; vec3_set(up, 0,1,0);
         mat4 viewMatrix;
@@ -195,9 +198,7 @@ namespace im3d {
         int   segments = 4;
         float radius = 5.f;
         float thickness = 1; // 6.f;
-        ImU32 red = IM_COL32(255,0,0,64), purple = IM_COL32(128,0,128,128);
         ImU32 dotcolor = (ImGui::GetColorU32(ImGuiCol_PlotLinesHovered) & IM_COL32(255,255,255,0)) | IM_COL32(0,0,0,64);
-        ImU32 color = is_aabb ? red : purple;
         auto *drawlist = ImGui::GetWindowDrawList();
 
         for( int m = 0; m < num_meshes; ++m ) {
@@ -279,7 +280,7 @@ void im3d_demo() {
         vp.x = xy.x, vp.y = xy.y, vp.w = wh.x, vp.h = wh.y;
 
         Mesh &prim = *prims[selected];
-        Render( cam, &vp, 1, &prim, false );
+        Render( cam, &vp, 1, &prim );
         vec3_set( prim.Rotation, X(prim.Rotation) + 0.5f * rotate[0], Y(prim.Rotation) + 0.5f * rotate[1], Z(prim.Rotation) + 0.5f * rotate[2] );
 
         {
@@ -289,7 +290,7 @@ void im3d_demo() {
             vec3_cpy( cb.Rotation, prim.Rotation );
             vec3_set( cb.Scale,  prim.extent[0]/2, prim.extent[1]/2, prim.extent[2]/2 );
 
-            Render(cam, &vp, 1, &cb, true );
+            Render(cam, &vp, 1, &cb, red );
         }
 
         ImGui::SliderInt("model", &selected, 0, (sizeof(prims)/sizeof(prims[0])) - 1);
