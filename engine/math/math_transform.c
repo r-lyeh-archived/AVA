@@ -2,7 +2,7 @@
 #define TRANSFORM_H
 #include "math_linear.c"
 
-float* transform( mat4x4 r, float position[3], float rotquat[4], float scale[3] );
+API float* transform( mat4x4 r, float position[3], float rotquat[4], float scale[3] );
 
 #endif
 

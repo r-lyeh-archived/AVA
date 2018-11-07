@@ -1,6 +1,10 @@
 // include opengl, imgui and all widgets.
 #include "imgui/imgui.cpp"
 
+#include "math/math_linear.c"
+#include "math/math_transform.c"
+#include "math/math_utils.c"
+
 #include <timeapi.h> // timeBeginPeriod, timeEndPeriod
 #include <thread>
 #include <chrono>
@@ -100,7 +104,207 @@ void textureset() {
 }
 
 
-void imgui_dockspace() {
+// laurent couvidou
+float vec3_dot(const vec3 v1, const vec3 v2) {
+    return v1[0] * v2[0] + v1[1] * v2[1] + v1[2] * v2[2];
+}
+void rotate_vector_by_quat(vec3 vprime, const vec3 v, const quat q )
+{
+    // Extract the vector part of the quaternion
+    vec3 u = {q[0], q[1], q[2]};
+
+    // Extract the scalar part of the quaternion
+    float s = q[3];
+
+    // Do the math
+    /*
+    vprime = 2.0f * dot(u, v) * u
+          + (s*s - dot(u, u)) * v
+          + 2.0f * s * cross(u, v);
+    */
+
+    float ss = s * s;
+    float s2 = s * 2;
+
+    float duv2 = 2 * vec3_dot(u,v);
+    float duuss = ss - vec3_dot(u,u);
+    vec3 cuv; vec3_mul_cross(cuv, u, v);
+
+    vprime[0] = duv2 * u[0] + duuss * v[0] + s2 * cuv[0];
+    vprime[1] = duv2 * u[1] + duuss * v[1] + s2 * cuv[1];
+    vprime[2] = duv2 * u[2] + duuss * v[2] + s2 * cuv[2];
+}
+void extract_direction( vec3 forward, vec3 right, vec3 up, const quat q ) {
+    vec3 u = {0,1,0};
+    vec3 f = {0,0,-1};
+    vec3 r = {1,0,0};
+    rotate_vector_by_quat( up, u, q );
+    rotate_vector_by_quat( forward, f, q );
+    rotate_vector_by_quat( right, r, q );
+}
+
+void GetRotation(float m[16], float& Yaw, float& Pitch, float& Roll) {
+    // @test me!
+    //     [0] [4] [8 ] [12]
+    //     [1] [5] [9 ] [13]
+    //     [2] [6] [10] [14]
+    //     [3] [7] [11] [15]
+
+    if( m[0] == 1.0f ) {
+        Yaw = atan2f( m[2], m[11] );
+        Pitch = 0;
+        Roll = 0;
+    }
+    else if( m[0] == -1.0f ) {
+        Yaw = atan2f( m[2], m[11] );
+        Pitch = 0;
+        Roll = 0;
+    }
+    else {
+        Yaw = atan2( -m[8], m[0] );
+        Pitch = asin( m[4] );
+        Roll = atan2( -m[6], m[5] );
+    }
+}
+
+
+// from wikipedia (in radians)
+void toQuaternion(float q[4], float pitch, float roll, float yaw) {
+    // Abbreviations for the various angular functions
+    float cy = cosf(yaw * 0.5);
+    float sy = sinf(yaw * 0.5);
+    float cr = cosf(roll * 0.5);
+    float sr = sinf(roll * 0.5);
+    float cp = cosf(pitch * 0.5);
+    float sp = sinf(pitch * 0.5);
+
+    q[0] = cy * cr * cp + sy * sr * sp;
+    q[1] = cy * sr * cp - sy * cr * sp;
+    q[2] = cy * cr * sp + sy * sr * cp;
+    q[3] = sy * cr * cp - cy * sr * sp;
+}
+void toEulerAngle(const float q[4], float *pitch, float *roll, float *yaw) {
+    // roll (x-axis rotation)
+    float sinr_cosp = +2.0 * (q[0] * q[1] + q[2] * q[3]);
+    float cosr_cosp = +1.0 - 2.0 * (q[1] * q[1] + q[2] * q[2]);
+    *roll = atan2f(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    float sinp = +2.0 * (q[0] * q[2] - q[3] * q[1]);
+    if (fabs(sinp) >= 1)
+        *pitch = copysignf(M_PI / 2, sinp); // use 90 degrees if out of range
+    else
+        *pitch = asinf(sinp);
+
+    // yaw (z-axis rotation)
+    float siny_cosp = +2.0 * (q[0] * q[3] + q[1] * q[2]);
+    float cosy_cosp = +1.0 - 2.0 * (q[2] * q[2] + q[3] * q[3]);
+    *yaw = atan2f(siny_cosp, cosy_cosp);
+}
+
+
+// https://github.com/procedural/gl_flycamera by @procedural (public domain)
+#include <math.h>
+static inline void flycamera(
+    float * cam_vec3, float * cam_quat, float * cam_m3x3,
+    float look_mult, float move_mult,
+    float x_delta, float y_delta,
+    float key_f, float key_l, float key_b, float key_r, float key_u, float key_d)
+{
+    // y_quat = quatFromAxisAngle({1, 0, 0}, y_delta * look_mult * to_radians)
+    // x_quat = quatFromAxisAngle({0, 1, 0}, x_delta * look_mult * to_radians)
+
+    float ydt = y_delta * look_mult * 0.017453f;
+    float xdt = x_delta * look_mult * 0.017453f;
+    float yqx = (float)sin(ydt);
+    float yqw = (float)cos(ydt);
+    float xqy = (float)sin(xdt);
+    float xqw = (float)cos(xdt);
+
+    // cam_quat = cam_quat * y_quat
+    // cam_quat = x_quat * cam_quat
+
+    float iqx = cam_quat[0];
+    float iqy = cam_quat[1];
+    float iqz = cam_quat[2];
+    float iqw = cam_quat[3];
+
+    float tqx = +iqw * yqx + iqx * yqw;
+    float tqy = -iqz * yqx - iqy * yqw;
+    float tqz = -iqy * yqx + iqz * yqw;
+    float tqw = +iqx * yqx - iqw * yqw;
+
+    float cqx = +tqz * xqy + tqx * xqw;
+    float cqy = -tqw * xqy - tqy * xqw;
+    float cqz = -tqx * xqy + tqz * xqw;
+    float cqw = +tqy * xqy - tqw * xqw;
+
+    // x_axis = rotateVec3ByQuat({-1, 0, 0}, cam_quat)
+    // y_axis = rotateVec3ByQuat({ 0, 1, 0}, cam_quat)
+    // z_axis = rotateVec3ByQuat({ 0, 0,-1}, cam_quat)
+
+    float qxqx = cqx * cqx;
+    float qxqy = cqx * cqy;
+    float qxqz = cqx * cqz;
+    float qxqw = cqx * cqw;
+
+    float qyqy = cqy * cqy;
+    float qyqz = cqy * cqz;
+    float qyqw = cqy * cqw;
+
+    float qzqz = cqz * cqz;
+    float qzqw = cqz * cqw;
+
+    float xax = (qyqy + qzqz) *  2.f - 1.f;
+    float xay = (qxqy + qzqw) * -2.f;
+    float xaz = (qyqw - qxqz) *  2.f;
+
+    float yax = (qxqy - qzqw) *  2.f;
+    float yay = (qxqx + qzqz) * -2.f + 1.f;
+    float yaz = (qxqw + qyqz) *  2.f;
+
+    float zax = (qyqw + qxqz) * -2.f;
+    float zay = (qxqw - qyqz) *  2.f;
+    float zaz = (qxqx + qyqy) *  2.f - 1.f;
+
+    float xm = key_l - key_r;
+    float ym = key_u - key_d;
+    float zm = key_f - key_b;
+
+    float mx = xax * xm + yax * ym + zax * zm;
+    float my = xay * xm + yay * ym + zay * zm;
+    float mz = xaz * xm + yaz * ym + zaz * zm;
+
+    float ln = (float)sqrt(mx * mx + my * my + mz * mz);
+    if (ln != 0) {
+        mx /= ln;
+        my /= ln;
+        mz /= ln;
+    }
+
+    cam_vec3[0] += mx * move_mult;
+    cam_vec3[1] += my * move_mult;
+    cam_vec3[2] += mz * move_mult;
+
+    cam_quat[0] =  cqx;
+    cam_quat[1] =  cqy;
+    cam_quat[2] =  cqz;
+    cam_quat[3] =  cqw;
+
+    cam_m3x3[0] = -xax;
+    cam_m3x3[1] =  yax;
+    cam_m3x3[2] = -zax;
+
+    cam_m3x3[3] = -xay;
+    cam_m3x3[4] =  yay;
+    cam_m3x3[5] = -zay;
+
+    cam_m3x3[6] = -xaz;
+    cam_m3x3[7] =  yaz;
+    cam_m3x3[8] = -zaz;
+}
+
+void imgui_dockspace_begin() {
     // config dockspace
     {
         // https://github.com/ocornut/imgui/issues/2109
@@ -212,6 +416,8 @@ void stats_demo() {
 
 // -----------------
 
+int osc_socket;
+
 struct remote_render {
     // virtual framebuffer
     char *buffer[2];
@@ -219,9 +425,6 @@ struct remote_render {
     // opengl
     GLuint texture_id;
 } R = { {0,0}, 256, 256, 0, 0 };
-
-
-int osc_socket;
 
 void editor_init() {
     imgui_config();
@@ -238,13 +441,12 @@ void editor_tick()
 
 void editor_draw() {
 
-
 #if WITH_MAINMENU
     imgui_menubar();
 #endif
 
 #if WITH_DOCKING
-    imgui_dockspace();
+    imgui_dockspace_begin();
 #endif
 
 #if WITH_SCENE
@@ -377,7 +579,204 @@ void editor_draw() {
         glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
     }
 
+    static Camera2 cam, *c = 0;
+    if( !c ) {
+        c = &cam;
+        c->YAngle = 52.f / 180.f * 3.14159f;
+        c->XAngle = 165.f / 180.f * 3.14159f;
+        c->Distance = 1; //8.f;
+        c->isPerspective = 1;
+        c->fov = 27, c->znear = 0.001f, c->zfar = 100.f; // for persp
+    }
+    // for ortho
+    ImGuiIO& io = ImGui::GetIO();
+    c->width = ImGui::GetWindowWidth(); //ImGui::GetContentRegionAvail().x;
+    c->height = ImGui::GetWindowHeight(); //ImGui::GetContentRegionAvail().y;
+    // for persp
+    c->ratio = c->width / c->height;
+
+    if (c->isPerspective) {
+        Perspective(c->fov, c->ratio, c->znear, c->zfar, c->projection);
+    } else {
+        OrthoGraphic(-c->width, c->width, -c->height, c->height, -c->width, c->width, c->projection);
+    }
+
+    // KeyCtrl, KeyShift, KeyAlt, KeySuper, KeysDown
+    const float movement_speed = 0.1f;
+    float vkw = !!(io.KeysDown[87/*GLFW_KEY_W*/] | io.KeysDown[265/*GLFW_KEY_UP*/]);
+    float vka = !!(io.KeysDown[65/*GLFW_KEY_A*/] | io.KeysDown[263/*GLFW_KEY_LEFT*/]);
+    float vks = !!(io.KeysDown[83/*GLFW_KEY_S*/] | io.KeysDown[264/*GLFW_KEY_DOWN*/]);
+    float vkd = !!(io.KeysDown[68/*GLFW_KEY_D*/] | io.KeysDown[262/*GLFW_KEY_RIGHT*/]);
+    float vke = !!(io.KeysDown[69/*GLFW_KEY_E*/] | io.KeysDown[81/*GLFW_KEY_Q*/]);
+    float vkc = !!(io.KeysDown[67/*GLFW_KEY_C*/]);
+
+    bool cam_active = ImGui::IsMouseDown(1) && !ImGuizmo::IsUsing();
+
+    static ImVec2 mouse_prev = {}, mouse_now = {}, mouse_diff = {};
+    mouse_now = ImGui::GetMousePos();
+    mouse_diff = mouse_now - mouse_prev;
+    mouse_prev = mouse_now;
+
+    if( cam_active ) {
+        //ImGui::CaptureKeyboardFromApp(false);
+        //ImGui::SetWindowFocus();
+    } else {
+        //ImGui::CaptureKeyboardFromApp(true);
+        mouse_diff = ImVec2(0,0);
+    }
+
+    float mouse_speed = 0.01f; //0.01f; // sensitivity
+    if( cam_active ) {
+        c->XAngle += mouse_diff.x * mouse_speed;
+        c->YAngle += mouse_diff.y * mouse_speed;
+    }
+
+    if( cam_active ) {
+    }
+
+#if 0
+    // orbit
+    c->Distance = 8;
+    float eye[] = { cosf(c->XAngle) * cosf(c->YAngle) * c->Distance, sinf(c->YAngle) * c->Distance, sinf(c->XAngle) * cosf(c->YAngle) * c->Distance };
+    float at[] = { 0.f, 0.f, 0.f };
+    float up[] = { 0.f, 1.f, 0.f };
+    LookAt(eye, at, up, c->transform);
+#endif
+
+#if 0
+    if( cam_active ) {
+        static float cam_pos[3] = {10,10,10};
+        static float cam_quat[4] = {0,0,0,1};
+        static float cam_scale[3] = {1,1,1};
+
+        quat q;
+        euler_to_quat(q, c->YAngle, c->XAngle, 0); //pyr
+        memcpy(cam_quat, q, 4 * sizeof(float));
+
+        vec3 fv,uv,rv;
+        extract_direction( fv, uv, rv, q );
+        cam_pos[0] += (kw-ks) * fv[0] * 0.1f + (kd-ka) * rv[0] * 0.1f;
+        cam_pos[1] += (kw-ks) * fv[1] * 0.1f + (kd-ka) * rv[1] * 0.1f;
+        cam_pos[2] += (kw-ks) * fv[2] * 0.1f + (kd-ka) * rv[2] * 0.1f;
+
+        mat4x4 r,m;
+        mat4x4_identity(r);
+        mat4x4_from_quat(r, q);
+        mat4x4_scale_aniso(r, r, cam_scale[0], cam_scale[1], cam_scale[2]);
+        mat4x4_translate_in_place(r, cam_pos[0], cam_pos[1], cam_pos[2]);
+        memcpy(c->transform, &r[0][0], 16 * sizeof(float));
+    }
+#endif
+
+#if 1
+    if( 1 ) { // if cam active
+        static float cam_pos[3] = {10,10,10};
+        static float cam_quat[4] = {0.915108f,0.108685f,-0.325526f,0.211654f}; //-0.132557,0.863924,-0.299154,-0.382806}; //-+-- quat_norm(cam_quat, cam_quat);
+        static float cam_mat3[9] = {0};
+        static float cam_scale[3] = {1,1,1};
+
+        /*
+        bool vkf1 = (GetAsyncKeyState(VK_F1) & 0x8000), vkf2 = (GetAsyncKeyState(VK_F2) & 0x8000);
+        if( vkf1 || vkf2 ) {
+            float p,r,y;
+            toEulerAngle(cam_quat, &p, &r, &y);
+
+            float rad2deg = (180.0 / M_PI);
+            float deg2rad = (M_PI / 180.0);
+            p *= rad2deg;
+            r *= rad2deg;
+            y *= rad2deg;
+            r += vkf1 ? +1 : -1;
+
+            float *q = cam_quat; //float q[4];
+            toQuaternion(q, p * deg2rad, r * deg2rad, y * deg2rad);
+
+            PRINTF("%ff,%ff,%ff,%ff (%f %f %f)\n", q[0], q[1], q[2], q[3], p, r, y);
+        }
+        */
+
+        float delta = 1; // 1/60.f
+        float look_mult = 0.1f, move_mult = 0.5f;
+
+
+        if( 1 ) {
+            // inverted!
+            flycamera( cam_pos, cam_quat, cam_mat3, look_mult, move_mult * delta, mouse_diff.x, -mouse_diff.y, vks, vkd, vkw, vka, vkc, vke );
+            // inverted!
+            mat4x4 r, s;
+            mat4x4_identity(r);
+            mat4x4_from_quat(r, cam_quat);
+            mat4x4_scale_aniso(r, r, -cam_scale[0], -cam_scale[1], -cam_scale[2]);
+            mat4_invert(s, r);
+            mat4x4_translate_in_place(s, -cam_pos[0], -cam_pos[1], -cam_pos[2]);
+            memcpy(c->transform, &s[0][0], 16 * sizeof(float));
+        } else {
+            // regular
+            flycamera( cam_pos, cam_quat, cam_mat3, look_mult, move_mult * delta, mouse_diff.x, mouse_diff.y, vkw, vka, vks, vkd, vke, vkc );
+            // regular
+            mat4x4 s;
+            mat4x4_identity(s);
+            mat4x4_from_quat(s, cam_quat);
+            mat4x4_scale_aniso(s, s, cam_scale[0], cam_scale[1], cam_scale[2]);
+            mat4x4_translate_in_place(s, cam_pos[0], cam_pos[1], cam_pos[2]);
+            memcpy(c->transform, &s[0][0], 16 * sizeof(float));
+        }
+
+        PRINTF("%f %f %f (%ff,%ff,%ff,%ff)\n", cam_pos[0], cam_pos[1], cam_pos[2], cam_quat[0], cam_quat[1], cam_quat[2], cam_quat[3]);
+     }
+#endif
+
+#if 0
+    //     OpenGL matrix convention for typical GL software
+    //     float transform[16];
+    //      
+    //     [0] [4] [8 ] [12]
+    //     [1] [5] [9 ] [13]
+    //     [2] [6] [10] [14]
+    //     [3] [7] [11] [15]
+    //      
+    //     [RIGHT.x] [UP.x] [BK.x] [POS.x]
+    //     [RIGHT.y] [UP.y] [BK.y] [POS.y]
+    //     [RIGHT.z] [UP.z] [BK.z] [POS.z]
+    //     [       ] [    ] [    ] [US   ]
+    //
+
+    float yaw = c->XAngle, pitch = c->YAngle, roll = 0;
+
+#if 0
+    float pos[3] = { c->transform[12], c->transform[13], c->transform[14] };
+    mat4 m;
+    RotationPitchYawRoll( m, pitch, yaw, roll );
+    memcpy(c->transform, &m[0][0], 16 * sizeof(float) );
+    memcpy(&c->transform[12], pos, 3 * sizeof(float) );
+    float *right = &c->transform[0];
+    float *up = &c->transform[4];
+    float *forward = &c->transform[8]; // backward!
+#else
+    float cy = cos(yaw), sy = sin(yaw);
+    float cp = cos(pitch), sp = sin(pitch);
+    float cr = cos(roll), sr = sin(roll);
+    float right   [] = {  cr * cy,                 sr * cy,               -sy      };
+    float upv     [] = { -sr * cp + cr * sy * sp,  cr * cp + sr * sy * sp, cy * sp };
+    float forward [] = {  sr * sp + cr * sy * cp, -cr * sp + sr * sy * cp, cy * cp };
+    memcpy(&c->transform[0], right, 3 * sizeof(float) );
+    memcpy(&c->transform[4], upv, 3 * sizeof(float) );
+    memcpy(&c->transform[8], forward, 3 * sizeof(float) );
+#endif
+
+    float *position = &c->transform[12];
+    //position[0] += (kw - ks) * movement_speed * forward[0] + (kd - ka) * movement_speed * right[0];
+    //position[1] += (kw - ks) * movement_speed * forward[1] + (kd - ka) * movement_speed * right[1];
+    //position[2] += (kw - ks) * movement_speed * forward[2] + (kd - ka) * movement_speed * right[2];
+    printf("%f %f %f (%f %f)\n", position[0], position[1], position[2], c->XAngle, c->YAngle);
+
+#endif
+
+
     #if 1 
+    static bool once = 0; if( !once ) { once = 1;
+        ImGui::SetNextWindowFocus();
+    }
     int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
     ImGui::Begin("Viewport", NULL, flags);
         ImVec2 cpos = ImGui::GetCursorPos();
@@ -406,17 +805,6 @@ void editor_draw() {
             Render( cam, &vp, 1, &prim );
             vec3_set( prim.Rotation, X(prim.Rotation) + 0.5f * rotate[0], Y(prim.Rotation) + 0.5f * rotate[1], Z(prim.Rotation) + 0.5f * rotate[2] );
 
-            if(0)
-            {
-                static Mesh cb = Mesh("cube", shape_cube_face_count, shape_cube_vertex_count, shape_cube_face, shape_cube_vertex);
-
-                vec3_set( cb.Position,  X(prim.midpoint) - X(cb.midpoint), Y(prim.midpoint) - Y(cb.midpoint), Z(prim.midpoint) - Z(cb.midpoint) );
-                vec3_cpy( cb.Rotation, prim.Rotation );
-                vec3_set( cb.Scale,  prim.extent[0]/2, prim.extent[1]/2, prim.extent[2]/2 );
-
-                Render(cam, &vp, 1, &cb );
-            }
-
             char buf[128];
             sprintf(buf, "%s, vp: %f,%f %f,%f", prim.Name, vp.x, vp.y, vp.w, vp.h);
             ImGui::TextDisabled( buf );
@@ -424,10 +812,8 @@ void editor_draw() {
         // layer #2 (gizmo)
         ImGui::SetCursorPos(cpos);
         ImGuizmo::SetDrawlist();
-        gizmo_demo2();
+        gizmo_demo1( c );
     ImGui::End();
-    #else
-    gizmo_demo();
     #endif
 #endif
 

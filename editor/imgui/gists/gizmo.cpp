@@ -2305,12 +2305,14 @@ void EditTransform(const float *cameraView, float *cameraProjection, float* matr
    static bool boundSizing = false;
    static bool boundSizingSnap = false;
 
+/*
    if (ImGui::IsKeyPressed(90))
       mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
    if (ImGui::IsKeyPressed(69))
       mCurrentGizmoOperation = ImGuizmo::ROTATE;
    if (ImGui::IsKeyPressed(82)) // r Key
       mCurrentGizmoOperation = ImGuizmo::SCALE;
+*/
    if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
       mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
    ImGui::SameLine();
@@ -2334,8 +2336,10 @@ void EditTransform(const float *cameraView, float *cameraProjection, float* matr
       if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
          mCurrentGizmoMode = ImGuizmo::WORLD;
    }
+/*
    if (ImGui::IsKeyPressed(83))
       useSnap = !useSnap;
+*/
    ImGui::Checkbox("", &useSnap);
    ImGui::SameLine();
 
@@ -2471,52 +2475,50 @@ void gizmo_demo() {
       ImGui::End();
 }
 
-void gizmo_demo2() {
-   static float objectMatrix[16] = 
-     { 1.f, 0.f, 0.f, 0.f,
-      0.f, 1.f, 0.f, 0.f,
-      0.f, 0.f, 1.f, 0.f,
-      0.f, 0.f, 0.f, 1.f };
+struct Camera2 {
+   bool isPerspective;
+   float XAngle, YAngle, Distance;
+   union {
+      struct { float fov, ratio, znear, zfar; };
+      struct { float width, height; };
+   };
 
+   //     OpenGL matrix convention for typical GL software
+   //     float transform[16];
+   //      
+   //     [0] [4] [8 ] [12]
+   //     [1] [5] [9 ] [13]
+   //     [2] [6] [10] [14]
+   //     [3] [7] [11] [15]
+   //      
+   //     [RIGHT.x] [UP.x] [BK.x] [POS.x]
+   //     [RIGHT.y] [UP.y] [BK.y] [POS.y]
+   //     [RIGHT.z] [UP.z] [BK.z] [POS.z]
+   //     [       ] [    ] [    ] [US   ]
+   float transform[16] = {
+        1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        0.f, 0.f, 0.f, 1.f };
+
+   float projection[16];
+};
+
+void gizmo_demo1(Camera2 *c) {
    static const float identityMatrix[16] =
    { 1.f, 0.f, 0.f, 0.f,
-      0.f, 1.f, 0.f, 0.f,
-      0.f, 0.f, 1.f, 0.f,
-      0.f, 0.f, 0.f, 1.f };
+   0.f, 1.f, 0.f, 0.f,
+   0.f, 0.f, 1.f, 0.f,
+   0.f, 0.f, 0.f, 1.f };
 
-   static float cameraView[16] = 
-     { 1.f, 0.f, 0.f, 0.f,
-      0.f, 1.f, 0.f, 0.f,
-      0.f, 0.f, 1.f, 0.f,
-      0.f, 0.f, 0.f, 1.f };
+   static float objectMatrix[16] = 
+   { 1.f, 0.f, 0.f, 0.f,
+   0.f, 1.f, 0.f, 0.f,
+   0.f, 0.f, 1.f, 0.f,
+   0.f, 0.f, 0.f, 1.f };
 
-   static float cameraProjection[16];
+   ImGuizmo::SetOrthographic(!c->isPerspective);
 
-   // Camera projection
-   static bool isPerspective = 1;
-   static float fov = 27.f;
-   static float viewWidth = 10.f; // for orthographic
-   static float camYAngle = 165.f / 180.f * 3.14159f;
-   static float camXAngle = 52.f / 180.f * 3.14159f;
-   static float camDistance = 8.f;
-   //rotationY(0.f, objectMatrix);
-
-   ImGuiIO& io = ImGui::GetIO();
-   if (isPerspective)
-   {
-      Perspective(fov, io.DisplaySize.x / io.DisplaySize.y, 0.1f, 100.f, cameraProjection);
-   }
-   else
-   {
-      float viewHeight = viewWidth*io.DisplaySize.y / io.DisplaySize.x;
-      OrthoGraphic(-viewWidth, viewWidth, -viewHeight, viewHeight, -viewWidth, viewWidth, cameraProjection);
-   }
-   ImGuizmo::SetOrthographic(!isPerspective);
-
-   float eye[] = { cosf(camYAngle) * cosf(camXAngle) * camDistance, sinf(camXAngle) * camDistance, sinf(camYAngle) * cosf(camXAngle) * camDistance };
-   float at[] = { 0.f, 0.f, 0.f };
-   float up[] = { 0.f, 1.f, 0.f };
-   LookAt(eye, at, up, cameraView);
 ///   ImGuizmo::BeginFrame();
 
    //static float ng = 0.f;
@@ -2525,8 +2527,8 @@ void gizmo_demo2() {
    //rotationY(ng, objectMatrix);
    //objectMatrix[12] = 5.f;
    // debug
-   ImGuizmo::DrawCube(cameraView, cameraProjection, objectMatrix);
-   ImGuizmo::DrawGrid(cameraView, cameraProjection, identityMatrix, 10.f);
+   ImGuizmo::DrawCube(c->transform, c->projection, objectMatrix);
+   ImGuizmo::DrawGrid(c->transform, c->projection, identityMatrix, 10.f);
 
-   EditTransform(cameraView, cameraProjection, objectMatrix);
+   EditTransform(c->transform, c->projection, objectMatrix);
 }
