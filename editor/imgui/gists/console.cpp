@@ -4,7 +4,11 @@
 #undef PRINTF
 #endif
 
-#define PRINTF(...) do { printf(__VA_ARGS__); puts(""); the_console.AddLog(__VA_ARGS__); } while(0)
+#define PRINTF(...) do { \
+    /*OutputConsoleA();*/ \
+    /*printf(__VA_ARGS__); puts("");*/ \
+    the_console.AddLog(__VA_ARGS__); \
+} while(0)
 
 // taken from imgui_demo.cpp
 // Demonstrating creating a simple console window, with scrolling, filtering, completion and history.
@@ -20,7 +24,8 @@ struct DebugConsole
 
     DebugConsole()
     {
-        ClearLog();
+        //ClearLog();
+        ScrollToBottom = 1;
         memset(InputBuf, 0, sizeof(InputBuf));
         HistoryPos = -1;
         Commands.push_back("HELP");
@@ -47,9 +52,8 @@ struct DebugConsole
         for (int i = 0; i < Items.Size; i++)
             free(Items[i]);
         Items.clear();
-        ScrollToBottom = true;
     }
-
+//
     void    AddLog(const char* fmt, ...) // IM_PRINTFARGS(2)
     {
         char buf[1024];
@@ -59,9 +63,8 @@ struct DebugConsole
         buf[IM_ARRAYSIZE(buf)-1] = 0;
         va_end(args);
         Items.push_back(Strdup(buf));
-//        ScrollToBottom = true;
     }
-
+//
     void    AddLogStamp(const char* fmt, ...) // IM_PRINTFARGS(2)
     {
         char buf[1024];
@@ -74,20 +77,10 @@ struct DebugConsole
         char buf2[1024];
         sprintf(buf2, "%6f %s", ImGui::GetTime(), buf );
         Items.push_back(Strdup(buf2));
-//        ScrollToBottom = true;
     }
-
+//
     void    Draw(const char* title, bool* p_open)
     {
-            // TODO: display items starting from the bottom
-/*
-            if (ImGui::SmallButton("Add Dummy Text")) { AddLog("%d some text", Items.Size); AddLog("some more text"); AddLog("display very important message here!"); } ImGui::SameLine();
-            if (ImGui::SmallButton("Add Dummy Error")) AddLog("[error] something went wrong"); ImGui::SameLine();
-            if (ImGui::SmallButton("Clear")) ClearLog(); ImGui::SameLine();
-            if (ImGui::SmallButton("Scroll to bottom")) ScrollToBottom = true;
-            static float t = 0.0f; if (ImGui::GetTime() - t > 0.02f) { t = ImGui::GetTime(); AddLog("Spam %f", t); }
-*/
-
             static ImGuiTextFilter filter;
 
             ICON( ICON_MD_KEYBOARD_BACKSPACE )
@@ -95,9 +88,14 @@ struct DebugConsole
                 HINT("Clear log")
             THEN
 
-            TOGGLE2( ICON_MD_VERTICAL_ALIGN_BOTTOM, ICON_MD_VERTICAL_ALIGN_CENTER )
+            if( ScrollToBottom ) {
+                ICON(ICON_MD_VERTICAL_ALIGN_BOTTOM)
+                HINT("Click to disable scroll-to-bottom");
+            } else {
+                ICON(ICON_MD_VERTICAL_ALIGN_CENTER)
+                HINT("Click to enable scroll-to-bottom");
+            }
                 ON_CLICK ScrollToBottom ^= 1;
-                HINT("Scroll to bottom");
             THEN
 
             ImGui::Text( "" ICON_MD_FILTER_LIST );
@@ -140,9 +138,10 @@ struct DebugConsole
                 ImGui::TextUnformatted(item);
                 ImGui::PopStyleColor();
             }
-            if (ScrollToBottom)
+            if (ScrollToBottom) {
                 ImGui::SetScrollHere();
-            ScrollToBottom = false;
+                // ScrollToBottom = false;
+            }
             ImGui::PopStyleVar();
             ImGui::PopFont();
             ImGui::EndChild();
@@ -317,5 +316,5 @@ static DebugConsole the_console;
 void console_demo() {
     static bool p_open = 1;
     the_console.Draw("Console Window", &p_open);
-    if( rand() < 100 ) PRINTF("Random Log #%d", rand());
+    //if( rand() < 100 ) PRINTF("Random Log #%d", rand());
 }
