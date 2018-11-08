@@ -304,6 +304,34 @@ static inline void flycamera(
     cam_m3x3[8] = -zaz;
 }
 
+struct Camera2 {
+   bool isPerspective;
+   float XAngle, YAngle, Distance;
+   struct { float fov, ratio, znear, zfar; };
+   struct { float width, height; };
+
+   //     OpenGL matrix convention for typical GL software
+   //     float transform[16];
+   //      
+   //     [0] [4] [8 ] [12]
+   //     [1] [5] [9 ] [13]
+   //     [2] [6] [10] [14]
+   //     [3] [7] [11] [15]
+   //      
+   //     [RIGHT.x] [UP.x] [BK.x] [POS.x]
+   //     [RIGHT.y] [UP.y] [BK.y] [POS.y]
+   //     [RIGHT.z] [UP.z] [BK.z] [POS.z]
+   //     [       ] [    ] [    ] [US   ]
+   float transform[16] = {
+        1.f, 0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f, 0.f,
+        0.f, 0.f, 1.f, 0.f,
+        0.f, 0.f, 0.f, 1.f };
+
+   float projection[16];
+};
+
+
 void imgui_dockspace_begin() {
     // config dockspace
     {
@@ -579,6 +607,8 @@ void editor_draw() {
         glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
     }
 
+    float rad2deg = (180.0 / M_PI);
+    float deg2rad = (M_PI / 180.0);
     static Camera2 cam, *c = 0;
     if( !c ) {
         c = &cam;
@@ -586,17 +616,25 @@ void editor_draw() {
         c->XAngle = 165.f / 180.f * 3.14159f;
         c->Distance = 1; //8.f;
         c->isPerspective = 1;
-        c->fov = 27, c->znear = 0.001f, c->zfar = 100.f; // for persp
+        c->fov = 45, c->znear = 0.001f, c->zfar = 100.f; // for persp
     }
     // for ortho
     ImGuiIO& io = ImGui::GetIO();
-    c->width = ImGui::GetWindowWidth(); //ImGui::GetContentRegionAvail().x;
-    c->height = ImGui::GetWindowHeight(); //ImGui::GetContentRegionAvail().y;
+    c->width = //ImGui::GetWindowWidth(); //
+    ImGui::GetContentRegionAvail().x;
+    c->height = //ImGui::GetWindowHeight(); //
+    ImGui::GetContentRegionAvail().y;
     // for persp
     c->ratio = c->width / c->height;
 
+    ImGui::Begin("Camera");
+    ImGui::SliderFloat("fov", &c->fov, 10, 120 );
+    ImGui::End();
+
     if (c->isPerspective) {
-        Perspective(c->fov, c->ratio, c->znear, c->zfar, c->projection);
+        mat4 m;
+        mat4_perspective( m, c->fov * deg2rad, c->ratio, c->znear, c->zfar );
+        memcpy( c->projection, m, 16 * sizeof(float));
     } else {
         OrthoGraphic(-c->width, c->width, -c->height, c->height, -c->width, c->width, c->projection);
     }
@@ -631,9 +669,6 @@ void editor_draw() {
         c->YAngle += mouse_diff.y * mouse_speed;
     }
 
-    if( cam_active ) {
-    }
-
 #if 0
     // orbit
     c->Distance = 8;
@@ -643,61 +678,27 @@ void editor_draw() {
     LookAt(eye, at, up, c->transform);
 #endif
 
-#if 0
-    if( cam_active ) {
-        static float cam_pos[3] = {10,10,10};
-        static float cam_quat[4] = {0,0,0,1};
-        static float cam_scale[3] = {1,1,1};
-
-        quat q;
-        euler_to_quat(q, c->YAngle, c->XAngle, 0); //pyr
-        memcpy(cam_quat, q, 4 * sizeof(float));
-
-        vec3 fv,uv,rv;
-        extract_direction( fv, uv, rv, q );
-        cam_pos[0] += (kw-ks) * fv[0] * 0.1f + (kd-ka) * rv[0] * 0.1f;
-        cam_pos[1] += (kw-ks) * fv[1] * 0.1f + (kd-ka) * rv[1] * 0.1f;
-        cam_pos[2] += (kw-ks) * fv[2] * 0.1f + (kd-ka) * rv[2] * 0.1f;
-
-        mat4x4 r,m;
-        mat4x4_identity(r);
-        mat4x4_from_quat(r, q);
-        mat4x4_scale_aniso(r, r, cam_scale[0], cam_scale[1], cam_scale[2]);
-        mat4x4_translate_in_place(r, cam_pos[0], cam_pos[1], cam_pos[2]);
-        memcpy(c->transform, &r[0][0], 16 * sizeof(float));
-    }
-#endif
-
 #if 1
     if( 1 ) { // if cam active
         static float cam_pos[3] = {10,10,10};
-        static float cam_quat[4] = {0.915108f,0.108685f,-0.325526f,0.211654f}; //-0.132557,0.863924,-0.299154,-0.382806}; //-+-- quat_norm(cam_quat, cam_quat);
+        static float cam_quat[4] = {0.852f,0.147f,-0.354f,0.355f};
         static float cam_mat3[9] = {0};
         static float cam_scale[3] = {1,1,1};
 
-        /*
+        float p,r,y;
+        toEulerAngle(cam_quat, &p, &r, &y);
         bool vkf1 = (GetAsyncKeyState(VK_F1) & 0x8000), vkf2 = (GetAsyncKeyState(VK_F2) & 0x8000);
         if( vkf1 || vkf2 ) {
-            float p,r,y;
-            toEulerAngle(cam_quat, &p, &r, &y);
-
-            float rad2deg = (180.0 / M_PI);
-            float deg2rad = (M_PI / 180.0);
             p *= rad2deg;
             r *= rad2deg;
             y *= rad2deg;
-            r += vkf1 ? +1 : -1;
-
-            float *q = cam_quat; //float q[4];
+            r = (int)r + (vkf1 ? +1 : -1); 
+            float *q = cam_quat;
             toQuaternion(q, p * deg2rad, r * deg2rad, y * deg2rad);
-
-            PRINTF("%ff,%ff,%ff,%ff (%f %f %f)\n", q[0], q[1], q[2], q[3], p, r, y);
         }
-        */
 
         float delta = 1; // 1/60.f
         float look_mult = 0.1f, move_mult = 0.5f;
-
 
         if( 1 ) {
             // inverted!
@@ -722,7 +723,7 @@ void editor_draw() {
             memcpy(c->transform, &s[0][0], 16 * sizeof(float));
         }
 
-        PRINTF("%f %f %f (%ff,%ff,%ff,%ff)\n", cam_pos[0], cam_pos[1], cam_pos[2], cam_quat[0], cam_quat[1], cam_quat[2], cam_quat[3]);
+        PRINTF("Cam: %f %f %f (%ff,%ff,%ff,%ff) (%05.2fº pitch, %05.2fº roll, %05.2fº yaw)\n", cam_pos[0], cam_pos[1], cam_pos[2], cam_quat[0], cam_quat[1], cam_quat[2], cam_quat[3], p*rad2deg,r*rad2deg,y*rad2deg);
      }
 #endif
 
@@ -812,7 +813,7 @@ void editor_draw() {
         // layer #2 (gizmo)
         ImGui::SetCursorPos(cpos);
         ImGuizmo::SetDrawlist();
-        gizmo_demo1( c );
+        gizmo_demo1( c->transform, c->projection, c->isPerspective );
     ImGui::End();
     #endif
 #endif
