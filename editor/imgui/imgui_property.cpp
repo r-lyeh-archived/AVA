@@ -2,30 +2,41 @@
 // [revert/random][icon][text]||[widget] with tooltip in whole line
 
 enum {
-    PROPERTY_GROUP,     // [x] >v
-    PROPERTY_SEPARATOR, // [x] ---
-    PROPERTY_CHECKBOX,  // [x] bool
-    PROPERTY_BUTTON,    // [x] button
-    PROPERTY_TOGGLE,    // [x] button (on/off state)
-    PROPERTY_SLIDERI,   // [ ] int
-    PROPERTY_SLIDERF,   // [x] float
-    PROPERTY_RANGEI,    // [ ] int[2]
-    PROPERTY_RANGEF,    // [ ] float[2]
-    PROPERTY_STRING,    // [x] string box
-    PROPERTY_TEXT,      // [x] text box
-    PROPERTY_TRANSFORM, // [ ] gizmo
-    PROPERTY_PASSWORD,  // [x] hidden string box ***
-    PROPERTY_DELTA,     // [x] float [0..1]
-    PROPERTY_PERCENT,   // [ ] float [0..100]
-    PROPERTY_ANGLE,     // [x] float [-180..180]
-    PROPERTY_BITMASK,   // [ ] int [0..64]
-    PROPERTY_PROGRESS,  // [ ] float [0..100]
-    PROPERTY_COLOR3,    // [x] color3
-    PROPERTY_COLOR4,    // [x] color4
-    PROPERTY_VECTOR3,   // [x] vector3
-    PROPERTY_VECTOR4,   // [x] vector4
+    PANEL_LIST,
+    PANEL_TOOLBAR,
+
+    PROPERTY_GROUP,      // [x] >v
+    PROPERTY_SEPARATOR,  // [x] ---
+    PROPERTY_ANGLE,      // [x] float [-180..180]
+    PROPERTY_DELTA,      // [x] float [0..1]
+    PROPERTY_SLIDER,     // [x] @todo: int
+    PROPERTY_FLOAT,      // [x] @todo: int + range: int[2], float[2]
+    PROPERTY_LIST,       // [x]
+    PROPERTY_FILTER,     // [x]
+    PROPERTY_VECTOR3,    // [x] vector3
+    PROPERTY_VECTOR4,    // [x] vector4
+    PROPERTY_COLOR3,     // [x] color3
+    PROPERTY_COLOR4,     // [x] color4
+    PROPERTY_CHECKBOX,   // [x] bool
+    PROPERTY_TOGGLE,     // [x] button (on/off state)
+    PROPERTY_BUTTON,     // [x] button
+    PROPERTY_STRING,     // [x] string box
+    PROPERTY_PASSWORD,   // [x] hidden string box ***
+    PROPERTY_BITMASK,    // [x] int [0..64]
+    PROPERTY_IP,         // [x]
+    PROPERTY_KNOB,       // [x]
+    PROPERTY_QUATERNION, // [x]
+    PROPERTY_BEZIER,     // [x]
+    PROPERTY_TEXTBOX,    // [x]
+    PROPERTY_IMAGE,      // [x] texture2d
+    PROPERTY_CURVE,      // [x] curve
 
 /*
+    PROPERTY_TRANSFORM,  // [ ] gizmo
+    PROPERTY_PERCENT,    // [ ] float [0..100]
+    PROPERTY_PROGRESS,   // [ ] float [0..100]
+
+    PROPERTY_SPINNER,
     PROPERTY_TEXTURE1D,
     PROPERTY_TEXTURE2D,
     PROPERTY_TEXTURE3D,
@@ -34,7 +45,6 @@ enum {
     PROPERTY_TRACKER,
     PROPERTY_TIMELINE,
     PROPERTY_PROFILER,
-    PROPERTY_TOOLBAR,
 */
 };
 

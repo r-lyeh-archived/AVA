@@ -305,7 +305,7 @@ static inline void flycamera(
 }
 
 struct Camera2 {
-   bool isPerspective;
+   bool is_perspective;
    float XAngle, YAngle, Distance;
    struct { float fov, ratio, znear, zfar; };
    struct { float width, height; };
@@ -615,15 +615,13 @@ void editor_draw() {
         c->YAngle = 52.f / 180.f * 3.14159f;
         c->XAngle = 165.f / 180.f * 3.14159f;
         c->Distance = 1; //8.f;
-        c->isPerspective = 1;
+        c->is_perspective = 1; // 1
         c->fov = 45, c->znear = 0.001f, c->zfar = 100.f; // for persp
     }
     // for ortho
     ImGuiIO& io = ImGui::GetIO();
-    c->width = //ImGui::GetWindowWidth(); //
-    ImGui::GetContentRegionAvail().x;
-    c->height = //ImGui::GetWindowHeight(); //
-    ImGui::GetContentRegionAvail().y;
+    c->width = ImGui::GetContentRegionAvail().x;
+    c->height = ImGui::GetContentRegionAvail().y;
     // for persp
     c->ratio = c->width / c->height;
 
@@ -631,7 +629,7 @@ void editor_draw() {
     ImGui::SliderFloat("fov", &c->fov, 10, 120 );
     ImGui::End();
 
-    if (c->isPerspective) {
+    if (c->is_perspective) {
         mat4 m;
         mat4_perspective( m, c->fov * deg2rad, c->ratio, c->znear, c->zfar );
         memcpy( c->projection, m, 16 * sizeof(float));
@@ -704,13 +702,15 @@ void editor_draw() {
             // inverted!
             flycamera( cam_pos, cam_quat, cam_mat3, look_mult, move_mult * delta, mouse_diff.x, -mouse_diff.y, vks, vkd, vkw, vka, vkc, vke );
             // inverted!
-            mat4x4 r, s;
-            mat4x4_identity(r);
-            mat4x4_from_quat(r, cam_quat);
-            mat4x4_scale_aniso(r, r, -cam_scale[0], -cam_scale[1], -cam_scale[2]);
-            mat4_invert(s, r);
+            mat4x4 s, t;
+            mat4x4_identity(t);
+            mat4x4_from_quat(t, cam_quat);
+            mat4x4_scale_aniso(t, t, -cam_scale[0], -cam_scale[1], -cam_scale[2]);
+            mat4_invert(s, t);
             mat4x4_translate_in_place(s, -cam_pos[0], -cam_pos[1], -cam_pos[2]);
             memcpy(c->transform, &s[0][0], 16 * sizeof(float));
+
+            p = -p, r = -r, y = -y;
         } else {
             // regular
             flycamera( cam_pos, cam_quat, cam_mat3, look_mult, move_mult * delta, mouse_diff.x, mouse_diff.y, vkw, vka, vks, vkd, vke, vkc );
@@ -813,7 +813,7 @@ void editor_draw() {
         // layer #2 (gizmo)
         ImGui::SetCursorPos(cpos);
         ImGuizmo::SetDrawlist();
-        gizmo_demo1( c->transform, c->projection, c->isPerspective );
+        gizmo_demo1( c->transform, c->projection, c->is_perspective );
     ImGui::End();
     #endif
 #endif
@@ -846,8 +846,12 @@ void editor_draw() {
 #endif
 
 #if WITH_PANELS
-    ImGui::Begin("demo2");
+// floating content
+    ImGui::Begin("toolbar demo 1", NULL, ImGuiWindowFlags_NoTitleBar);
+        toolbar_demo();
+    ImGui::End();
 
+    ImGui::Begin("demo 1");
         PlotVar("fps", ImGui::GetIO().Framerate); // if(t>60s) PlotVarFlushOldEntries(), t = 0;
 
         stats_demo();
@@ -867,20 +871,16 @@ void editor_draw() {
         profiler2_demo();
         spinner_demo();
 
-        curve_demo();
+        //curve_demo();
         table_demo();
-
     ImGui::End();
 
-// floating content
-    ImGui::Begin("toolbar demo 1", NULL, ImGuiWindowFlags_NoTitleBar);
-        toolbar_demo();
-    ImGui::End();
-
-    ImGui::Begin("demo 1");
+    ImGui::Begin("demo 2");
         extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
         static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
         property_demo();
+
+        richtext_demo();
 
         static GLuint texture_id = 0;
         if( !texture_id ) {
@@ -900,10 +900,8 @@ void editor_draw() {
             }
         */
         }
-
-        richtext_demo();
-
     ImGui::End();
+
 #endif
 
     ImGui::Begin("Texture viewer");
