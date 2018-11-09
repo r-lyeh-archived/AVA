@@ -1,6 +1,7 @@
 // [src] https://github.com/ocornut/imgui/issues/123
 // [src] https://github.com/ocornut/imgui/issues/55
 
+// v1.23 - delete size argument (use avail width instead)
 // v1.22 - flip button; cosmetic fixes
 // v1.21 - oops :)
 // v1.20 - add iq's interpolation code
@@ -22,15 +23,10 @@ namespace ImGui
 /*
     Example of use:
 
-    static ImVec2 foo[10];
-    ...
-    foo[0].x = -1; // init data so editor knows to take it from here
-    ...
-    if (ImGui::Curve("Das editor", ImVec2(600, 200), 10, foo))
-    {
+    static ImVec2 foo[10] = {{-1,0}}; // init data so editor knows to take it from here
+    if (ImGui::Curve("Curve editor", 10, foo)) {
         // curve changed
     }
-    ...
     float value_you_care_about = ImGui::CurveValue(0.7f, 10, foo); // calculate value at position 0.7
 */
 
@@ -316,30 +312,30 @@ namespace tween {
                 }
             }
 
-#           define tween$bounceout(p) ( \
+#           define TWEEN_BOUNCEOUT(p) ( \
                 (p) < 4/11.0 ? (121 * (p) * (p))/16.0 : \
                 (p) < 8/11.0 ? (363/40.0 * (p) * (p)) - (99/10.0 * (p)) + 17/5.0 : \
                 (p) < 9/10.0 ? (4356/361.0 * (p) * (p)) - (35442/1805.0 * (p)) + 16061/1805.0 \
                            : (54/5.0 * (p) * (p)) - (513/25.0 * (p)) + 268/25.0 )
 
             case TYPE::BOUNCEIN: {
-                return 1 - tween$bounceout(1 - p);
+                return 1 - TWEEN_BOUNCEOUT(1 - p);
             }
 
             case TYPE::BOUNCEOUT: {
-                return tween$bounceout(p);
+                return TWEEN_BOUNCEOUT(p);
             }
 
             case TYPE::BOUNCEINOUT: {
                 if(p < 0.5) {
-                    return 0.5 * (1 - tween$bounceout(1 - p * 2));
+                    return 0.5 * (1 - TWEEN_BOUNCEOUT(1 - p * 2));
                 }
                 else {
-                    return 0.5 * tween$bounceout((p * 2 - 1)) + 0.5;
+                    return 0.5 * TWEEN_BOUNCEOUT((p * 2 - 1)) + 0.5;
                 }
             }
 
-#           undef tween$bounceout
+#           undef TWEEN_BOUNCEOUT
 
             case TYPE::SINESQUARE: {
                 double A = sin((p)*pi2);
@@ -454,7 +450,7 @@ namespace ImGui
         return points[left].y + (points[left + 1].y - points[left].y) * d;
     }
 
-    int Curve(const char *label, const ImVec2& size, const int maxpoints, ImVec2 *points)
+    int Curve(const char *label, const int maxpoints, ImVec2 *points)
     {
         int modified = 0;
         int i;
@@ -472,6 +468,7 @@ namespace ImGui
 
         ImGuiWindow* window = GetCurrentWindow();
         ImGuiStyle& style = ImGui::GetStyle();
+        ImVec2 size( ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().x / 2 ); // 16:9
         ImGuiIO& io = ImGui::GetIO();
         const ImGuiID id = window->GetID(label);
         if (window->SkipItems)
@@ -689,7 +686,8 @@ namespace ImGui
         if( modified ) {
             item = 0;
         }
-        if( ImGui::Combo("Ease type", &item, items, IM_ARRAYSIZE(items)) ) {
+        ImGui::PushID(points);
+        if( ImGui::Combo("##Ease type", &item, items, IM_ARRAYSIZE(items)) ) {
             max = maxpoints;
             if( item > 0 ) {
                 for( i = 0; i < max; ++i) { 
@@ -698,6 +696,9 @@ namespace ImGui
                 }               
             }
         }
+        ImGui::PopID();
+
+        // point info
 
         char buf[128];
         const char *str = label;
@@ -719,10 +720,9 @@ namespace ImGui
 
 
 void curve_demo() {
-    static ImVec2 foo[10];
-    foo[0].x = -1; // init data so editor knows to take it from here
+    static ImVec2 foo[10] = { {-1,0} }; // init data so editor knows to take it from here
     // ...
-    if (ImGui::Curve("Das editor", ImVec2(600, 200), 10, foo)) {
+    if (ImGui::Curve("Curve editor", 10, foo)) {
         // curve changed
     }
     // ...

@@ -60,6 +60,7 @@ union property_data {
     struct { ImVec3 axis; float angle; };
     struct { char *textbox; size_t textbox_size; };
     struct { uintptr_t image_id; float image_w, image_h; };
+    struct { char curve_maxpoints; ImVec2 curve_points[8+1]; };
 };
 
 struct property_result { // @todo
@@ -140,6 +141,9 @@ struct property {
             }
             break; case 'i': {
                 imgui_texture( data.image_id, data.image_w, data.image_h );
+            }
+            break; case 'u': {
+                ImGui::Curve(info, data.curve_maxpoints, data.curve_points);
             }
         }
         ImGui::PopID();
@@ -289,7 +293,7 @@ property property_list( const char *info, const std::vector<const char *> &label
     return p;
 }
 
-property property_listfilt( const char *info, const std::vector<const char *> &labels ) {
+property property_filter( const char *info, const std::vector<const char *> &labels ) {
     property p = MAKE_PROPERTY(info, 'L');
     p.data.max_items = (int)labels.size();
     p.data.items = (const char **)malloc( sizeof(char*) * p.data.max_items ); // LEAK
@@ -401,6 +405,18 @@ property property_image( const char *info, uintptr_t id, float w, float h ) {
     return p;
 }
 
+property property_curve( const char *info, int num_points, float *curve ) {
+    property p = MAKE_PROPERTY(info, 'u');
+    p.data.curve_maxpoints = num_points >= 8 ? 8 - 1 : num_points;
+    for( int i = 0; i < p.data.curve_maxpoints; ++i ) {
+        p.data.curve_points[i].x = curve[i * 2 + 0];
+        p.data.curve_points[i].y = curve[i * 2 + 1];
+    }
+    p.data.curve_points[ p.data.curve_maxpoints ].x = -1;
+    p.data.curve_maxpoints = 8;
+    return p;
+}
+
 void property_panel( struct property *ps, int num ) {
     for( int i = 0; i < num; ++i ) {
         if( ps[i].info[2] == '>' ) {
@@ -436,7 +452,7 @@ void property_demo() { // panel demo
         property_group( "My widgets 1" ),
             property_angle( ICON_MD_KEYBOARD_ARROW_DOWN " My Angle\nThis is PI", 3.14159f ),
             property_list( ICON_MD_TIMELAPSE " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
-            property_listfilt( ICON_MD_FILE_UPLOAD " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
+            property_filter( ICON_MD_FILE_UPLOAD " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
             property_color3( "My Color3\nConfigure a color", 0,0,0 ),
             property_color4( "My Color4\nConfigure a color", 0,0,0,0 ),
             property_separator( "" ),
@@ -457,6 +473,7 @@ void property_demo() { // panel demo
             property_quaternion( "My Quaternion", 1,0,0,1 ),
             property_textbox( "My Textbox", "This\nis\nan\neditable\nstring."),
         property_group( "My widgets 3" ),
+            property_curve( "My Curve", 3, std::vector<float>({0.f,0.f, 0.5f,0.5f, 1.f,1.f }).data()),
             property_bezier( "My Bezier", 0.390f, 0.575f, 0.565f, 1.000f ),
             property_image( "My Image", 1, 32, 32),
     };
