@@ -99,7 +99,10 @@ exit
 
             REM actual build
             set NINJA_STATUS="[%%e] [%%r/%%f]"
-            ninja.exe -v -C ..\..\_project && REM debugopt && REM release
+            if "%1"=="debugopt" ( ninja.exe -v -C ..\..\_project debugopt ) else ( ^
+            if "%1"=="release"  ( ninja.exe -v -C ..\..\_project release  ) else ( ^
+                                  ninja.exe -v -C ..\..\_project                   ^
+            ) )
             set OK=%ERRORLEVEL%
 
         popd
@@ -112,11 +115,17 @@ exit
                 color
                 echo ^>^> launch
 
+                if "%1"=="release" shift
+                if "%1"=="debugopt" shift
+
                 if "%1"=="debug" (
-                    shift
-                    start "" devenv /Run "_debug\launch.exe" %*
+                    if exist _debug\launch.exe start "" devenv /Run "_debug\launch.exe" %*
+                    if exist _release\launch.exe start "" devenv /Run "_release\launch.exe" %*
+                    if exist _debugopt\launch.exe start "" devenv /Run "_debugopt\launch.exe" %*
                 ) else (
-                    _debug\launch.exe %*
+                    if exist _debug\launch.exe _debug\launch.exe %*
+                    if exist _release\launch.exe _release\launch.exe %*
+                    if exist _debugopt\launch.exe _debugopt\launch.exe %*
                 )
 
                 echo ^<^< launch
