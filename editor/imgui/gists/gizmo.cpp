@@ -2307,29 +2307,38 @@ void gizmo_demo1(float camview[16], float camproj[16], int is_perspective) {
    if (ImGui::IsKeyPressed(82)) // r Key
       mCurrentGizmoOperation = ImGuizmo::SCALE;
 */
-   if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
-      mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-   ImGui::SameLine();
-   if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
-      mCurrentGizmoOperation = ImGuizmo::ROTATE;
-   ImGui::SameLine();
-   if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-      mCurrentGizmoOperation = ImGuizmo::SCALE;
-   float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-   ImGuizmo::DecomposeMatrixToComponents(matrix, matrixTranslation, matrixRotation, matrixScale);
-   ImGui::InputFloat3("Tr", matrixTranslation, 3);
-   ImGui::InputFloat3("Rt", matrixRotation, 3);
-   ImGui::InputFloat3("Sc", matrixScale, 3);
-   ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix);
+
+   auto ToggleButton = []( const char *text, bool on ) -> bool {
+       const ImU32 col = ImGui::GetColorU32(on ? ImGuiCol_FrameBgActive : ImGuiCol_FrameBg);
+       ImGui::PushStyleColor(ImGuiCol_Button, col);
+       ImGui::PushStyleColor(ImGuiCol_ButtonHovered, col);
+       ImGui::PushStyleColor(ImGuiCol_ButtonActive, col);
+       bool ret = ImGui::SmallButton(text); on ^= !!ret;
+       ImGui::PopStyleColor(3);
+       return ret;
+   };
+
+   if (ToggleButton(ICON_MD_TRANSFORM "Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE)) mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+   ImGui::SameLine(0,1);
+   if (ToggleButton(ICON_MD_CROP_ROTATE "Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE)) mCurrentGizmoOperation = ImGuizmo::ROTATE;
+   ImGui::SameLine(0,1);
+   if (ToggleButton(ICON_MD_ZOOM_OUT_MAP "Scale", mCurrentGizmoOperation == ImGuizmo::SCALE)) mCurrentGizmoOperation = ImGuizmo::SCALE;
 
    if (mCurrentGizmoOperation != ImGuizmo::SCALE)
    {
-      if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-         mCurrentGizmoMode = ImGuizmo::LOCAL;
       ImGui::SameLine();
-      if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-         mCurrentGizmoMode = ImGuizmo::WORLD;
+      if (ToggleButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL)) mCurrentGizmoMode = ImGuizmo::LOCAL;
+      ImGui::SameLine(0,1);
+      if (ToggleButton("World", mCurrentGizmoMode == ImGuizmo::WORLD)) mCurrentGizmoMode = ImGuizmo::WORLD;
    }
+
+   float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+   ImGuizmo::DecomposeMatrixToComponents(matrix, matrixTranslation, matrixRotation, matrixScale);
+   if(mCurrentGizmoOperation == ImGuizmo::TRANSLATE) ImGui::InputFloat3("Tr", matrixTranslation, 3);
+   if(mCurrentGizmoOperation == ImGuizmo::ROTATE) ImGui::InputFloat3("Rt", matrixRotation, 3);
+   if(mCurrentGizmoOperation == ImGuizmo::SCALE) ImGui::InputFloat3("Sc", matrixScale, 3);
+   ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix);
+
 /*
    if (ImGui::IsKeyPressed(83))
       useSnap = !useSnap;

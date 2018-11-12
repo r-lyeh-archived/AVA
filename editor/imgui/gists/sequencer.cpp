@@ -419,15 +419,16 @@ void sequencer_demo() {
     static bool expanded = true;
     //ImGui::SetNextWindowPos(ImVec2(10, 350));
     //ImGui::SetNextWindowSize(ImVec2(740, 380));
-    ImGui::Begin("Sequencer");
-    ImGui::InputInt("Frame count", &mySequence.mFrameCount);
-    Sequencer(&mySequence, NULL, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE);
-    // add a UI to edit that particular item
-    if (selectedEntry != -1)
-    {
-        MySequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
-        ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
-        // switch (type) ....
+    if( ImGui::Begin("Sequencer") ) {
+        ImGui::InputInt("Frame count", &mySequence.mFrameCount);
+        Sequencer(&mySequence, NULL, &expanded, &selectedEntry, &firstFrame, ImSequencer::SEQUENCER_EDIT_STARTEND | ImSequencer::SEQUENCER_ADD | ImSequencer::SEQUENCER_DEL | ImSequencer::SEQUENCER_COPYPASTE);
+        // add a UI to edit that particular item
+        if (selectedEntry != -1)
+        {
+            MySequence::MySequenceItem &item = mySequence.myItems[selectedEntry];
+            ImGui::Text("I am a %s, please edit me", SequencerItemTypeNames[item.mType]);
+            // switch (type) ....
+        }
     }
     ImGui::End();
 }
