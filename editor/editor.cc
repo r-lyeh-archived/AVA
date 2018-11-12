@@ -871,16 +871,7 @@ void editor_draw() {
         profiler2_demo();
         spinner_demo();
 
-        //curve_demo();
         table_demo();
-    ImGui::End();
-
-    ImGui::Begin("demo 2");
-        extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
-        static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
-        property_demo();
-
-        richtext_demo();
 
         static GLuint texture_id = 0;
         if( !texture_id ) {
@@ -900,6 +891,14 @@ void editor_draw() {
             }
         */
         }
+    ImGui::End();
+
+    ImGui::Begin("demo 2");
+        extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
+        static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
+        property_demo();
+
+        richtext_demo();
     ImGui::End();
 
 #endif

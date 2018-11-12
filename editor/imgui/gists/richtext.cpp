@@ -123,8 +123,8 @@ void        RichTextDraw(ImDrawList* draw_list, const CRichTextDrawConfig& confi
 // cpp
 
 //#include "texture.h"
-int GetTexture(const char *asset) { return 1; }
-ImVec2 GetTextureRect(int handle) { return ImVec2(4,4); }
+int GetTexture(const char *path_asset) { return 1; }
+ImVec2 GetTextureRect(int handle) { return ImVec2(32,32); }
 
 //-------------------------------------------------------------------------
 // DATA
@@ -234,7 +234,12 @@ static int UiRichParseChar(CRichTextState& state, const char*& src, const char* 
                     if (state.DrawList)
                     {
                         ImVec2 img_pos(state.StartPos.x, state.CurrentPos.y + state.FontSize * 0.4f);
-                        //tex->Draw(state.DrawList, img_pos, IM_COL32_WHITE, ImVec2(tex_scale, tex_scale), 0.0f, ImVec2(0.5f,0.0f)); 
+                        //tex->Draw(state.DrawList, img_pos, IM_COL32_WHITE, ImVec2(tex_scale, tex_scale), 0.0f, ImVec2(0.5f,0.0f));
+
+                        //ImGui::Image( (ImTextureID)(uintptr_t)tex, tex_size );
+
+                        ImRect bb(state.CurrentPos, state.CurrentPos + tex_size);
+                        state.DrawList->AddImage((ImTextureID)(uintptr_t)tex, bb.Min, bb.Max, ImVec2(0,0), ImVec2(1,1), IM_COL32_WHITE);
                     }
                     state.CurrentPos.y += (state.FontSize * 0.4f) + tex_size.y;
                     state.HideChars = false;
@@ -355,6 +360,8 @@ ImVec2 RichTextCalcSizeEx(const CRichTextDrawConfig& config, const char* text_be
 
 void RichTextDraw(ImDrawList* draw_list, const CRichTextDrawConfig& config, CRichTextState& state, CUiTextFlags flags, ImVec2 text_pos, const char* text_begin, const char* text_end, const char* text_display_end)
 {
+    ImVec2 before = state.CurrentPos;
+
     if (!text_end)
         text_end = text_begin + strlen(text_begin);
 
@@ -482,25 +489,35 @@ void RichTextDraw(ImDrawList* draw_list, const CRichTextDrawConfig& config, CRic
     state.DrawList = NULL;
 }
 
-void richtext_demo() {
+bool richtext_demo() {
     static CRichTextDrawConfig config, *ever = 0;
     if( !ever ) { ever = &config;
         config.Styles[RichTextStyle_Normal].Font = ImGui::GetIO().Fonts->Fonts[0];
-        config.Styles[RichTextStyle_Normal].FontSize = 16;
-        config.Styles[RichTextStyle_Bold].Font = ImGui::GetIO().Fonts->Fonts[0];
-        config.Styles[RichTextStyle_Bold].FontSize = 16;
-        config.Styles[RichTextStyle_H1].Font = ImGui::GetIO().Fonts->Fonts[0];
-        config.Styles[RichTextStyle_H1].FontSize = 16;
-        config.Styles[RichTextStyle_H2].Font = ImGui::GetIO().Fonts->Fonts[0];
-        config.Styles[RichTextStyle_H2].FontSize = 16;
-        config.Styles[RichTextStyle_H3].Font = ImGui::GetIO().Fonts->Fonts[0];
-        config.Styles[RichTextStyle_H3].FontSize = 16;
-        config.Styles[RichTextStyle_H4].Font = ImGui::GetIO().Fonts->Fonts[0];
-        config.Styles[RichTextStyle_H4].FontSize = 16;
+        config.Styles[RichTextStyle_Normal].FontSize = ImGui::GetIO().Fonts->Fonts[0]->FontSize;
+
+        config.Styles[RichTextStyle_Bold].Font = ImGui::GetIO().Fonts->Fonts[2];
+        config.Styles[RichTextStyle_Bold].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize;
+
+        config.Styles[RichTextStyle_H1].Font = ImGui::GetIO().Fonts->Fonts[2];
+        config.Styles[RichTextStyle_H1].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.125;
+        config.Styles[RichTextStyle_H1].Color = IM_COL32(255,255,0,255); // YELLOW
+        config.Styles[RichTextStyle_H1].ColorOutline = IM_COL32(255,0,0,255); //RED
+        config.Styles[RichTextStyle_H2].Font = ImGui::GetIO().Fonts->Fonts[2];
+        config.Styles[RichTextStyle_H2].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.250;
+        config.Styles[RichTextStyle_H3].Font = ImGui::GetIO().Fonts->Fonts[2];
+        config.Styles[RichTextStyle_H3].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.500;
+        config.Styles[RichTextStyle_H4].Font = ImGui::GetIO().Fonts->Fonts[2];
+        config.Styles[RichTextStyle_H4].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.750;
     }
     static CRichTextState state( &config );
-    ImVec2 pos(0,0);
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = g.CurrentWindow;
-    RichTextDraw(window->DrawList, config, state, UiTextFlags_Default_, pos, "this is a test" );
+
+    const char *text = "richtext: [h1]this[/h1] [h2]is[/h2] [h3]a[/h3] [h4]rich[/h4] [b]test[/b]"; //" [img]smiley.png[/img]";
+
+    int flags = UiTextFlags_Left /*C,R*/ | UiTextFlags_VTop /*VT,VB*/; // | UiTextFlags_Outline; (<-- misaligned)
+    RichTextDraw(window->DrawList, config, state, (CUiTextFlags)flags, ImGui::GetWindowPos() + ImGui::GetCursorPos() + ImVec2(-ImGui::GetScrollX(), -ImGui::GetScrollY()), text);
+
+    ImVec2 rect = RichTextCalcSizeEx(config, text);
+    return ImGui::InvisibleButton( text, rect );
 }
