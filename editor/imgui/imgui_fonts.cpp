@@ -16,7 +16,7 @@
 */
 
 #include "3rd/@juliettef/IconsMaterialDesign_c.h"
-#include "3rd/@juliettef/IconsMaterialDesignRanges.h"
+#include "3rd/@juliettef/IconsMaterialDesignIcons_c.h"
 
 #include "3rd/fonts/mp1m.c" //   formal style, medium
 #define FONT_BUF  mp1m_compressed_data
@@ -39,9 +39,18 @@
 #define FONT_EXTRA_KR_SIZE     15.f // 21.f
 
 #include "3rd/fonts/mtir.c"    // material icons, regular
-#define FONT_EXTRA_ICON_BUF    mtir_compressed_data
-#define FONT_EXTRA_ICON_LEN    mtir_compressed_size
-#define FONT_EXTRA_ICON_SIZE   19.f
+#define FONT_EXTRA_ICON1_BUF   mtir_compressed_data
+#define FONT_EXTRA_ICON1_LEN   mtir_compressed_size
+#define FONT_EXTRA_ICON1_SIZE  19.f
+#define FONT_EXTRA_ICON1_MIN   0xE000 // error, was ICON_MIN_MD
+#define FONT_EXTRA_ICON1_MAX   0xEB4C // spa, was ICON_MAX_MD
+
+#include "3rd/fonts/mdi.c"    // material design icons, webfont
+#define FONT_EXTRA_ICON2_BUF   mdi_compressed_data
+#define FONT_EXTRA_ICON2_LEN   mdi_compressed_size
+#define FONT_EXTRA_ICON2_SIZE  19.f
+#define FONT_EXTRA_ICON2_MIN   0xF001 // mdi-vector-square, was ICON_MIN_MDI
+#define FONT_EXTRA_ICON2_MAX   0xFBBC // mdi-wrench-outline, was ICON_MAX_MDI
 
 #include "3rd/fonts/rbtb.c"    // roboto, bold
 #define FONT_EXTRA_ROBOTO_BUF  rbtb_compressed_data
@@ -191,15 +200,22 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
     cfg->OversampleV = 1; // 1
 
     if( 1 ) {
-        /*
-        static const ImWchar ranges[] = { 
-            ICON_MD_MIN, ICON_MD_MAX
+        static const ImWchar ranges[] = {
+            FONT_EXTRA_ICON1_MIN, FONT_EXTRA_ICON1_MAX,
             0
-        }; */
+        };
         cfg->MergeMode = true; cfg->PixelSnapH = true; cfg->GlyphOffset.y += 4;
-        auto *icon = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_EXTRA_ICON_BUF, FONT_EXTRA_ICON_LEN, FONT_EXTRA_ICON_SIZE - 3, cfg, IconsMaterialDesignRanges );
+        auto *icon = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_EXTRA_ICON1_BUF, FONT_EXTRA_ICON1_LEN, FONT_EXTRA_ICON1_SIZE - 3, cfg, ranges );
     }
 
+    if( 1 ) {
+        static const ImWchar ranges[] = {
+            FONT_EXTRA_ICON2_MIN, FONT_EXTRA_ICON2_MAX,
+            0
+        };
+        cfg->MergeMode = true; cfg->PixelSnapH = true; cfg->GlyphOffset.y += -2;
+        auto *icon = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_EXTRA_ICON2_BUF, FONT_EXTRA_ICON2_LEN, FONT_EXTRA_ICON2_SIZE - 3, cfg, ranges );
+    }
 
     io.Fonts->AddFontDefault(); // just in case none of the above is available at all...
     io.Fonts->AddFontFromMemoryCompressedTTF(FONT_EXTRA_ROBOTO_BUF, FONT_EXTRA_ROBOTO_LEN, FONT_EXTRA_ROBOTO_SIZE); //bold
