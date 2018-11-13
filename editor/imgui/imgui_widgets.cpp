@@ -2,18 +2,21 @@
 #define IsHovered(rect, id) \
     !!(ImGui::IsMouseHoveringRect(rect.Min, rect.Max) && ImGui::ItemHoverable(rect, id))
 
-#include "imgui/gists/bitfield.cpp"
-#include "imgui/gists/hexedit.cpp"
-#include "imgui/gists/ip_entry.cpp"
-#include "imgui/gists/knob.cpp" // fresh ideas here: https://www.g200kg.com/en/webknobman/gallery.php
-#include "imgui/gists/toggle.cpp"
-
+#include "imgui/gists/imgui_tooltip.cpp"
 #include "imgui/gists/imgui_browser.cpp"
 #include "imgui/gists/imgui_disabled.cpp"
 #include "imgui/gists/imgui_combofilter.cpp"
 #include "imgui/gists/imgui_bezier.cpp"
 #include "imgui/gists/imgui_curve.cpp"
 #include "imgui/gists/imgui_texture.cpp"
+
+#include "imgui/gists/group.cpp"
+
+#include "imgui/gists/bitfield.cpp"
+#include "imgui/gists/hexedit.cpp"
+#include "imgui/gists/ip_entry.cpp"
+#include "imgui/gists/knob.cpp" // fresh ideas here: https://www.g200kg.com/en/webknobman/gallery.php
+#include "imgui/gists/toggle.cpp"
 
 #include "imgui/gists/spinner.cpp"
 #include "imgui/gists/table.cpp"

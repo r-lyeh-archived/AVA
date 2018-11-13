@@ -896,6 +896,9 @@ void editor_draw() {
     ImGui::Begin("demo 2");
         extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
         static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
+
+        group_demo();
+
         property_demo();
 
         richtext_demo();

@@ -2299,15 +2299,6 @@ void gizmo_demo1(float camview[16], float camproj[16], int is_perspective) {
    static bool boundSizing = false;
    static bool boundSizingSnap = false;
 
-/*
-   if (ImGui::IsKeyPressed(90))
-      mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-   if (ImGui::IsKeyPressed(69))
-      mCurrentGizmoOperation = ImGuizmo::ROTATE;
-   if (ImGui::IsKeyPressed(82)) // r Key
-      mCurrentGizmoOperation = ImGuizmo::SCALE;
-*/
-
    auto ToggleButton = []( const char *text, bool on ) -> bool {
        const ImU32 col = ImGui::GetColorU32(on ? ImGuiCol_FrameBgActive : ImGuiCol_FrameBg);
        ImGui::PushStyleColor(ImGuiCol_Button, col);
@@ -2318,46 +2309,48 @@ void gizmo_demo1(float camview[16], float camproj[16], int is_perspective) {
        return ret;
    };
 
-   if (ToggleButton(ICON_MD_TRANSFORM "Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE)) mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-   ImGui::SameLine(0,1);
-   if (ToggleButton(ICON_MD_CROP_ROTATE "Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE)) mCurrentGizmoOperation = ImGuizmo::ROTATE;
-   ImGui::SameLine(0,1);
-   if (ToggleButton(ICON_MD_ZOOM_OUT_MAP "Scale", mCurrentGizmoOperation == ImGuizmo::SCALE)) mCurrentGizmoOperation = ImGuizmo::SCALE;
+   if(ImGui::IsKeyPressed(32)) mCurrentGizmoOperation = (ImGuizmo::OPERATION)((mCurrentGizmoOperation+1) % 3);
+   group_begin("gizmo1");
+      if (ToggleButton(ICON_MD_TRANSFORM, mCurrentGizmoOperation == ImGuizmo::TRANSLATE)) mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+      tooltip("Translate");
+      ImGui::SameLine(); //0,1);
+      if (ToggleButton(ICON_MD_CROP_ROTATE, mCurrentGizmoOperation == ImGuizmo::ROTATE)) mCurrentGizmoOperation = ImGuizmo::ROTATE;
+      tooltip("Rotate");
+      ImGui::SameLine(); //0,1);
+      if (ToggleButton(ICON_MD_ZOOM_OUT_MAP, mCurrentGizmoOperation == ImGuizmo::SCALE)) mCurrentGizmoOperation = ImGuizmo::SCALE;
+      tooltip("Scale");
+   group_end();
 
-   if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-   {
-      ImGui::SameLine();
-      if (ToggleButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL)) mCurrentGizmoMode = ImGuizmo::LOCAL;
-      ImGui::SameLine(0,1);
-      if (ToggleButton("World", mCurrentGizmoMode == ImGuizmo::WORLD)) mCurrentGizmoMode = ImGuizmo::WORLD;
-   }
-
-   float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-   ImGuizmo::DecomposeMatrixToComponents(matrix, matrixTranslation, matrixRotation, matrixScale);
-   if(mCurrentGizmoOperation == ImGuizmo::TRANSLATE) ImGui::InputFloat3("Tr", matrixTranslation, 3);
-   if(mCurrentGizmoOperation == ImGuizmo::ROTATE) ImGui::InputFloat3("Rt", matrixRotation, 3);
-   if(mCurrentGizmoOperation == ImGuizmo::SCALE) ImGui::InputFloat3("Sc", matrixScale, 3);
-   ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix);
-
-/*
-   if (ImGui::IsKeyPressed(83))
-      useSnap = !useSnap;
-*/
-   ImGui::Checkbox("", &useSnap);
    ImGui::SameLine();
+   group_begin("gizmo2");
+      ImGui::PushDisabled(mCurrentGizmoOperation == ImGuizmo::SCALE);
+      if (ToggleButton(ICON_MD_HOME, mCurrentGizmoMode == ImGuizmo::LOCAL)) mCurrentGizmoMode = ImGuizmo::LOCAL;
+      tooltip("Local space");
+      ImGui::SameLine(); //0,1);
+      if (ToggleButton(ICON_MD_PUBLIC, mCurrentGizmoMode == ImGuizmo::WORLD)) mCurrentGizmoMode = ImGuizmo::WORLD;
+      tooltip("World space");
+      ImGui::PopDisabled();
+   group_end();
 
-   switch (mCurrentGizmoOperation)
-   {
-   case ImGuizmo::TRANSLATE:
-      ImGui::InputFloat3("Snap", &snap[0]);
-      break;
-   case ImGuizmo::ROTATE:
-      ImGui::InputFloat("Angle Snap", &snap[0]);
-      break;
-   case ImGuizmo::SCALE:
-      ImGui::InputFloat("Scale Snap", &snap[0]);
-      break;
-   }
+   group_begin("gizmo3");
+      float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+      ImGuizmo::DecomposeMatrixToComponents(matrix, matrixTranslation, matrixRotation, matrixScale);
+      if(mCurrentGizmoOperation == ImGuizmo::TRANSLATE) ImGui::InputFloat3("Tr", matrixTranslation, 3);
+      if(mCurrentGizmoOperation == ImGuizmo::ROTATE) ImGui::InputFloat3("Rt", matrixRotation, 3);
+      if(mCurrentGizmoOperation == ImGuizmo::SCALE) ImGui::InputFloat3("Sc", matrixScale, 3);
+      ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix);
+   group_end();
+
+   // if (ImGui::IsKeyPressed(83)) useSnap = !useSnap;
+   group_begin("gizmo4");
+      if(ToggleButton(ICON_MD_LINK, useSnap)) useSnap = !useSnap;
+      tooltip("Use snap");
+      ImGui::SameLine();
+      if(mCurrentGizmoOperation == ImGuizmo::TRANSLATE) ImGui::InputFloat3("Snap", &snap[0]);
+      if(mCurrentGizmoOperation == ImGuizmo::ROTATE) ImGui::InputFloat("Angle Snap", &snap[0]);
+      if(mCurrentGizmoOperation == ImGuizmo::SCALE) ImGui::InputFloat("Scale Snap", &snap[0]);
+   group_end();
+
    ImGui::Checkbox("Bound Sizing", &boundSizing);
    if (boundSizing)
    {
@@ -2368,7 +2361,7 @@ void gizmo_demo1(float camview[16], float camproj[16], int is_perspective) {
       ImGui::PopID();
    }
 
-   ImGuiIO& io = ImGui::GetIO();
-   ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+   ImVec2 sz = ImGui::GetIO().DisplaySize; // ImGui::GetContentRegionAvail();
+   ImGuizmo::SetRect(0, 0, sz.x, sz.y);
    ImGuizmo::Manipulate(camview, camproj, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, useSnap ? &snap[0] : NULL, boundSizing?bounds:NULL, boundSizingSnap?boundsSnap:NULL);
 }
