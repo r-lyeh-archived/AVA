@@ -100,13 +100,7 @@ struct property {
     void (*on_random)();
 
     void draw_tooltip(const char *text) {
-        if (text && ImGui::IsItemHovered()) {
-            ImGui::BeginTooltip();
-            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-            ImGui::TextUnformatted(text);
-            ImGui::PopTextWrapPos();
-            ImGui::EndTooltip();
-        }
+        tooltip(text);
     }
 
     int draw_widget() {
