@@ -775,17 +775,26 @@ void editor_draw() {
 
 
     #if 1 
-    static bool once = 0; if( !once ) { once = 1;
-        ImGui::SetNextWindowFocus();
-    }
-    int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
-    ImGui::Begin("Viewport", NULL, flags);
-        ImVec2 cpos = ImGui::GetCursorPos();
+    if( ImGui::Begin("Game") ) {
+        ImVec2 cursor_pos = ImGui::GetCursorPos();
+
         // layer #0 (remoteview)
-        ImGui::SetCursorPos(cpos);
-        imgui_texture( remote_id, R.width, R.height, false );
+        ImGui::SetCursorPos(cursor_pos);
+        imgui_texture( remote_id, ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y, false); // R.width, R.height, false );
+    }
+    ImGui::End();
+
+    int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
+    if( ImGui::IsMouseDown(1) ) ImGui::SetNextWindowFocus();
+    ImGui::Begin("Viewport", NULL, flags);
+        ImVec2 cursor_pos = ImGui::GetCursorPos();
+
+        // layer #0 (remoteview)
+        // ImGui::SetCursorPos(cursor_pos);
+        // imgui_texture( remote_id, R.width, R.height, false );
+
         // layer #1 (debugdraw)
-        ImGui::SetCursorPos(cpos);
+        ImGui::SetCursorPos(cursor_pos);
         {
             using namespace im3d;
             static Camera cam = { {0, 0, 90}, {0,0,0} };
@@ -810,8 +819,9 @@ void editor_draw() {
             sprintf(buf, "%s, vp: %f,%f %f,%f", prim.Name, vp.x, vp.y, vp.w, vp.h);
             ImGui::TextDisabled( buf );
         }
+
         // layer #2 (gizmo)
-        ImGui::SetCursorPos(cpos);
+        ImGui::SetCursorPos(cursor_pos);
         ImGuizmo::SetDrawlist();
         gizmo_demo1( c->transform, c->projection, c->is_perspective );
     ImGui::End();
@@ -840,8 +850,9 @@ void editor_draw() {
         mem_edit_1.DrawWindow("Memory Editor", mem_block, mem_block_size, 0x0000); // create a window and draw memory editor (if you already have a window, use DrawContents())
     ImGui::PopFont();
 
-    ImGui::Begin("Log");
+    if( ImGui::Begin("Log") ) {
         console_demo();
+    }
     ImGui::End();
 #endif
 
