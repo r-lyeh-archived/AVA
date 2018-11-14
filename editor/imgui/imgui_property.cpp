@@ -438,11 +438,11 @@ void property_panel( struct property *ps, int num ) {
 void toolbar_panel( struct property *ps, int num ) {
     for( int i = 0; i < num; ++i ) {
         if( ps[i].info[2] == '>' ) {
-            ImGui::TextDisabled(":::"); ImGui::SameLine();
+            ImGui::TextDisabled(/*":::"*/ ICON_MDI_DRAG_VERTICAL); ImGui::SameLine();
             ImGui::TextDisabled(ps[i].info+3); ImGui::SameLine();
         }
         else if( ps[i].info[2] == '-' ) {
-            ImGui::TextDisabled(":::"); ImGui::SameLine();
+            ImGui::TextDisabled(/*":::"*/ ICON_MDI_DRAG_VERTICAL); ImGui::SameLine();
         } else {
             ps[i].draw_widget(); ps[i].draw_tooltip(ps[i].help); ImGui::SameLine();
         }
