@@ -202,7 +202,7 @@ namespace ImGuizmo
 #endif
 #include "imgui_internal.h"
 
-#define GUIZMO_LMB 1 // 0
+#define GUIZMO_LMB 0 // 0
 
 // includes patches for multiview from
 // https://github.com/CedricGuillemet/ImGuizmo/issues/15

@@ -785,7 +785,7 @@ void editor_draw() {
     ImGui::End();
 
     int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
-    if( ImGui::IsMouseDown(1) ) ImGui::SetNextWindowFocus();
+    if( ImGui::IsMouseDown(1) || (ImGui::IsMouseDown(0) && ImGuizmo::IsOver()) ) ImGui::SetNextWindowFocus();
     ImGui::Begin("Viewport", NULL, flags);
         ImVec2 cursor_pos = ImGui::GetCursorPos();
 
