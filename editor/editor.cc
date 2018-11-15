@@ -8,6 +8,25 @@
 #include <timeapi.h> // timeBeginPeriod, timeEndPeriod
 #include <thread>
 #include <chrono>
+#include <set>
+
+// dir.h
+#include <sys/stat.h>
+#ifndef S_ISDIR
+#define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
+#endif
+#ifndef S_ISREG
+#define S_ISREG(mode)  (((mode) & S_IFMT) == S_IFREG)
+#endif
+bool dir_exists( const char *pathfile ) {
+    struct stat s;
+    return (stat(pathfile, &s) == 0 && S_ISDIR(s.st_mode));
+}
+// --
+#ifdef _WIN32
+#define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
+#endif
+
 
 #define WITH_MAINMENU 1
 #define WITH_DOCKING  1
@@ -773,6 +792,25 @@ void editor_draw() {
 
 #endif
 
+     if( 0 )
+     {
+        /*
+        int tex_px = 64;
+        int images_per_line = (ImGui::GetWindowContentRegionWidth() / (tex_px * 1.20));
+        ImVec2 zoom( tex_px * 4, tex_px * 4 );
+        if( images_per_line ) for( int ID = 1; ID <= texture_count; ++ID ) {
+            ImGui::PushID(ID);
+
+            imgui_texture( ID % texture_count, tex_px, tex_px, true );
+
+            if ((ID % images_per_line) < (images_per_line-1)) {
+                ImGui::SameLine();
+            }
+            ImGui::PopID();
+        }
+        */
+     }
+
 
     #if 1 
     if( ImGui::Begin("Game") ) {
@@ -785,7 +823,7 @@ void editor_draw() {
     ImGui::End();
 
     int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
-    if( ImGui::IsMouseDown(1) || (ImGui::IsMouseDown(0) && ImGuizmo::IsOver()) ) ImGui::SetNextWindowFocus();
+    if( /*ImGui::IsMouseDown(1) ||*/ (ImGui::IsMouseDown(0) && ImGuizmo::IsOver()) ) ImGui::SetNextWindowFocus();
     ImGui::Begin("Viewport", NULL, flags);
         ImVec2 cursor_pos = ImGui::GetCursorPos();
 

@@ -64,7 +64,6 @@ int tinydir( const char *path, std::function<void (const char *fname,bool is_dir
 #include <stdint.h>
 #include <time.h>
 #include <functional>
-bool needs_refresh = true;
 struct filedir {
     bool is_dir;
     std::string name;
@@ -76,9 +75,17 @@ struct filedir {
     uint64_t    color;
 };
 std::vector<filedir> dir_cache[2];
+int bs_viewmode = 0;
+bool bs_refreshed = false;
+bool bs_strmatch( const char *text, const char *pattern ) {
+    if( *pattern=='\0' ) return !*text;
+    if( *pattern=='*' )  return bs_strmatch(text, pattern+1) || (*text && bs_strmatch(text+1, pattern));
+    if( *pattern=='?' )  return *text && (*text != '.') && bs_strmatch(text+1, pattern+1);
+    return (*text == *pattern) && bs_strmatch(text+1, pattern+1);
+}
 int imgui_browser( char path[256] ) {
-    if( needs_refresh ) {
-        needs_refresh = false;
+    if( !bs_refreshed ) {
+        bs_refreshed = true;
 
         char temp[256];
         strcpy(temp, path[0] ? path : "./");
@@ -119,25 +126,96 @@ int imgui_browser( char path[256] ) {
         dir_cache[1].clear();
         tinydir( path, callback );
     }
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(60/255.f,60/255.f,60/255.f,60/255.f));
-    for( auto &f : dir_cache[0] ) {
-        ImGui::TextColored( ImVec4(255/255.f,240/255.f,90/255.f,255/255.f), ICON_MD_FOLDER );
-        ImGui::SameLine();
-        if( ImGui::MenuItem( f.name.c_str() ) ) {
-            needs_refresh = true;
-            strcat(path, f.name.c_str() /*MD icon*/ );
-        }
+    auto draw_entry = [&]( const filedir &f, bool is_dir ) -> int {
+        ImGui::PushID(&f);
+        ImGui::BeginGroup();
+
+        ImTextureID thumbnail = (ImTextureID)(uintptr_t)0; // find_thumbnail(f.name);
+        int thumb_size = bs_viewmode == 1 ? 64 : 128;
+        ImVec2 sz(thumb_size - 20, thumb_size - 16);
+
+        auto iconify = [&]() {
+            if( thumbnail != NULL )
+                ImGui::ImageButton( thumbnail, sz );
+            else if( is_dir )
+                ImGui::TextColored( ImVec4(255/255.f,240/255.f,90/255.f,255/255.f), ICON_MD_FOLDER );
+            else
+                ImGui::TextColored( editor_palette[f.color], ICON_MD_INSERT_DRIVE_FILE );
+
+            if( bs_viewmode <= 1 ) {
+                ImGui::SameLine();
+            }
+            ImGui::Text( f.name.c_str() );
+        };
+
+        iconify();
+        int clicked = ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0);
+
         HINT( f.hint.c_str() )
-    }
-    for( auto &f : dir_cache[1] ) {
-        ImGui::TextColored( editor_palette[f.color], ICON_MD_INSERT_DRIVE_FILE );
-        ImGui::SameLine();
-        if( ImGui::MenuItem( f.name.c_str() ) ) {
+
+        // contextual menu
+        if (!ImGui::IsPopupOpen("##popup") && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+            ImGui::SetDragDropPayload("EDITOR__FILEDROP", &f, sizeof(filedir*));
+            iconify();
+            ImGui::EndDragDropSource();
         }
-        HINT( f.hint.c_str() )
+        else
+        if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1)) ImGui::OpenPopup("##popup");
+
+        ImGui::EndGroup();
+        ImGui::PopID();
+
+        return clicked;
+    };
+
+    static char computer_bufname[128], *computer_name = 0;
+    if( !computer_name ) {
+        computer_name = getenv("COMPUTERNAME") ? getenv("COMPUTERNAME") : "PC";
+        sprintf(computer_bufname, ICON_MDI_HOME " %s", computer_name );
     }
 
+    ImGui::Button(computer_bufname);
+    ImGui::SameLine();
+    ImGui::Button(ICON_MDI_FOLDER " C:");
+    ImGui::SameLine();
+
+    if(ImGui::Button(ICON_MDI_EYE)) bs_viewmode = (bs_viewmode+1) % 3;
+    ImGui::SameLine();
+    static char filterbuf[128] = {0}, filter[128+2];
+    ImGui::InputText(ICON_MDI_FILTER, filterbuf, sizeof(filterbuf)-1);
+    sprintf(filter, "*%s*", filterbuf);
+
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(60/255.f,60/255.f,60/255.f,60/255.f));
+        float itemSize = bs_viewmode > 1 ? 48 : 128;
+        int columns = (int)(ImGui::GetContentRegionAvail().x / (bs_viewmode > 1 ? 256.0f : 128.0f));
+        columns = columns < 1 || bs_viewmode == 0 ? 1 : columns;
+        ImGui::Columns(columns, false);
+
+        for( auto &f : dir_cache[0] ) {
+            if( filter[2] && !bs_strmatch(f.name.c_str(), filter)) continue;
+            if( draw_entry(f, 1) ) {
+                bs_refreshed = false;
+                strcat(path, f.name.c_str() /*MD icon*/ );
+            }
+
+            ImGui::NextColumn();
+        }
+        for( auto &f : dir_cache[1] ) {
+            if( filter[2] && !bs_strmatch(f.name.c_str(), filter)) continue;
+            draw_entry(f, 0);
+
+            ImGui::NextColumn();
+        }
+
+        ImGui::Columns(1);
     ImGui::PopStyleColor();
+
+    if (ImGui::BeginPopup("##popup", ImGuiWindowFlags_None)) {
+        if (ImGui::MenuItem("Open")) {
+        }
+        ImGui::EndPopup();
+    }
+
     return 0;
 }
 
