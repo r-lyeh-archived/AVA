@@ -89,8 +89,8 @@ Additionally:
 - `.git/`, dot folders are always ignored.
 - `editor/`, generic 3d editor and viewer.
 - `engine/`, engine runtime.
-- `import/`, asset pipeline that imports foreign data.
 - `games/`, all your game sources here.
+- `tools/`, build & data pipeline that imports foreign data.
 
 ## Download
 

@@ -1,12 +1,15 @@
-## Roadmap Editor
+## Editor: Roadmap
 - [x] UI: Dockspace, tabs and custom menu.
-- [x] UI: 3D gizmo.
+- [x] UI: 3D Gizmo.
 - [x] UI: 3D DebugDraw.
 - [x] UI: Most useful widgets.
 - [x] UI: Timeline and data tracks.
 - [x] UI: Property widget.
+- [x] UI: Groups as radio buttons.
+- [x] UI: Toolbar (button, on/off buttons).
+- [ ] UI: File browser.
+- [ ] UI: Property containers: element, array, map, set.
 - [ ] UI: Object/Hierarchy viewer.
-- [ ] UI: Toolbar (button, on/off buttons), radio buttons (one).
 - [ ] Spec: Specify final JSON/Object notation.
 - [x] Spec: OSC/UDP message sharing.
 - [ ] Spec: IPC mem sharing.
@@ -26,3 +29,6 @@
 - [ ] Core: Remote logic -> send: tick(dt), recv: world.diff file
 - [ ] Core: Remote UI -> scripted windows (tick,step,edit,init,quit,draw).
 - [ ] Prefabs: Scenegraph + cameras, lights, models, skeletons, splines, materials, attributes, LOD groups.
+
+## Editor: Known bugs
+- [ ] Dummy.

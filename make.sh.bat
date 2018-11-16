@@ -87,7 +87,7 @@ exit
 
         call "%0" clean
 
-        pushd "%~dp0%\import\builder"
+        pushd "%~dp0%\tools\builder"
 
             REM project generation
             REM premake5.exe codelite
