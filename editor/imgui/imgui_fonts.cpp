@@ -18,10 +18,15 @@
 #include "3rd/@juliettef/IconsMaterialDesign_c.h"
 #include "3rd/@juliettef/IconsMaterialDesignIcons_c.h"
 
-#include "3rd/fonts/mp1m.c" //   formal style, medium
-#define FONT_BUF  mp1m_compressed_data
-#define FONT_LEN  mp1m_compressed_size
-#define FONT_SIZE 18.f // 21.f
+#include "3rd/fonts/cfr.c"  // carlito font regular
+#define FONT_MAIN_BUF  cfr_compressed_data
+#define FONT_MAIN_LEN  cfr_compressed_size
+#define FONT_MAIN_SIZE 14.f
+
+#include "3rd/fonts/mp1m.c" // formal style, medium
+#define FONT_CJK_BUF   mp1m_compressed_data
+#define FONT_CJK_LEN   mp1m_compressed_size
+#define FONT_CJK_SIZE  18.f // 21.f
 #define FONT_CHN  1
 #define FONT_JAP  1
 #define FONT_KOR  0
@@ -104,7 +109,7 @@ void imgui_fonts() {
 
 cfg->RasterizerMultiply = 1.1f; // increase brightness
 
-    io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, default_ranges ); // io.Fonts->GetGlyphRangesDefault() );
+    io.Fonts->AddFontFromMemoryCompressedTTF( FONT_MAIN_BUF, FONT_MAIN_LEN, FONT_MAIN_SIZE, cfg, default_ranges ); // io.Fonts->GetGlyphRangesDefault() );
     cfg->MergeMode = true;
 
     if( 1 ) {
@@ -112,14 +117,14 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         0x0370, 0x03FF, // Greek and Coptic
         0x10A0, 0x10FF, // Modern Georgian, Svan, and Mingrelian
         0 };
-        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE + 1, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE + 1, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
     }
 
     if( 1 ) {
         static const ImWchar ranges[] = {  
         0x0590, 0x05FF, // Hebrew, Yiddish, Ladino, and other Jewish diaspora languages.
         0 };
-        auto *f = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE + 2, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
+        auto *f = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE + 2, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
         // f->Scale = 100.f;
     }
 
@@ -129,7 +134,7 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         0x2DE0, 0x2DFF, // Cyrillic Extended-A
         0xA640, 0xA69F, // Cyrillic Extended-B
             0 };
-        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, ranges ); //io.Fonts->GetGlyphRangesCyrillic() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE, cfg, ranges ); //io.Fonts->GetGlyphRangesCyrillic() );
     }
 
     cfg->OversampleH = 2;
@@ -151,12 +156,12 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         0xFF00, 0xFFEF, // Half-width characters
         0 };
 #endif
-        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE + 1.5, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE + 1.5, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
     }
 
     if( FONT_CHN ) {
 #if 0
-        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, io.Fonts->GetGlyphRangesChinese() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE, cfg, io.Fonts->GetGlyphRangesChinese() );
 #else
         static const ImWchar ranges[] = {  
             //0x3000, 0x303F, // CJK punctuation
@@ -172,12 +177,12 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         CJK Compatibility Ideographs            F900-FAFF   Duplicates, unifiable variants, corporate characters
         CJK Compatibility Ideographs Supplement 2F800-2FA1F Unifiable variants
         */
-        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE + 2, cfg, ranges );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE + 2, cfg, ranges );
 #endif
     }
     if( 1 ) { // FONT_KOR ) {
 #if 0
-        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, io.Fonts->GetGlyphRangesKorean() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE, cfg, io.Fonts->GetGlyphRangesKorean() );
 #else
         static const ImWchar ranges[] = {
             //0x3000, 0x303F, // CJK punctuation
@@ -193,7 +198,7 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         0x2010, 0x205E, // Punctuations
         0x0E00, 0x0E7F, // Thai
             0 };
-        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_BUF, FONT_LEN, FONT_SIZE, cfg, ranges ); //io.Fonts->GetGlyphRangesThai() );
+        io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE, cfg, ranges ); //io.Fonts->GetGlyphRangesThai() );
     }
 
     cfg->OversampleH = 1;
