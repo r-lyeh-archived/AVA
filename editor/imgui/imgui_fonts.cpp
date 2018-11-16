@@ -1,29 +1,29 @@
 #pragma once
 
 /*
-#include "3rd/fonts/fs3.c"  // monospaced
-#include "3rd/fonts/djv.c"  //               , medium  (18.f)
-#include "3rd/fonts/mp1r.c" //   formal style, regular (21.f)
-#include "3rd/fonts/mp1m.c" //   formal style, medium
-#include "3rd/fonts/mp1b.c" //   formal style, bold
-#include "3rd/fonts/mp1h.c" //   formal style, heavy
-#include "3rd/fonts/mp1a.c" //   formal style, black
-#include "3rd/fonts/mp2r.c" // informal style, regular (21.f)
-#include "3rd/fonts/mp2m.c" // informal style, medium
-#include "3rd/fonts/mp2b.c" // informal style, bold
-#include "3rd/fonts/mp2h.c" // informal style, heavy
-#include "3rd/fonts/mp2a.c" // informal style, black
+#include "assets/fonts/fs3.c"  // monospaced
+#include "assets/fonts/djv.c"  //               , medium  (18.f)
+#include "assets/fonts/mp1r.c" //   formal style, regular (21.f)
+#include "assets/fonts/mp1m.c" //   formal style, medium
+#include "assets/fonts/mp1b.c" //   formal style, bold
+#include "assets/fonts/mp1h.c" //   formal style, heavy
+#include "assets/fonts/mp1a.c" //   formal style, black
+#include "assets/fonts/mp2r.c" // informal style, regular (21.f)
+#include "assets/fonts/mp2m.c" // informal style, medium
+#include "assets/fonts/mp2b.c" // informal style, bold
+#include "assets/fonts/mp2h.c" // informal style, heavy
+#include "assets/fonts/mp2a.c" // informal style, black
 */
 
 #include "3rd/@juliettef/IconsMaterialDesign_c.h"
 #include "3rd/@juliettef/IconsMaterialDesignIcons_c.h"
 
-#include "3rd/fonts/cfr.c"  // carlito font regular
+#include "assets/fonts/cfr.c"  // carlito font regular
 #define FONT_MAIN_BUF  cfr_compressed_data
 #define FONT_MAIN_LEN  cfr_compressed_size
 #define FONT_MAIN_SIZE 14.f
 
-#include "3rd/fonts/mp1m.c" // formal style, medium
+#include "assets/fonts/mp1m.c" // formal style, medium
 #define FONT_CJK_BUF   mp1m_compressed_data
 #define FONT_CJK_LEN   mp1m_compressed_size
 #define FONT_CJK_SIZE  18.f // 21.f
@@ -33,31 +33,31 @@
 #define FONT_CYR  1
 #define FONT_THA  0
 
-#include "3rd/fonts/ntar.c"    // noto sans cjk (arabic), regular
+#include "assets/fonts/ntar.c"    // noto sans cjk (arabic), regular
 #define FONT_EXTRA_AR_BUF      ntar_compressed_data
 #define FONT_EXTRA_AR_LEN      ntar_compressed_size
 #define FONT_EXTRA_AR_SIZE     30.f // 21.f
 
-#include "3rd/fonts/ntkr.c"    // noto sans cjk (kr only), regular
+#include "assets/fonts/ntkr.c"    // noto sans cjk (kr only), regular
 #define FONT_EXTRA_KR_BUF      ntkr_compressed_data
 #define FONT_EXTRA_KR_LEN      ntkr_compressed_size
 #define FONT_EXTRA_KR_SIZE     15.f // 21.f
 
-#include "3rd/fonts/mtir.c"    // material icons, regular
+#include "assets/fonts/mtir.c"    // material icons, regular
 #define FONT_EXTRA_ICON1_BUF   mtir_compressed_data
 #define FONT_EXTRA_ICON1_LEN   mtir_compressed_size
 #define FONT_EXTRA_ICON1_SIZE  19.f
 #define FONT_EXTRA_ICON1_MIN   0xE000 // error, was ICON_MIN_MD
 #define FONT_EXTRA_ICON1_MAX   0xEB4C // spa, was ICON_MAX_MD
 
-#include "3rd/fonts/mdi.c"    // material design icons, webfont
+#include "assets/fonts/mdi.c"    // material design icons, webfont
 #define FONT_EXTRA_ICON2_BUF   mdi_compressed_data
 #define FONT_EXTRA_ICON2_LEN   mdi_compressed_size
 #define FONT_EXTRA_ICON2_SIZE  19.f
 #define FONT_EXTRA_ICON2_MIN   0xF001 // mdi-vector-square, was ICON_MIN_MDI
 #define FONT_EXTRA_ICON2_MAX   0xFBBC // mdi-wrench-outline, was ICON_MAX_MDI
 
-#include "3rd/fonts/rbtb.c"    // roboto, bold
+#include "assets/fonts/rbtb.c"    // roboto, bold
 #define FONT_EXTRA_ROBOTO_BUF  rbtb_compressed_data
 #define FONT_EXTRA_ROBOTO_LEN  rbtb_compressed_size
 #define FONT_EXTRA_ROBOTO_SIZE 16.f

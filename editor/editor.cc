@@ -28,6 +28,12 @@ bool dir_exists( const char *pathfile ) {
 #endif
 
 
+typedef unsigned char stbi_uc;
+extern "C" stbi_uc* stbi_load_from_memory( const stbi_uc *bin, int len, int *x, int *y, int *n, int comp );
+extern "C" void stbi_image_free( stbi_uc * );
+
+
+
 #define WITH_MAINMENU 1
 #define WITH_DOCKING  1
 #define WITH_SCENE    1
@@ -626,6 +632,41 @@ void editor_draw() {
         glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
     }
 
+    // create suru icons
+    static GLuint suru_id = 0;
+    if( !suru_id ) {
+        // suru_id = texgen();
+        glGenTextures(1, &suru_id);
+
+
+
+        // texupdate( suru_id, R.buffer, 256, 256 );
+        glBindTexture( GL_TEXTURE_2D, suru_id );
+        // clamping (s,t,r)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // border color
+        float color[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+        // filtering
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // #if OPENGL >= 3
+        // glGenerateMipmap(GL_TEXTURE_2D);
+        // #endif
+
+
+        int x,y,n;
+        stbi_uc *pixels = stbi_load_from_memory((const stbi_uc*)suru_data, suru_size, &x, &y, &n, 4);
+        int mip = 0, w = x, h = y;
+        int texture_fmt = GL_RGBA; // incl. compressed formats
+        int image_fmt = GL_RGBA, pixel_fmt = GL_UNSIGNED_BYTE;
+        if( pixels) {
+            glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
+            stbi_image_free(pixels);
+        }
+    }
+
     float rad2deg = (180.0 / M_PI);
     float deg2rad = (M_PI / 180.0);
     static Camera2 cam, *c = 0;
@@ -944,11 +985,11 @@ void editor_draw() {
         extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
         static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
 
-        table_panel_demo();
         property_panel_demo();
 
-        richtext_demo();
+        table_panel_demo();
         group_demo();
+        richtext_demo();
     ImGui::End();
 
 #endif

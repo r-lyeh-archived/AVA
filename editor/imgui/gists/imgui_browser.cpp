@@ -130,25 +130,86 @@ int imgui_browser( char path[256] ) {
         ImGui::PushID(&f);
         ImGui::BeginGroup();
 
-        ImTextureID thumbnail = (ImTextureID)(uintptr_t)0; // find_thumbnail(f.name);
-        int thumb_size = bs_viewmode == 1 ? 64 : 128;
-        ImVec2 sz(thumb_size - 20, thumb_size - 16);
+        auto lower = []( const char *buf ) -> std::string {
+            std::string x = buf;
+            for( auto &c : x ) if( c >= 'A' && c <= 'Z' ) c = c - 'A' + 'a';
+            return x;
+        };
+
+        static std::map< std::string, const icon *> cache, *init = 0;
+        if( !init ) {
+            init = &cache;
+            // array
+            for( int i = 0; i < IM_ARRAYSIZE(suru); ++i ) {
+                const char *ext = strrchr(suru[i].name, '-');
+                cache[ lower( ext ? ext + 1 : suru[i].name).c_str() ] = &suru[i];
+            }
+            // aliases
+            cache[ "ico" ] = cache["image"];
+            cache[ "gif" ] = cache["image"];
+            cache[ "png" ] = cache["image"];
+            cache[ "pkm" ] = cache["image"];
+            cache[ "dds" ] = cache["image"];
+            cache[ "ktx" ] = cache["image"];
+            cache[ "pvr" ] = cache["image"];
+            cache[ "jpg" ] = cache["image"];
+            cache[ "tga" ] = cache["image"];
+            cache[ "bmp" ] = cache["image"];
+            cache[ "mp3" ] = cache["audio"];
+            cache[ "wav" ] = cache["audio"];
+            cache[ "ogg" ] = cache["audio"];
+            cache[ "xm"  ] = cache["audio"];
+            cache[ "mod" ] = cache["audio"];
+            cache[ "mid" ] = cache["audio"];
+            cache[ "avi" ] = cache["video"];
+            cache[ "mov" ] = cache["video"];
+            cache[ "license" ] = cache["copying"];
+            cache[ "authors" ] = cache["credits"];
+            cache[ "bat" ] = cache["sh"];
+            cache[ "htm" ] = cache["html"];
+            cache[ "dll" ] = cache["bin"];
+            cache[ "cc" ] = cache["cpp"];
+            cache[ "hh" ] = cache["hpp"];
+            cache[ "inl" ] = cache["cpp"];
+        }
+        auto find_thumbnail = [&]( const char *fname ) -> const icon * {
+            const char *ext = strrchr(fname, '.');
+            auto find = cache.find( lower( ext ? ext + 1 : fname).c_str() );
+            if( find == cache.end() ) return NULL;
+            return find->second;
+        };
+
+        ImTextureID thumbnail = (ImTextureID)(uintptr_t)(3); // 3: suru.png texture
+        const auto *suru_icon = thumbnail ? find_thumbnail( f.name.c_str() ) : NULL;
+        const auto *suru_blank_folder = &suru[79], *suru_blank_file = &suru[3];
+        float factor = bs_viewmode == 0 ? 6 : bs_viewmode == 1 ? 2 : 1;
+        if( thumbnail != NULL ) {
+            if( !suru_icon ) suru_icon = is_dir ? suru_blank_folder : suru_blank_file;
+        }
 
         auto iconify = [&]() {
-            if( thumbnail != NULL )
-                ImGui::ImageButton( thumbnail, sz );
-            else if( is_dir )
+            /****/ if( thumbnail != NULL ) {
+                ImGui::Image( thumbnail, ImVec2(suru_icon->w/factor, suru_icon->h/factor),
+                    ImVec2( suru_icon->u0, suru_icon->v0 ),
+                    ImVec2( suru_icon->u1, suru_icon->v1 ),
+                    suru_icon == suru_blank_file ? editor_palette[f.color] : ImVec4(1,1,1,1)
+                );
+            } else if( is_dir ) {
                 ImGui::TextColored( ImVec4(255/255.f,240/255.f,90/255.f,255/255.f), ICON_MD_FOLDER );
-            else
+            } else {
                 ImGui::TextColored( editor_palette[f.color], ICON_MD_INSERT_DRIVE_FILE );
-
-            if( bs_viewmode <= 1 ) {
-                ImGui::SameLine();
             }
-            ImGui::Text( f.name.c_str() );
+
+            /****/ if( bs_viewmode == 0 ) {
+                ImGui::SameLine(); ImGui::Text( f.name.c_str() );
+            } else if( bs_viewmode >= 1 ) {
+                ImGui::Text( f.name.c_str() );
+            }
         };
 
         iconify();
+
+        ImGui::EndGroup();
         int clicked = ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0);
 
         HINT( f.hint.c_str() )
@@ -162,7 +223,6 @@ int imgui_browser( char path[256] ) {
         else
         if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(1)) ImGui::OpenPopup("##popup");
 
-        ImGui::EndGroup();
         ImGui::PopID();
 
         return clicked;
@@ -186,8 +246,7 @@ int imgui_browser( char path[256] ) {
     sprintf(filter, "*%s*", filterbuf);
 
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(60/255.f,60/255.f,60/255.f,60/255.f));
-        float itemSize = bs_viewmode > 1 ? 48 : 128;
-        int columns = (int)(ImGui::GetContentRegionAvail().x / (bs_viewmode > 1 ? 256.0f : 128.0f));
+        int columns = (int)(ImGui::GetContentRegionAvail().x / (bs_viewmode > 1 ? 128.0f : 96.0f));
         columns = columns < 1 || bs_viewmode == 0 ? 1 : columns;
         ImGui::Columns(columns, false);
 
