@@ -19,27 +19,23 @@
 
 // .h
 namespace ImGui {
-IMGUI_API int  BeginTable(const char* columnsId, const char** headers, float *widths, int count, bool border=true);
+IMGUI_API int  BeginTable(const char* id, const char** headers, float *widths, int count, bool border=true);
 IMGUI_API void EndTable();
 }
 
 // .cpp
 namespace ImGui {
 static inline IMGUI_API
-int BeginTable(const char* columnsId, const char** headers, float* widths, int count, bool draw_border)
+int BeginTable(const char* id, const char** headers, float* widths, int count, bool draw_border)
 {
     if(count<=0)
         return 0;
 
     // Draw column headers
     ImGuiStyle & style = ImGui::GetStyle();
-    const ImVec2 firstTextSize = ImGui::CalcTextSize(headers[0], NULL, true);
 
-    ImGui::BeginChild(columnsId, ImVec2(0,firstTextSize.y + 2 * style.ItemSpacing.y), true);
-
-    char str_id[256];
-    sprintf(str_id, "tbl0_%s", columnsId);
-    ImGui::Columns(count, str_id, draw_border);
+    ImGui::PushID(id);
+    ImGui::Columns(count, id, draw_border);
 
     float offset = 0.0f;
     for(int i=0; i < count; i++)
@@ -65,14 +61,10 @@ int BeginTable(const char* columnsId, const char** headers, float* widths, int c
     }
 
     ImGui::Columns(1);
-    ImGui::EndChild();
 
     // Draw body
-    str_id[3] = '1';
-    columnsId = str_id;
-
-    ImGui::BeginChild(columnsId, ImVec2(0,0), true);
-    ImGui::Columns(count, columnsId, draw_border);
+    ImGui::PushID("table_next");
+    ImGui::Columns(count, id, draw_border);
 
     offset = 0.0f;
     for(int i=0; i < count; i++)
@@ -88,7 +80,8 @@ static inline IMGUI_API
 void EndTable()
 {
     ImGui::Columns(1);
-    ImGui::EndChild();
+    ImGui::PopID();
+    ImGui::PopID();
 }
 
 }
