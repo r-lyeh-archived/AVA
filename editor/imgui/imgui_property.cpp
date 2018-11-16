@@ -5,31 +5,32 @@ enum {
     PANEL_LIST,
     PANEL_TOOLBAR,
 
-    PROPERTY_GROUP,      // [x] >v
-    PROPERTY_SEPARATOR,  // [x] ---
-    PROPERTY_ANGLE,      // [x] float [-180..180]
-    PROPERTY_DELTA,      // [x] float [0..1]
-    PROPERTY_SLIDER,     // [x] @todo: int
-    PROPERTY_FLOAT,      // [x] @todo: int + range: int[2], float[2]
-    PROPERTY_LIST,       // [x]
-    PROPERTY_FILTER,     // [x]
-    PROPERTY_VECTOR3,    // [x] vector3
-    PROPERTY_VECTOR4,    // [x] vector4
-    PROPERTY_COLOR3,     // [x] color3
-    PROPERTY_COLOR4,     // [x] color4
-    PROPERTY_CHECKBOX,   // [x] bool
-    PROPERTY_TOGGLE,     // [x] button (on/off state)
-    PROPERTY_BUTTON,     // [x] button
-    PROPERTY_STRING,     // [x] string box
-    PROPERTY_PASSWORD,   // [x] hidden string box ***
-    PROPERTY_BITMASK,    // [x] int [0..64]
-    PROPERTY_IP,         // [x]
-    PROPERTY_KNOB,       // [x]
-    PROPERTY_QUATERNION, // [x]
-    PROPERTY_BEZIER,     // [x]
-    PROPERTY_TEXTBOX,    // [x]
-    PROPERTY_IMAGE,      // [x] texture2d
-    PROPERTY_CURVE,      // [x] curve
+    PROPERTY_GROUP,       // [x] >v
+    PROPERTY_SEPARATOR,   // [x] ---
+    PROPERTY_ANGLE,       // [x] float [-180..180]
+    PROPERTY_DELTA,       // [x] float [0..1]
+    PROPERTY_SLIDER,      // [x] @todo: int
+    PROPERTY_FLOAT,       // [x] @todo: int + range: int[2], float[2]
+    PROPERTY_LIST,        // [x]
+    PROPERTY_FILTER,      // [x]
+    PROPERTY_VECTOR3,     // [x] vector3
+    PROPERTY_VECTOR4,     // [x] vector4
+    PROPERTY_COLOR3,      // [x] color3
+    PROPERTY_COLOR4,      // [x] color4
+    PROPERTY_CHECKBOX,    // [x] bool
+    PROPERTY_TOGGLE,      // [x] button (on/off state)
+    PROPERTY_BUTTON,      // [x] button
+    PROPERTY_STRING,      // [x] string box
+    PROPERTY_PASSWORD,    // [x] hidden string box ***
+    PROPERTY_BITMASK,     // [x] int [0..64]
+    PROPERTY_IP,          // [x]
+    PROPERTY_KNOB,        // [x]
+    PROPERTY_QUATERNION,  // [x]
+    PROPERTY_BEZIER,      // [x]
+    PROPERTY_TEXTBOX,     // [x]
+    PROPERTY_IMAGE,       // [x] texture2d
+    PROPERTY_CURVE,       // [x] curve
+    PROPERTY_LABEL = 'A', // [x]
 
 /*
     PROPERTY_TRANSFORM,  // [ ] gizmo
@@ -107,8 +108,10 @@ struct property {
         char *id = info, type = info[2], *name = info+3;
         int ret = 0;
         ImGui::PushID(this);
+
         switch( type ) {
             default:
+            break; case PROPERTY_LABEL: ImGui::Text(data.string);
             break; case 'l': ret = ImGui::Combo(info, &data.item, data.items, data.max_items);
             break; case 'L': ret = ComboFilter(info, data.filtbuf, 32, data.items, data.max_items, data.cfs);
             break; case 'f': ret = ImGui::SliderFloat(info, &data.value, data.minv, data.maxv, data.format);
@@ -421,6 +424,15 @@ property property_curve( const char *info, int num_points, float *curve ) {
     return p;
 }
 
+property property_label( const char *info, const char *default_string = "" ) {
+    property p = MAKE_PROPERTY(info, PROPERTY_LABEL);
+    snprintf( p.data.string, sizeof(p.data.string), "%s", default_string );
+    return p;
+}
+
+
+
+
 void property_panel( struct property *ps, int num ) {
     for( int i = 0; i < num; ++i ) {
         if( ps[i].info[2] == '>' ) {
@@ -449,11 +461,27 @@ void toolbar_panel( struct property *ps, int num ) {
     }
 }
 
+void table_panel( struct property *ps, int num, int columns ) {
+    float widths[ 256 ] = {0}; // <-- FIXME: static float array would allow to resize table
+    const char *headers[256] = {0};
+    for( int i = 0; i < columns; ++i ) { headers[i] = ps[i].info+3; }
+    ImGui::PushID(ps);
+    if( ImGui::BeginTable("##headers", headers, widths, columns) ) {
+        for( int i = columns; i < num; ++i ) {
+            if( ps[i].info[2] == '>' ) continue;
+            if( ps[i].info[2] == '-' ) continue;
+            ps[i].draw_widget(); /*ps[i].draw_tooltip(ps[i].help);*/ ImGui::NextColumn();
+        }
+        ImGui::EndTable();
+    }
+    ImGui::PopID();
+}
 
 
-void property_demo() { // panel demo
+void property_panel_demo() { // panel demo
     static struct property ps[] = {
         property_group( "My widgets 1" ),
+            property_label( "My Label", "Hello" ),
             property_angle( ICON_MD_KEYBOARD_ARROW_DOWN " My Angle\nThis is PI", 3.14159f ),
             property_list( ICON_MD_TIMELAPSE " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
             property_filter( ICON_MD_FILE_UPLOAD " My Enum\nThis is ENUM", {"AAAA", "BBBB", "CCCC"} ),
@@ -484,7 +512,7 @@ void property_demo() { // panel demo
     property_panel( ps, IM_ARRAYSIZE(ps) );
 }
 
-void toolbar_demo() {
+void toolbar_panel_demo() {
     static struct property ps[] = {
         property_group( "My widgets 1" ),
             property_toggle( "My Toggle\nConfigure a state", 1 ),
@@ -494,4 +522,22 @@ void toolbar_demo() {
             property_button( "My Button 2" ),
     };
     toolbar_panel( ps, IM_ARRAYSIZE(ps) );
+}
+
+void table_panel_demo() {
+    static struct property ps[] = {
+        // head
+        property_label( "My Toggle" ),
+        property_label( "My Checkbox" ),
+        property_label( "My Color3" ),
+        // row 0
+        property_toggle( "My Toggle\nConfigure a state", 1 ),
+        property_checkbox( "My Checkbox", 1 ),
+        property_color3( "My Color3\nConfigure a color", 1,0,0 ),
+        // row 1
+        property_toggle( "My Toggle\nConfigure a state", 1 ),
+        property_checkbox( "My Checkbox", 1 ),
+        property_color3( "My Color3\nConfigure a color", 1,0,0 ),
+    };
+    table_panel( ps, IM_ARRAYSIZE(ps), 3 );
 }

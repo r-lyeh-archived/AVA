@@ -897,7 +897,7 @@ void editor_draw() {
 #if WITH_PANELS
 // floating content
     ImGui::Begin("toolbar demo 1", NULL, ImGuiWindowFlags_NoTitleBar);
-        toolbar_demo();
+        toolbar_panel_demo();
     ImGui::End();
 
     ImGui::Begin("demo 1");
@@ -919,8 +919,6 @@ void editor_draw() {
 
         profiler2_demo();
         spinner_demo();
-
-        table_demo();
 
         static GLuint texture_id = 0;
         if( !texture_id ) {
@@ -946,11 +944,11 @@ void editor_draw() {
         extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
         static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
 
-        group_demo();
-
-        property_demo();
+        table_panel_demo();
+        property_panel_demo();
 
         richtext_demo();
+        group_demo();
     ImGui::End();
 
 #endif
