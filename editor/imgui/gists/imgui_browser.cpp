@@ -84,12 +84,15 @@ bool bs_strmatch( const char *text, const char *pattern ) {
     return (*text == *pattern) && bs_strmatch(text+1, pattern+1);
 }
 int imgui_browser( char path[256] ) {
+    auto update_path = [&]( const char *new_path ) {
+        char temp[256];
+        strcpy(temp, new_path);
+        _fullpath(path, temp, 256);
+    };
+
     if( !bs_refreshed ) {
         bs_refreshed = true;
-
-        char temp[256];
-        strcpy(temp, path[0] ? path : "./");
-        _fullpath(path, temp, 256);
+        //update_path( path[0] ? path : "./" );
 
         int skip = strlen(path);
         std::function<void(const char *,bool)> callback = [&]( const char *name, bool is_dir ) {
@@ -105,13 +108,13 @@ int imgui_browser( char path[256] ) {
             f.color = 0;
             const char *ext = strrchr(name, '.');
             while( ext && ext[0] ) {
-                f.color ^= ((uint8_t)*ext++) * 131;
+                f.color = (f.color ^ ((uint8_t)*ext++)) * 131;
             }
             f.color %= editor_palette_max;
 
             char fdtemp[256];
             sprintf(fdtemp, 
-                "Name: %s\n"
+                "Path: %s\n"
                 "Type: %lld\n"
                 "Size: %lld\n"
                 "Owner: %lld\n"
@@ -187,9 +190,9 @@ int imgui_browser( char path[256] ) {
             if( !suru_icon ) suru_icon = is_dir ? suru_blank_folder : suru_blank_file;
         }
 
-        auto iconify = [&]() {
+        auto iconify = [&]( float zoomout_factor ) {
             /****/ if( thumbnail != NULL ) {
-                ImGui::Image( thumbnail, ImVec2(suru_icon->w/factor, suru_icon->h/factor),
+                ImGui::Image( thumbnail, ImVec2(suru_icon->w/zoomout_factor, suru_icon->h/zoomout_factor),
                     ImVec2( suru_icon->u0, suru_icon->v0 ),
                     ImVec2( suru_icon->u1, suru_icon->v1 ),
                     suru_icon == suru_blank_file ? editor_palette[f.color] : ImVec4(1,1,1,1)
@@ -207,17 +210,24 @@ int imgui_browser( char path[256] ) {
             }
         };
 
-        iconify();
+        iconify(factor);
 
         ImGui::EndGroup();
         int clicked = ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0);
 
-        HINT( f.hint.c_str() )
+        if(ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+            iconify(2);
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted(f.hint.c_str());
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
 
         // contextual menu
         if (!ImGui::IsPopupOpen("##popup") && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
             ImGui::SetDragDropPayload("EDITOR__FILEDROP", &f, sizeof(filedir*));
-            iconify();
+            iconify(factor);
             ImGui::EndDragDropSource();
         }
         else
@@ -228,22 +238,67 @@ int imgui_browser( char path[256] ) {
         return clicked;
     };
 
-    static char computer_bufname[128], *computer_name = 0;
-    if( !computer_name ) {
-        computer_name = getenv("COMPUTERNAME") ? getenv("COMPUTERNAME") : "PC";
-        sprintf(computer_bufname, ICON_MDI_HOME " %s", computer_name );
-    }
-
-    ImGui::Button(computer_bufname);
-    ImGui::SameLine();
-    ImGui::Button(ICON_MDI_FOLDER " C:");
-    ImGui::SameLine();
 
     if(ImGui::Button(ICON_MDI_EYE)) bs_viewmode = (bs_viewmode+1) % 3;
+
     ImGui::SameLine();
+
+    static char computer_bufname[128], *computer_name = 0;
+    if( !computer_name ) {
+        computer_name = getenv("COMPUTERNAME") ? getenv("COMPUTERNAME") : "HOME";
+        sprintf(computer_bufname, ICON_MDI_HOME " %s", computer_name );
+    }
+    static char drive_name[128], *drive_buffer = 0;
+    if( !drive_buffer ) {
+        sprintf(drive_buffer = drive_name, "%s", computer_bufname);
+    }
+    if( ImGui::Button(drive_name) ) ImGui::OpenPopup("id");
+        if (ImGui::BeginPopupContextItem("id")) {
+            // --- special folders
+            if( ImGui::Selectable(computer_bufname) ) {
+                ImGui::CloseCurrentPopup();
+                strcpy(drive_name, computer_bufname);
+                update_path("./");
+                bs_refreshed = false;
+            }
+            // --- drives
+            DWORD d = GetLogicalDrives();
+            for( int i = 0; i < 26; i++ ) {
+                if( !(d & (1<<i)) ) continue;
+
+                bool is_virtual_drive = false;
+                DWORD sectorsPerCluster;
+                DWORD bytesPerSector;
+                DWORD numberOfFreeClusters;
+                DWORD totalNumberOfClusters;
+                char Drive[] = "\\\\.\\F:"; Drive[4] = 'A' + i;
+                is_virtual_drive = 0 == GetDiskFreeSpaceA(Drive, &sectorsPerCluster, &bytesPerSector,
+                    &numberOfFreeClusters, &totalNumberOfClusters);
+
+                char buf[16];
+                sprintf(buf, ICON_MDI_FOLDER " %c:/", 'A' + i );
+                if( ImGui::Selectable(buf) ) {
+                    ImGui::CloseCurrentPopup();
+                    strcpy(drive_name, buf);
+                    update_path(&buf[4]);
+                    bs_refreshed = false;
+                    break;
+                }
+            }
+            ImGui::EndPopup();
+        }
+
+    ImGui::SameLine();
+
     static char filterbuf[128] = {0}, filter[128+2];
-    ImGui::InputText(ICON_MDI_FILTER, filterbuf, sizeof(filterbuf)-1);
+    ImGui::Text(ICON_MDI_FILTER);
+    ImGui::SameLine();
+    ImGui::PushItemWidth(-1);
+    ImGui::InputText("##ICON_MDI_FILTER", filterbuf, sizeof(filterbuf)-1);
+    ImGui::PopItemWidth();
     sprintf(filter, "*%s*", filterbuf);
+
+
 
     ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(60/255.f,60/255.f,60/255.f,60/255.f));
         int columns = (int)(ImGui::GetContentRegionAvail().x / (bs_viewmode > 1 ? 128.0f : 96.0f));
@@ -255,6 +310,7 @@ int imgui_browser( char path[256] ) {
             if( draw_entry(f, 1) ) {
                 bs_refreshed = false;
                 strcat(path, f.name.c_str() /*MD icon*/ );
+                update_path(path);
             }
 
             ImGui::NextColumn();
@@ -279,7 +335,7 @@ int imgui_browser( char path[256] ) {
 }
 
 void browser_demo() {
-    static char path[256] = "./";
+    static char path[2048] = "./";
     ImGui::Begin("Browser");
         if( imgui_browser( path ) ) {
 
