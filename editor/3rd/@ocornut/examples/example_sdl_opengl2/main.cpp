@@ -34,7 +34,7 @@ int main(int, char**)
     SDL_GLContext gl_context = SDL_GL_CreateContext(window);
     SDL_GL_SetSwapInterval(1); // Enable vsync
 
-    // Setup Dear ImGui binding
+    // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -44,10 +44,11 @@ int main(int, char**)
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
+    // Setup Platform/Renderer bindings
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL2_Init();
 
-    // Setup style
+    // Setup Style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsClassic();
 
@@ -136,6 +137,15 @@ int main(int, char**)
         glClear(GL_COLOR_BUFFER_BIT);
         //glUseProgram(0); // You may want this if using this code in an OpenGL 3+ context where shaders may be bound
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+
+        // Update and Render additional Platform Windows
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
+
+        SDL_GL_MakeCurrent(window, gl_context);
         SDL_GL_SwapWindow(window);
     }
 
