@@ -7,7 +7,9 @@
 - [x] UI: Property widget.
 - [x] UI: Groups as radio buttons.
 - [x] UI: Toolbar (button, on/off buttons).
-- [ ] UI: File browser.
+- [x] UI: File browser.
+- [ ] UI: File browser: add ( LOCAL(C: D:) REMOTE(192.168.1.34) GAME(..) )
+- [ ] UI: Scenegraph( WORLD(..) MAP(..) LEVEL(L1 L2 L3) SCENE(Level/ Object1 Object2) )
 - [ ] UI: Property containers: element, array, map, set.
 - [ ] UI: Object/Hierarchy viewer.
 - [ ] Spec: Specify final JSON/Object notation.

@@ -785,6 +785,113 @@ void editor_draw() {
 
         PRINTF("Cam: %f %f %f (%ff,%ff,%ff,%ff) (%05.2fº pitch, %05.2fº roll, %05.2fº yaw)\n", cam_pos[0], cam_pos[1], cam_pos[2], cam_quat[0], cam_quat[1], cam_quat[2], cam_quat[3], p*rad2deg,r*rad2deg,y*rad2deg);
      }
+
+
+     if( ImGui::Begin("Scene") ) {
+        ImGui::Text("Scene graph");
+
+        // [see] https://github.com/ocornut/imgui/issues/143
+
+        static int selected = 0;
+
+        auto left = [&]() {
+            // User state
+            const int COUNT = 5;
+            static const char* items_data[COUNT] = { "Item One", "Item Two", "Item Three", "Item Four", "Item Five" };
+            static int items_list[COUNT] = { 0, 1, 2, 3, 4 };
+
+            // Render + dragging
+            for (int n = 0; n < COUNT; n++)
+            {
+                int item_no = items_list[n];
+                ImGui::Selectable(items_data[item_no]);
+
+                if (ImGui::IsItemActive() && !ImGui::IsItemHovered())
+                {
+                    float drag_dy = ImGui::GetMouseDragDelta(0).y;
+                    if (drag_dy < 0.0f && n > 0)
+                    {
+                        // Swap
+                        items_list[n] = items_list[n-1];
+                        items_list[n-1] = item_no;
+                        ImGui::ResetMouseDragDelta();
+                    }
+                    else if (drag_dy > 0.0f && n < COUNT-1)
+                    {
+                        items_list[n] = items_list[n+1];
+                        items_list[n+1] = item_no;
+                        ImGui::ResetMouseDragDelta();
+                    }
+                }
+            }
+
+            struct funcs
+            {
+                static void ShowDummyObject(const char* prefix, int uid)
+                {
+                    ImGui::PushID(uid);                // Use object uid as identifier. Most commonly you could also use the object pointer as a base ID.
+                    ImGui::AlignTextToFramePadding();  // Text and Tree nodes are less high than regular widgets, here we add vertical spacing to make the tree lines equal high.
+                    bool node_open = ImGui::TreeNode("Object", "%s_%u", prefix, uid);
+                    if (node_open) {
+                        static float dummy_members[8] = { 0.0f,0.0f,1.0f,3.1416f,100.0f,999.0f };
+                        for (int i = 0; i < 8; i++)
+                        {
+                            ImGui::PushID(i); // Use field index as identifier.
+                            if (i < 2) {
+                                ShowDummyObject("Child", 424242);
+                            }
+                            else {
+                                // Here we use a TreeNode to highlight on hover (we could use e.g. Selectable as well)
+                                ImGui::AlignTextToFramePadding();
+                                ImGui::TreeNodeEx("Field", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Field_%d", i);
+                            }
+                            ImGui::PopID();
+                        }
+                        ImGui::TreePop();
+                    }
+                    ImGui::PopID();
+                }
+            };
+
+            funcs::ShowDummyObject("Object", 0);
+
+            for (int i = 0; i < 100; i++)
+            {
+                char label[128];
+                sprintf(label, "MyObject %d", i);
+                if (ImGui::Selectable(label, selected == i))
+                    selected = i;
+            }
+        };
+
+        auto right = [&]() {
+            ImGui::Text("MyObject: %d", selected);
+            ImGui::Separator();
+            ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
+
+            property_panel_demo();
+        };
+
+        // left
+        ImGui::BeginChild("left pane", ImVec2(150, 0), true);
+        left();
+        ImGui::EndChild();
+        ImGui::SameLine();
+
+        // right
+        ImGui::BeginGroup();
+            ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+                right();
+            ImGui::EndChild();
+            if (ImGui::Button("Revert")) {}
+            ImGui::SameLine();
+            if (ImGui::Button("Save")) {}
+        ImGui::EndGroup();
+
+     }
+     ImGui::End();
+
+
 #endif
 
 #if 0
