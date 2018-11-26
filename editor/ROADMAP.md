@@ -8,10 +8,11 @@
 - [x] UI: Groups as radio buttons.
 - [x] UI: Toolbar (button, on/off buttons).
 - [x] UI: File browser.
-- [ ] UI: File browser: add ( LOCAL(C: D:) REMOTE(192.168.1.34) GAME(..) )
+- [ ] UI: File browser 2: add ( LOCAL(C: D:) REMOTE(192.168.1.34) GAME(..) )
 - [ ] UI: Scenegraph( WORLD(..) MAP(..) LEVEL(L1 L2 L3) SCENE(Level/ Object1 Object2) )
 - [ ] UI: Property containers: element, array, map, set.
 - [ ] UI: Object/Hierarchy viewer.
+- [ ] UI: Undo/Redo.
 - [ ] Spec: Specify final JSON/Object notation.
 - [x] Spec: OSC/UDP message sharing.
 - [ ] Spec: IPC mem sharing.

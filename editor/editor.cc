@@ -685,8 +685,9 @@ void editor_draw() {
     // for persp
     c->ratio = c->width / c->height;
 
-    ImGui::Begin("Camera");
-    ImGui::SliderFloat("fov", &c->fov, 10, 120 );
+    if( ImGui::Begin("Camera") ) {
+	    ImGui::SliderFloat("fov", &c->fov, 10, 120 );
+    }
     ImGui::End();
 
     if (c->is_perspective) {
@@ -972,7 +973,7 @@ void editor_draw() {
 
     int flags = ImGui::IsMouseDown(0) ? 0 : ImGuiWindowFlags_NoMove;
     if( /*ImGui::IsMouseDown(1) ||*/ (ImGui::IsMouseDown(0) && ImGuizmo::IsOver()) ) ImGui::SetNextWindowFocus();
-    ImGui::Begin("Viewport", NULL, flags);
+    if( ImGui::Begin("Viewport", NULL, flags) ) {
         ImVec2 cursor_pos = ImGui::GetCursorPos();
 
         // layer #0 (remoteview)
@@ -1010,6 +1011,7 @@ void editor_draw() {
         ImGui::SetCursorPos(cursor_pos);
         ImGuizmo::SetDrawlist();
         gizmo_demo1( c->transform, c->projection, c->is_perspective );
+    }
     ImGui::End();
     #endif
 #endif
@@ -1022,8 +1024,9 @@ void editor_draw() {
     browser_demo();
 
     static ImGui::Nodes nodes_;
-    ImGui::Begin("Nodes");
-    nodes_.ProcessNodes();
+    if( ImGui::Begin("Nodes") ) {
+    	nodes_.ProcessNodes();
+    }
     ImGui::End();
 
     // alt, monospaced font
@@ -1044,11 +1047,12 @@ void editor_draw() {
 
 #if WITH_PANELS
 // floating content
-    ImGui::Begin("toolbar demo 1", NULL, ImGuiWindowFlags_NoTitleBar);
+    if( ImGui::Begin("toolbar demo 1", NULL, ImGuiWindowFlags_NoTitleBar) ) {
         toolbar_panel_demo();
+    }
     ImGui::End();
 
-    ImGui::Begin("demo 1");
+    if( ImGui::Begin("demo 1") ) {
         PlotVar("fps", ImGui::GetIO().Framerate); // if(t>60s) PlotVarFlushOldEntries(), t = 0;
 
         stats_demo();
@@ -1086,9 +1090,10 @@ void editor_draw() {
             }
         */
         }
+    }
     ImGui::End();
 
-    ImGui::Begin("demo 2");
+    if( ImGui::Begin("demo 2") ) {
         extern bool show_demo_window; ImGui::Checkbox("Demo Window", &show_demo_window);
         static bool rec = 0; if( ImGui::Checkbox("Record", &rec) ) set_render('rec0', (double)!!rec);
 
@@ -1097,12 +1102,12 @@ void editor_draw() {
         table_panel_demo();
         group_demo();
         richtext_demo();
+    }
     ImGui::End();
 
 #endif
 
-    ImGui::Begin("Texture viewer");
-    {
+    if( ImGui::Begin("Texture viewer") ) {
         GLuint tc;
         glGenTextures( 1, &tc );
         int texture_count = (int)tc;
