@@ -1047,7 +1047,7 @@ void editor_draw() {
 
 #if WITH_PANELS
 // floating content
-    if( ImGui::Begin("toolbar demo 1", NULL, ImGuiWindowFlags_NoTitleBar) ) {
+    if( ImGui::Begin("toolbar demo 1" /*, NULL, ImGuiWindowFlags_NoTitleBar */) ) {
         toolbar_panel_demo();
     }
     ImGui::End();

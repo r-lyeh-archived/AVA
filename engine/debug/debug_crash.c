@@ -141,7 +141,7 @@ LONG WINAPI crash_reporter(PEXCEPTION_POINTERS exc_info) {
     return EXCEPTION_EXECUTE_HANDLER;
 }
 
-#ifdef AUTORUN
+#if defined AUTORUN && (defined RELEASE && RELEASE)
 AUTORUN {
     LOG(CRASH.C, "unhandled exception handler installed...");
 

@@ -88,7 +88,7 @@ void imgui_fonts() {
 
     static const ImWchar default_ranges[] =
     {
-        0x0020, 0x00FF, // Basic Latin + Latin Supplement
+        0x0020, 0x007F, // Basic Latin + Latin Supplement
         0x0080, 0x00FF, // Latin_Supplement
         0x0100, 0x017F, // Latin_Extended-A
         0x0180, 0x024F, // Latin_Extended-B
@@ -101,7 +101,7 @@ void imgui_fonts() {
 
         0x16A0, 0x16F0, // Old Norse / Runic
 
-        0x01FF, 0x03FF, // fix IPA missing glyphs (?)
+        //0x01FF, 0x03FF, // fix IPA missing glyphs (?)
         0x1F00, 0x1FFF, // fix ancient greek glyphs (?)
 
         0,
@@ -114,25 +114,25 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
 
     if( 1 ) {
         static const ImWchar ranges[] = {  
-        0x0370, 0x03FF, // Greek and Coptic
-        0x10A0, 0x10FF, // Modern Georgian, Svan, and Mingrelian
-        0 };
+            0x0370, 0x03FF, // Greek and Coptic
+            0x10A0, 0x10FF, // Modern Georgian, Svan, and Mingrelian
+            0 };
         io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE + 1, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
     }
 
     if( 1 ) {
         static const ImWchar ranges[] = {  
-        0x0590, 0x05FF, // Hebrew, Yiddish, Ladino, and other Jewish diaspora languages.
-        0 };
+            0x0590, 0x05FF, // Hebrew, Yiddish, Ladino, and other Jewish diaspora languages.
+            0 };
         auto *f = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE + 2, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
         // f->Scale = 100.f;
     }
 
     if( FONT_CYR ) {
         static const ImWchar ranges[] = {  
-        0x0400, 0x052F, // Cyrillic + Cyrillic Supplement
-        0x2DE0, 0x2DFF, // Cyrillic Extended-A
-        0xA640, 0xA69F, // Cyrillic Extended-B
+            0x0400, 0x052F, // Cyrillic + Cyrillic Supplement
+            0x2DE0, 0x2DFF, // Cyrillic Extended-A
+            0xA640, 0xA69F, // Cyrillic Extended-B
             0 };
         io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE, cfg, ranges ); //io.Fonts->GetGlyphRangesCyrillic() );
     }
@@ -142,8 +142,8 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
 
     if( 1 ) {
         static const ImWchar ranges[] = {  
-        0x0600, 0x06FF, // Arabic script, and the Arabic-Indic digits
-        0 };
+            0x0600, 0x06FF, // Arabic script, and the Arabic-Indic digits
+            0 };
         auto *f = io.Fonts->AddFontFromMemoryCompressedTTF( FONT_EXTRA_AR_BUF, FONT_EXTRA_AR_LEN, FONT_EXTRA_AR_SIZE, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
         // f->Scale = 100.f;
     }
@@ -151,10 +151,10 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
     if( FONT_JAP ) {
 #if 1
         static const ImWchar ranges[] = {  
-        0x3000, 0x30FF, // Punctuations, Hiragana, Katakana
-        0x31F0, 0x31FF, // Katakana Phonetic Extensions
-        0xFF00, 0xFFEF, // Half-width characters
-        0 };
+            0x3000, 0x30FF, // Punctuations, Hiragana, Katakana
+            0x31F0, 0x31FF, // Katakana Phonetic Extensions
+            0xFF00, 0xFFEF, // Half-width characters
+            0 };
 #endif
         io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE + 1.5, cfg, ranges ); // io.Fonts->GetGlyphRangesJapanese() );
     }
@@ -195,8 +195,8 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
     }
     if( FONT_THA ) {
         static const ImWchar ranges[] = {  
-        0x2010, 0x205E, // Punctuations
-        0x0E00, 0x0E7F, // Thai
+            0x2010, 0x205E, // Punctuations
+            0x0E00, 0x0E7F, // Thai
             0 };
         io.Fonts->AddFontFromMemoryCompressedTTF( FONT_CJK_BUF, FONT_CJK_LEN, FONT_CJK_SIZE, cfg, ranges ); //io.Fonts->GetGlyphRangesThai() );
     }
