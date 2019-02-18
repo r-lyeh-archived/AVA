@@ -60,7 +60,7 @@ static void SleepShort(float milliseconds) {
     NtDelayExecution(false, &interval);
 }
 // Emil Gustafsson
-int usleep(unsigned long usec) {
+void usleep(unsigned long usec) {
     struct timeval tv;
     fd_set dummy;
     SOCKET s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -70,7 +70,6 @@ int usleep(unsigned long usec) {
     tv.tv_usec = usec%1000000L;
     int r = select(0, 0, 0, &dummy, &tv); /* return bool: 0 == select() */
     closesocket(s);
-    return r;
 }
 // Adi Shavit
 void usleep2(__int64 usec) {

@@ -790,7 +790,7 @@ void TextEditor::Render()
         }
 
         // Draw a tooltip on known identifiers/preprocessor symbols
-        if (ImGui::IsMousePosValid())
+        if (ImGui::IsWindowHovered() && ImGui::IsMousePosValid()) // @r-lyeh: added iswindowhovered
         {
             auto id = GetWordAt(ScreenPosToCoordinates(ImGui::GetMousePos()));
             if (!id.empty())
