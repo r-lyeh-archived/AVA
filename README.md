@@ -17,7 +17,7 @@
 <br/>
 <a href="https://discord.gg/vu6Vt9d"><img alt="Discord" src="https://img.shields.io/badge/chat-AVA%20lounge-738bd7.svg?logo=discord"/></a>
 <a href="https://travis-ci.org/r-lyeh/AVA"><img alt="Travis" src="https://api.travis-ci.org/r-lyeh/AVA.svg?branch=master"/></a>
-<a href="https://github.com/r-lyeh/AVA/issues"><img alt="Issues" src="https://github-meta-badges.herokuapp.com/r-lyeh/AVA/issues.svg"/></a>
+<a href="https://github.com/r-lyeh/AVA/issues"><img alt="Issues" src="https://img.shields.io/github/issues-raw/r-lyeh/AVA.svg"/></a>
 <a href="http://unlicense.org/"><img alt="Unlicensed" src="http://img.shields.io/badge/license-Unlicense-blue.svg?style=flat"/></a>
 <br/>
 </p>
