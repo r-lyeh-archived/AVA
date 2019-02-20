@@ -200,6 +200,15 @@ void imgui_theme_cherry() {
     style.Colors[ImGuiCol_TextSelectedBg]        = MED( 0.43f);
     // [...]
     style.Colors[ImGuiCol_ModalWindowDarkening]  = BG( 0.73f);
+
+    return;
+    style.Colors[ImGuiCol_Tab]  = ImVec4(0.455,0.198,0.301,0.862);
+    style.Colors[ImGuiCol_TabUnfocused] = ImVec4(0.455,0.198,0.301,0.500);
+
+    style.Colors[ImGuiCol_TabHovered] = ImVec4(0.204,0.478,0.741,1.000);
+    style.Colors[ImGuiCol_TabActive] = ImVec4(0.204,0.478,0.741,1.000);
+    style.Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.204,0.478,0.741,0.500);
+    style.Colors[ImGuiCol_DockingPreview] = ImVec4(0.204,0.478,0.741,1.000);
 }
 
 void imgui_style_framework() {
