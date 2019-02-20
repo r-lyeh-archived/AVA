@@ -102,7 +102,7 @@ struct DebugConsole
                 HINT("Filter (\"incl,-excl\") (\"error\")");
             THEN
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0,0));
-                filter.Draw("", -1);
+                filter.Draw("##Filter", -1);
                 ImGui::PopStyleVar();
 
 
