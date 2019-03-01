@@ -24,11 +24,15 @@
 #include "imgui_freetype.h"
 #include "imgui_internal.h"     // ImMin,ImMax,ImFontAtlasBuild*,
 #include <stdint.h>
+#if 1 // @r-lyeh
+#include "3rd/@vinniefalco/ft2build.h" //<ft2build.h>
+#else
 #include <ft2build.h>
 #include FT_FREETYPE_H          // <freetype/freetype.h>
 #include FT_MODULE_H            // <freetype/ftmodapi.h>
 #include FT_GLYPH_H             // <freetype/ftglyph.h>
 #include FT_SYNTHESIS_H         // <freetype/ftsynth.h>
+#endif
 
 #ifdef _MSC_VER
 #pragma warning (disable: 4505) // unreferenced local function has been removed (stb stuff)
@@ -191,6 +195,7 @@ namespace
         IM_ASSERT(slot->format == FT_GLYPH_FORMAT_OUTLINE);
 
         // Apply convenience transform (this is not picking from real "Bold"/"Italic" fonts! Merely applying FreeType helper transform. Oblique == Slanting)
+#if 0 // @r-lyeh
         if (UserFlags & ImGuiFreeType::Bold)
             FT_GlyphSlot_Embolden(slot);
         if (UserFlags & ImGuiFreeType::Oblique)
@@ -201,6 +206,7 @@ namespace
             //slot->metrics.width = bbox.xMax - bbox.xMin;
             //slot->metrics.height = bbox.yMax - bbox.yMin;
         }
+#endif
 
         return &slot->metrics;
     }

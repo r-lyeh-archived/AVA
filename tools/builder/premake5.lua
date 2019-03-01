@@ -41,6 +41,8 @@ project "editor"
     "../../editor/3rd/@ocornut/examples/imgui_impl_glfw.cpp",
     "../../editor/3rd/@ocornut/examples/imgui_impl_opengl3.cpp",
     "../../editor/3rd/@ocornut/examples/libs/gl3w/GL/gl3w.c",
+    "../../editor/3rd/@ocornut/misc/freetype/*.cpp",
+    "../../editor/3rd/@vinniefalco/*freetype*.c",
     "../../engine/engine.c",
     }
     includedirs {

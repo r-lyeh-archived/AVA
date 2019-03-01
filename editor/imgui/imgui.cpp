@@ -2,6 +2,7 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 #include "imgui.h"
+#include "misc/freetype/imgui_freetype.h"
 #include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -62,3 +63,4 @@ using namespace ImGui;
 
 #include "imgui/imgui_widgets.cpp" // must be first. widgets, all of them.
 #include "imgui/imgui_property.cpp" // must be last
+
