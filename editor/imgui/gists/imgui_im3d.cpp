@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "../engine/math/math.c"
-#include "../engine/render/render_shape.c"
+#include "../engine/core/math/math.c"
+#include "../engine/framework/render/render_shape.c"
 
 #define X(v3) 0[v3]
 #define Y(v3) 1[v3]

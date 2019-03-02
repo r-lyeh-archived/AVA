@@ -4,67 +4,13 @@
 #pragma once
 #define CORE_C
 #define FRAMEWORK_C
-#define RENDER_C
-#define WORLD_C
+#define SERVER_C
 #endif
 
-#ifdef CORE_C
-#pragma once
-#define ASYNC_C
-#define DEBUG_C
-#define DETECT_C
-#define FILESYS_C
-#define MATH_C
-#define MEMORY_C
-#define NATIVE_C
-//#define OBJECT_C
-#define SERIAL_C
-//#define STRUCT_C
-#define TIME_C
-#define STRING_C
-#endif
-#include "detect/detect.c"
-#include "memory/memory.c"
-#include "object/object.c"
-#include "struct/struct.c"
-#include "async/async.c"
-#include "debug/debug.c"
-#include "filesys/filesys.c"
-#include "math/math.c"
-#include "native/native.c"
-#include "serial/serial.c"
-#include "time/time.c"
-#include "string/string.c"
+#include "core/core.c"
+#include "framework/framework.c"
+#include "server/server.c"
 
-#ifdef FRAMEWORK_C
-#pragma once
-#define APP_C
-#define AUDIO_C
-#define INPUT_C
-#define ASSET_C
-#define STORAGE_C
-#define NETWORK_C
-#endif
-#include "app/app.c"
-#include "audio/audio.c"
-#include "input/input.c"
-//#include "asset/asset.c"
-//#include "storage/storage.c"
-#include "network/network.c"
-
-#ifdef RENDER_C
-#pragma once
-#endif
-#include "render/render.c"
-
-#ifdef WORLD_C
-#pragma once
-#define MEDIA_C
-#define SCENE_C
-#endif
-#include "media/media.c"
-#include "scene/scene.c"
-#include "world/world.c"
 
 API int init();
 

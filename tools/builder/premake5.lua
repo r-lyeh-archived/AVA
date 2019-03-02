@@ -47,7 +47,7 @@ project "editor"
     }
     includedirs {
     "../../engine/",
-    "../../engine/app/3rd/",
+    "../../engine/framework/app/3rd/",
     "../../editor/",
     "../../editor/imgui/",
     "../../editor/3rd/@ocornut/",

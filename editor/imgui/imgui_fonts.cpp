@@ -21,7 +21,7 @@
 #include "assets/fonts/cfr.c"  // carlito font regular
 #define FONT_MAIN_BUF  cfr_compressed_data
 #define FONT_MAIN_LEN  cfr_compressed_size
-#define FONT_MAIN_SIZE 14.f
+#define FONT_MAIN_SIZE 13.f
 
 #include "assets/fonts/mp1m.c" // formal style, medium
 #define FONT_CJK_BUF   mp1m_compressed_data

@@ -27,7 +27,7 @@ extern "C" {
 
 // detect platform
 
-#include "detect/detect.c"
+#include "core/detect/detect.c"
 
 // code annotations
 
@@ -58,35 +58,9 @@ API char *va( const char *fmt, ... );
 // ----------------------------------------------------------------------------
 // modules
 
-// core.c {
-#include "detect/detect.c"
-#include "memory/memory.c"
-#include "object/object.c"
-#include "struct/struct.c"
-#include "async/async.c"
-#include "debug/debug.c"
-#include "filesys/filesys.c"
-#include "math/math.c"
-#include "native/native.c"
-#include "serial/serial.c"
-#include "time/time.c"
-#include "string/string.c"
-// } core.c
-
-// framework.c {
-#include "app/app.c"
-#include "audio/audio.c"
-#include "input/input.c"
-//#include "asset/asset.c"
-//#include "storage/storage.c"
-#include "network/network.c"
-// } framework.c
-
-#include "media/media.c"
-
-#include "render/render.c"
-#include "scene/scene.c"
-#include "world/world.c"
+#include "core/core.c"
+#include "framework/framework.c"
+#include "server/server.c"
 
 #ifdef __cplusplus
 }

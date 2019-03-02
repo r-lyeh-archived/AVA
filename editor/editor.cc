@@ -1,9 +1,9 @@
 // include opengl, imgui and all widgets.
 #include "imgui/imgui.cpp"
 
-#include "math/math_linear.c"
-#include "math/math_transform.c"
-#include "math/math_utils.c"
+#include "core/math/math_linear.c"
+#include "core/math/math_transform.c"
+#include "core/math/math_utils.c"
 
 #include <timeapi.h> // timeBeginPeriod, timeEndPeriod
 #include <thread>
