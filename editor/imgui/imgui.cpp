@@ -40,9 +40,9 @@ using namespace ImGui;
 #define ASSERT assert
 #define EXPORT __declspec(dllexport)
 #define OSCRECV_C
-#include "framework/network/network_oscrecv.c"
+#include "network/network_oscrecv.c"
 #define SHAPE_C
-#include "framework/render/render_shape.c"
+#include "render/render_shape.c"
 #include <stdint.h>
 #define GL(...) __VA_ARGS__
 

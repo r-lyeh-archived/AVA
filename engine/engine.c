@@ -8,8 +8,8 @@
 #endif
 
 #include "core/core.c"
-#include "framework/framework.c"
-#include "server/server.c"
+#include "framework.c"
+#include "server.c"
 
 
 API int init();

@@ -59,8 +59,8 @@ API char *va( const char *fmt, ... );
 // modules
 
 #include "core/core.c"
-#include "framework/framework.c"
-#include "server/server.c"
+#include "framework.c"
+#include "server.c"
 
 #ifdef __cplusplus
 }
