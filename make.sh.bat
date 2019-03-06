@@ -92,16 +92,16 @@ exit
             REM project generation
             REM premake5.exe codelite
             REM premake5.exe gmake
-            premake5.exe vs2015
+            ..\colorizer premake5.exe vs2015
             REM premake5.exe vs2013
             REM premake5.exe xcode4
-            premake5.exe ninja
+            ..\colorizer premake5.exe ninja
 
             REM actual build
             set NINJA_STATUS="[%%r/%%f] [%%e] "
-            if "%1"=="debugopt" ( ninja.exe -v -C ..\..\_project debugopt ) else ( ^
-            if "%1"=="release"  ( ninja.exe -v -C ..\..\_project release  ) else ( ^
-                                  ninja.exe -v -C ..\..\_project                   ^
+            if "%1"=="debugopt" ( ..\colorizer ninja.exe -v -C ..\..\_project debugopt ) else ( ^
+            if "%1"=="release"  ( ..\colorizer ninja.exe -v -C ..\..\_project release  ) else ( ^
+                                  ..\colorizer ninja.exe -v -C ..\..\_project                   ^
             ) )
             set OK=%ERRORLEVEL%
 
@@ -116,7 +116,7 @@ exit
             if exist _debugopt\launch.exe copy /y engine\3rd\SDL2.dll _debugopt 1>2> nul
 
             if "0"=="%OK%" (
-                color
+                rem color
                 echo ^>^> launch
 
                 if "%1"=="release" shift
@@ -135,8 +135,8 @@ exit
                 echo ^<^< launch
             ) else (
                 :error
-                color 4f
-                echo  && rem beep
+                rem color 4f
+                rem echo  && rem beep
             )
 
         popd
@@ -144,5 +144,5 @@ exit
     REM exit
 
         echo Press any key to continue... && pause > nul
-        color
+        rem color
         exit /b
