@@ -70,8 +70,8 @@ API audio audio_delete( audio s );
 #define STS_MIXER_IMPLEMENTATION
 #include "3rd/sts_mixer.h"
 
-#define MINI_AL_IMPLEMENTATION
-#include "3rd/mini_al.h"
+#define MINIAUDIO_IMPLEMENTATION
+#include "3rd/miniaudio.h"
 
 
 // encapsulate drflac and some buffer with the sts_mixer_stream_t
@@ -155,8 +155,8 @@ static void refill_stream(sts_mixer_sample_t* sample, void* userdata) {
         }
         break; case MP3: {
             int sl = sample->length / 2; /*sample->channels*/;
-            if (drmp3_read_f32(&stream->mp3_, sl, stream->dataf) < sl) {
-                drmp3_seek_to_frame(&stream->mp3_, 0);
+            if (drmp3_read_pcm_frames_f32(&stream->mp3_, sl, stream->dataf) < sl) {
+                drmp3_seek_to_pcm_frame(&stream->mp3_, 0);
             }
         }
         break; case OGG: {
@@ -167,7 +167,7 @@ static void refill_stream(sts_mixer_sample_t* sample, void* userdata) {
         }
         break; case MOD: {
             jar_mod_context_t *mod = (jar_mod_context_t*)&stream->mod;
-            jar_mod_fillbuffer(mod, (mal_int16*)stream->data, sample->length / 2, 0);
+            jar_mod_fillbuffer(mod, (ma_int16*)stream->data, sample->length / 2, 0);
         }
         break; case XM: {
             jar_xm_context_t *xm = (jar_xm_context_t*)stream->xm;
@@ -272,7 +272,7 @@ static bool load_sample(sts_mixer_sample_t* sample, const char *filename) {
     }
     drmp3_config mp3_cfg = { 2, 44100 };
     drmp3_uint64 mp3_fc;
-    if( !channels ) for( float *fbuf; 0 != (fbuf = drmp3_open_and_decode_file_f32(filename, &mp3_cfg, &mp3_fc)); ) {
+    if( !channels ) for( float *fbuf; 0 != (fbuf = drmp3_open_file_and_read_f32(filename, &mp3_cfg, &mp3_fc)); ) {
         sample->frequency = mp3_cfg.outputSampleRate;
         sample->audio_format = STS_MIXER_SAMPLE_FORMAT_FLOAT;
         sample->length = mp3_fc / sizeof(float) / mp3_cfg.outputChannels;
@@ -330,15 +330,15 @@ static bool load_sample(sts_mixer_sample_t* sample, const char *filename) {
 #include <stdbool.h>
 #include <stdint.h>
 
-mal_device  device;
-mal_context context;
+ma_device  device;
+ma_context context;
 sts_mixer_t mixer;
 
 // This is the function that's used for sending more data to the device for playback.
 static
-mal_uint32 audio_callback(mal_device* pDevice, mal_uint32 frameCount, void* buffer) {
+ma_uint32 audio_callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount) {
     int len = frameCount;
-    sts_mixer_mix_audio(&mixer, buffer, len / (sizeof(int32_t) / 4));
+    sts_mixer_mix_audio(&mixer, pOutput, len / (sizeof(int32_t) / 4));
     return len / (sizeof(int32_t) / 4);
 }
 
@@ -347,48 +347,52 @@ bool audio_init( int flags ) {
     sts_mixer_init(&mixer, 44100, STS_MIXER_SAMPLE_FORMAT_32);
 
     // The prioritization of backends can be controlled by the application. You need only specify the backends
-    // you care about. If the context cannot be initialized for any of the specified backends mal_context_init()
+    // you care about. If the context cannot be initialized for any of the specified backends ma_context_init()
     // will fail.
-    mal_backend backends[] = {
-        mal_backend_wasapi, // Higest priority.
-        mal_backend_dsound,
-        mal_backend_winmm,
-        mal_backend_pulseaudio,
-        mal_backend_alsa,
-        mal_backend_oss,
-        mal_backend_jack,
-        mal_backend_opensl,
-        mal_backend_openal,
-        mal_backend_sdl,
-        mal_backend_null    // Lowest priority.
+    ma_backend backends[] = {
+        ma_backend_wasapi, // Higest priority.
+        ma_backend_dsound,
+        ma_backend_winmm,
+        ma_backend_pulseaudio,
+        ma_backend_alsa,
+        ma_backend_oss,
+        ma_backend_jack,
+        ma_backend_opensl,
+        //ma_backend_openal,
+        //ma_backend_sdl,
+        ma_backend_null    // Lowest priority.
     };
 
-    if (mal_context_init(backends, sizeof(backends)/sizeof(backends[0]), NULL, &context) != MAL_SUCCESS) {
+    if (ma_context_init(backends, sizeof(backends)/sizeof(backends[0]), NULL, &context) != MA_SUCCESS) {
         printf("Failed to initialize context.");
         return false;
     }
 
-    int format = mal_format_s32;
-    int channels = 2;
-    int playrate = 44100; //44100; //22050;
-    mal_device_config config = mal_device_config_init_playback(format, channels, playrate, audio_callback );
+    ma_device_config config = ma_device_config_init(ma_device_type_playback); // Or ma_device_type_capture or ma_device_type_duplex.
+    config.playback.pDeviceID = NULL; // &myPlaybackDeviceID; // Or NULL for the default playback device.
+    config.playback.format    = ma_format_s32;
+    config.playback.channels  = 2;
+    //config.capture.pDeviceID  = &myCaptureDeviceID;  // Or NULL for the default capture device.
+    //config.capture.format     = ma_format_s16;
+    //config.capture.channels   = 1;
+    config.sampleRate         = 44100;
+    config.dataCallback       = audio_callback;
+    config.pUserData          = NULL;
 
-    void *userdata = NULL;
-
-    if (mal_device_init(&context, mal_device_type_playback, NULL, &config, userdata, &device) != MAL_SUCCESS) {
+    if (ma_device_init(NULL, &config, &device) != MA_SUCCESS) {
         printf("Failed to open playback device.");
-        mal_context_uninit(&context);
+        ma_context_uninit(&context);
         return false;
     }
 
-    mal_device_start(&device);
+    ma_device_start(&device);
     return true;
 }
 
 void audio_drop() {
-    mal_device_stop(&device);
-    mal_device_uninit(&device);
-    mal_context_uninit(&context);
+    ma_device_stop(&device);
+    ma_device_uninit(&device);
+    ma_context_uninit(&context);
 }
 
 typedef struct audio_handle {

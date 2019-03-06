@@ -98,7 +98,7 @@ exit
             premake5.exe ninja
 
             REM actual build
-            set NINJA_STATUS="[%%e] [%%r/%%f]"
+            set NINJA_STATUS="[%%r/%%f] [%%e] "
             if "%1"=="debugopt" ( ninja.exe -v -C ..\..\_project debugopt ) else ( ^
             if "%1"=="release"  ( ninja.exe -v -C ..\..\_project release  ) else ( ^
                                   ninja.exe -v -C ..\..\_project                   ^
@@ -111,9 +111,9 @@ exit
 
         pushd "%~dp0%"
 
-            if exist _debug\launch.exe    copy /y engine\3rd\SDL2.dll _debug
-            if exist _release\launch.exe  copy /y engine\3rd\SDL2.dll _release
-            if exist _debugopt\launch.exe copy /y engine\3rd\SDL2.dll _debugopt
+            if exist _debug\launch.exe    copy /y engine\3rd\SDL2.dll _debug 1>2> nul
+            if exist _release\launch.exe  copy /y engine\3rd\SDL2.dll _release 1>2> nul
+            if exist _debugopt\launch.exe copy /y engine\3rd\SDL2.dll _debugopt 1>2> nul
 
             if "0"=="%OK%" (
                 color
