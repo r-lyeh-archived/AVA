@@ -31,29 +31,25 @@ int key( int key );
 static double mx, my, mb[3], mcursor = 1;
 static int mhas_imgui = 0;
 
+
 //static 
 void mouse_update() { // $
-    mb[0] = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
-    mb[1] = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE) == GLFW_PRESS;
-    mb[2] = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS;
-    glfwGetCursorPos(window, &mx, &my);
+    int mxi, myi;
+    uint32_t state = SDL_GetMouseState(&mxi, &myi);
+    mx = mxi; my = myi;
+
+    mb[0] = state & SDL_BUTTON(SDL_BUTTON_LEFT);
+    mb[1] = state & SDL_BUTTON(SDL_BUTTON_MIDDLE);
+    mb[2] = state & SDL_BUTTON(SDL_BUTTON_RIGHT);
     // show or hide+lock
     if( mcursor ) {
         if( mhas_imgui ) {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            SDL_ShowCursor(SDL_DISABLE);
         } else {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            SDL_ShowCursor(SDL_ENABLE);
         }
     } else {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
-        //int width, height;
-        //glfwGetFramebufferSize(window, &width, &height);
-        //glfwSetCursorPos(window, width/2, height/2);
-        // or ...
-        //if(mx > width) set mx -= width; else if(mx < 0) set mx += width;
-        //if(MY > height) set MY -= height; else if(MY < 0) set MY += height;
+        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 }
 // @todo: delta(mouse('X')), repeat(mouse('X')), click(mouse('L'), click2(mouse('L')
@@ -89,68 +85,68 @@ void set_mouse(int key) { // $
 
 int key( int key ) { // $
     switch(key) {
-        break; case    '*': key = GLFW_KEY_KP_MULTIPLY;
-        break; case    '+': key = GLFW_KEY_KP_ADD;
-        break; case    ',': key = GLFW_KEY_COMMA;
-        break; case    '-': case 'L-': key = GLFW_KEY_MINUS;
-        break; case    '.': case 'L.': key = GLFW_KEY_PERIOD;
-        break; case    '/': case 'L/': key = GLFW_KEY_SLASH;
-        break; case    ';': key = GLFW_KEY_SEMICOLON;
-        break; case    '=': case 'L=': key = GLFW_KEY_EQUAL;
-        break; case    '[': key = GLFW_KEY_LEFT_BRACKET;
-        break; case    ']': key = GLFW_KEY_RIGHT_BRACKET;
-        break; case    '`': case 'BTCK': key = GLFW_KEY_GRAVE_ACCENT;
-        break; case   'R-': key = GLFW_KEY_KP_SUBTRACT;
-        break; case   'R.': key = GLFW_KEY_KP_DECIMAL;
-        break; case   'R/': key = GLFW_KEY_KP_DIVIDE;
-        break; case   'R=': key = GLFW_KEY_KP_EQUAL;
-        break; case   '\\': key = GLFW_KEY_BACKSLASH;
-        break; case 'LALT': key = GLFW_KEY_LEFT_ALT;
-        break; case 'RALT': key = GLFW_KEY_RIGHT_ALT;
-        break; case 'BACK': case '\b': key = GLFW_KEY_BACKSPACE;
-        break; case 'CAPS': key = GLFW_KEY_CAPS_LOCK;
-        break; case 'LCTR': key = GLFW_KEY_LEFT_CONTROL;
-        break; case 'RCTR': key = GLFW_KEY_RIGHT_CONTROL;
-        break; case 'DEL' : key = GLFW_KEY_DELETE;
-        break; case 'DOWN': key = GLFW_KEY_DOWN;
-        break; case 'END' : key = GLFW_KEY_END;
-        break; case 'LENT': case '\n': case '\r': key = GLFW_KEY_ENTER;
-        break; case 'RENT': key = GLFW_KEY_KP_ENTER;
-        break; case 'ESC' : case '\x1b': key = GLFW_KEY_ESCAPE;
-        break; case 'HOME': key = GLFW_KEY_HOME;
-        break; case 'INS' : key = GLFW_KEY_INSERT;
-        break; case 'LEFT': key = GLFW_KEY_LEFT;
-        break; case 'MENU': key = GLFW_KEY_MENU;
-        break; case 'NUML': key = GLFW_KEY_NUM_LOCK;
-        break; case 'PAUS': key = GLFW_KEY_PAUSE;
-        break; case 'PGDN': key = GLFW_KEY_PAGE_DOWN;
-        break; case 'PGUP': key = GLFW_KEY_PAGE_UP;
-        break; case 'PRNT': key = GLFW_KEY_PRINT_SCREEN;
-        break; case 'RGHT': key = GLFW_KEY_RIGHT;
-        break; case 'SCRL': key = GLFW_KEY_SCROLL_LOCK;
-        break; case 'LSHF': key = GLFW_KEY_LEFT_SHIFT;
-        break; case 'RSHF': key = GLFW_KEY_RIGHT_SHIFT;
-        break; case 'SPC' : case  ' ': key = GLFW_KEY_SPACE;
-        break; case 'LSUP': case 'LWIN': key = GLFW_KEY_LEFT_SUPER;
-        break; case 'RSUP': case 'RWIN': key = GLFW_KEY_RIGHT_SUPER;
-        break; case 'TAB' : case '\t': key = GLFW_KEY_TAB;
-        break; case 'TICK': case '\'': key = GLFW_KEY_APOSTROPHE;
-        break; case 'UP'  : key = GLFW_KEY_UP;
+        break; case    '*': key = SDL_SCANCODE_KP_MULTIPLY;
+        break; case    '+': key = SDL_SCANCODE_KP_PLUS;
+        break; case    ',': key = SDL_SCANCODE_COMMA;
+        break; case    '-': case 'L-': key = SDL_SCANCODE_MINUS;
+        break; case    '.': case 'L.': key = SDL_SCANCODE_PERIOD;
+        break; case    '/': case 'L/': key = SDL_SCANCODE_SLASH;
+        break; case    ';': key = SDL_SCANCODE_SEMICOLON;
+        break; case    '=': case 'L=': key = SDL_SCANCODE_EQUALS;
+        break; case    '[': key = SDL_SCANCODE_LEFTBRACKET;
+        break; case    ']': key = SDL_SCANCODE_RIGHTBRACKET;
+        break; case    '`': case 'BTCK': key = SDL_SCANCODE_NONUSBACKSLASH;
+        break; case   'R-': key = SDL_SCANCODE_KP_MINUS;
+        break; case   'R.': key = SDL_SCANCODE_KP_DECIMAL;
+        break; case   'R/': key = SDL_SCANCODE_KP_DIVIDE;
+        break; case   'R=': key = SDL_SCANCODE_KP_EQUALS;
+        break; case   '\\': key = SDL_SCANCODE_BACKSLASH;
+        break; case 'LALT': key = SDL_SCANCODE_LALT;
+        break; case 'RALT': key = SDL_SCANCODE_RALT;
+        break; case 'BACK': case '\b': key = SDL_SCANCODE_BACKSPACE;
+        break; case 'CAPS': key = SDL_SCANCODE_CAPSLOCK;
+        break; case 'LCTR': key = SDL_SCANCODE_LCTRL;
+        break; case 'RCTR': key = SDL_SCANCODE_RCTRL;
+        break; case 'DEL' : key = SDL_SCANCODE_DELETE;
+        break; case 'DOWN': key = SDL_SCANCODE_DOWN;
+        break; case 'END' : key = SDL_SCANCODE_END;
+        break; case 'LENT': case '\n': case '\r': key = SDL_SCANCODE_RETURN;
+        break; case 'RENT': key = SDL_SCANCODE_KP_ENTER;
+        break; case 'ESC' : case '\x1b': key = SDL_SCANCODE_ESCAPE;
+        break; case 'HOME': key = SDL_SCANCODE_HOME;
+        break; case 'INS' : key = SDL_SCANCODE_INSERT;
+        break; case 'LEFT': key = SDL_SCANCODE_LEFT;
+        break; case 'MENU': key = SDL_SCANCODE_MENU;
+        break; case 'NUML': key = SDL_SCANCODE_NUMLOCKCLEAR;
+        break; case 'PAUS': key = SDL_SCANCODE_PAUSE;
+        break; case 'PGDN': key = SDL_SCANCODE_PAGEDOWN;
+        break; case 'PGUP': key = SDL_SCANCODE_PAGEUP;
+        break; case 'PRNT': key = SDL_SCANCODE_PRINTSCREEN;
+        break; case 'RGHT': key = SDL_SCANCODE_RIGHT;
+        break; case 'SCRL': key = SDL_SCANCODE_SCROLLLOCK;
+        break; case 'LSHF': key = SDL_SCANCODE_LSHIFT;
+        break; case 'RSHF': key = SDL_SCANCODE_RSHIFT;
+        break; case 'SPC' : case  ' ': key = SDL_SCANCODE_SPACE;
+        break; case 'LSUP': case 'LWIN': key = SDL_SCANCODE_LGUI;
+        break; case 'RSUP': case 'RWIN': key = SDL_SCANCODE_RGUI;
+        break; case 'TAB' : case '\t': key = SDL_SCANCODE_TAB;
+        break; case 'TICK': case '\'': key = SDL_SCANCODE_APOSTROPHE;
+        break; case 'UP'  : key = SDL_SCANCODE_UP;
         default:
-        /**/ if( key >=    '0' && key <=    '9' ) key +=-   '0' + GLFW_KEY_0;
-        else if( key >=    'a' && key <=    'z' ) key +=-   'a' + GLFW_KEY_A;
-        else if( key >=    'A' && key <=    'Z' ) key +=-   'A' + GLFW_KEY_A;
-        else if( key >=   'F1' && key <=   'F9' ) key +=-  'F1' + GLFW_KEY_F1;
-        else if( key >=  'F10' && key <=  'F19' ) key +=- 'F10' + GLFW_KEY_F10;
-        else if( key >=  'F20' && key <=  'F25' ) key +=- 'F20' + GLFW_KEY_F20;
-        else if( key >= 'PAD0' && key <= 'PAD9' ) key +=-'PAD0' + GLFW_KEY_KP_0;
+        /**/ if( key >=    '0' && key <=    '9' ) key +=-   '0' + SDL_SCANCODE_0;
+        else if( key >=    'a' && key <=    'z' ) key +=-   'a' + SDL_SCANCODE_A;
+        else if( key >=    'A' && key <=    'Z' ) key +=-   'A' + SDL_SCANCODE_A;
+        else if( key >=   'F1' && key <=   'F9' ) key +=-  'F1' + SDL_SCANCODE_F1;
+        else if( key >=  'F10' && key <=  'F19' ) key +=- 'F10' + SDL_SCANCODE_F10;
+        else if( key >=  'F20' && key <=  'F25' ) key +=- 'F20' + SDL_SCANCODE_F20;
+        else if( key >= 'PAD0' && key <= 'PAD9' ) key +=-'PAD0' + SDL_SCANCODE_KP_0;
         else return 0;
     }
 /*
     GLFW_KEY_WORLD_1            161 // non-US #1
     GLFW_KEY_WORLD_2            162 // non-US #2
 */
-    return !!glfwGetKey(window, key);
+    return !!SDL_GetKeyboardState(NULL)[key];
 }
 
 // ----------------------------------------------------------------------------

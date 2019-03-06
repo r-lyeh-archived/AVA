@@ -10,13 +10,11 @@
 #ifdef APP_C
 #pragma once
 #define MODULE_C
-#define GLFW3_C
 #define WINDOW_C
 #endif
 
 #include "../render/render.c" // opengl, pass
 
-#include "glfw3.c"
 #include "module.c"
 #include "window.c"
 

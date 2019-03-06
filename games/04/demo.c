@@ -12,7 +12,7 @@ static const struct {
 };
 
 static const char* vertex_shader_text =
-    VS130
+    VS150 //VS130
     "uniform mat4 MVP;\n"
     "attribute vec3 vCol;\n"
     "attribute vec2 vPos;\n"
@@ -22,7 +22,7 @@ static const char* vertex_shader_text =
     "    color = vCol;\n"
     "}\n";
 static const char* fragment_shader_text =
-    FS130
+    FS150 //FS130
     "varying vec3 color;\n"
     "void main() {\n"
     "    fragColor = vec4(color, 1.0);\n"

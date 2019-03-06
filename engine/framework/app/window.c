@@ -1,10 +1,12 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "../render/render.c" // opengl
-#include "3rd/GLFW/glfw3.h"
+#include "../render/render.c" // OPENGL
+#define SDL_MAIN_HANDLED
+#include "../3rd/SDL2/SDL.h" // SDL2
+// #include "../3rd/glfast.h" // SDL2+OPENGL(subset)
 
-extern GLFWwindow *window;
+extern SDL_Window *window;
 
 enum {
     WINDOW_LEGACY_OPENGL = 0x4,
@@ -32,6 +34,7 @@ API double *window_get( int variable );
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
 
 int (*printf_handler)(const char *fmt, ...) = printf;
 
@@ -42,13 +45,13 @@ static void die_callback( const char *text ) {
 static void error_callback(int error, const char* description) {
     int whitelisted = !!strstr(description, "Failed to create OpenGL context");
     if(whitelisted) return;
-    fprintf(stderr, "GLFW error %#x: %s\n", error, description);
+    fprintf(stderr, "app error %#x: %s\n", error, description);
 }
+/*
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
 }
-
 static void* glfwGetProcAddressExtraCompat(const char *name) {
     void *ptr = glfwGetProcAddress(name);
     if( !ptr ) {
@@ -68,6 +71,13 @@ static void* glfwGetProcAddressExtraCompat(const char *name) {
     }
     return ptr;
 }
+*/
+
+/*
+#define GLFAST_EXTERNAL_LOADER
+#define GLFAST_IMPLEMENTATION
+#include "../3rd/glfast.h" // OPENGL(subset)
+*/
 
 #define GL_DEBUG_OUTPUT                   0x92E0
 #define GL_DEBUG_OUTPUT_SYNCHRONOUS       0x8242
@@ -92,6 +102,7 @@ static void* glfwGetProcAddressExtraCompat(const char *name) {
 #define GL_DEBUG_TYPE_PUSH_GROUP          0x8269
 #define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  0x824E
 
+#if 0
 static void APIENTRY glDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
     /*
     // whitelisted codes
@@ -130,7 +141,7 @@ static void APIENTRY glDebugCallback(GLenum source, GLenum type, GLuint id, GLen
 
 void trap_gl() {
 #ifndef SHIPPING
-	if (!glDebugMessageCallback) return;
+    if (!glDebugMessageCallback) return;
     int flags;
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
     if( flags & GL_CONTEXT_FLAG_DEBUG_BIT ) {
@@ -145,28 +156,39 @@ void trap_gl() {
 #endif
 }
 
+#else
 
-/*static*/ GLFWwindow *window = 0;
+void trap_gl() {
+
+}
+
+#endif
+
+
+/*static*/ SDL_Window  * window = NULL;
+/*static*/ SDL_GLContext glcontext;
 /*static*/ char *title = "";
+static int should_quit = 0;
 
 void window_destroy(void) {
     render_quit();
     if(window) {
-        glfwDestroyWindow(window);
+        SDL_DestroyWindow(window);
         window = 0;
+        should_quit = 0;
     }
     // if( num_active_windows == 0 )
-    glfwTerminate(); // exit(0)
+    // glfwTerminate(); // exit(0)
 }
 int window_create( float zoom, int flags ) {
     if( window ) {
         return 0;
     } else {
-        glfwSetErrorCallback(error_callback);
-        if( !glfwInit() ) {
-            die_callback("cant init glfw");
+        int sdl_init_flags = 0;
+        if( SDL_Init(SDL_INIT_VIDEO | sdl_init_flags) ) {
+            die_callback("Error: Cannot initalize application (SDL_Init)"); //, SDL_GetError());
         }
-        //atexit(window_destroy);
+        // atexit(window_destroy);
     }
 
 #ifdef _MSC_VER
@@ -187,13 +209,22 @@ int window_create( float zoom, int flags ) {
     zoom = zoom > 1.1 ? zoom / 100.f : zoom;
     zoom = zoom > 0 && zoom < 1 ? zoom : (fullscreen = 1, 1);
 
-    GLFWmonitor* primary = glfwGetPrimaryMonitor();
-    const GLFWvidmode* desktop = glfwGetVideoMode(primary);
-    int appw = (int)(desktop->width * zoom), apph = (int)(desktop->height * zoom);
+    int have_debug = GL_FALSE;
+    int have_core = 1/*flags & WINDOW_LEGACY_OPENGL*/ ? SDL_GL_CONTEXT_PROFILE_COMPATIBILITY : SDL_GL_CONTEXT_PROFILE_CORE;
+
+    SDL_Rect bounds;
+    int monitor = 0;
+    for( ; monitor < SDL_GetNumVideoDisplays(); ++monitor ) {
+        SDL_GetDisplayBounds( monitor, &bounds );
+        if(!bounds.x && !bounds.y) break; // primary monitor found
+    }
+
+    int appw = (int)(bounds.w * zoom), apph = (int)(bounds.h * zoom);
     int w = appw, h = apph;
 
-    int have_debug = GL_FALSE;
-    int have_core = flags & WINDOW_LEGACY_OPENGL ? GLFW_OPENGL_COMPAT_PROFILE : GLFW_OPENGL_CORE_PROFILE;
+
+#if 0
+
 
     // glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
     // glfwWindowHint(GLFW_RED_BITS, desktop->redBits);
@@ -245,17 +276,6 @@ int window_create( float zoom, int flags ) {
         if(window) printf("opengl 2.1%s%s context created\n", 0 ? "-core" : "", have_debug ? "-debug" : "");
     }
 
-    if (!window) {
-        die_callback("cant create window");
-    }
-
-    // center
-    if( desktop ) {
-        glfwSetWindowPos(window , (desktop->width-appw)/2 , (desktop->height-apph)/2);
-    }
-
-    glfwSetKeyCallback(window, key_callback);
-
     glfwMakeContextCurrent(window);
 #  if defined __gl3w_h_
     gl3w_init();
@@ -269,12 +289,116 @@ int window_create( float zoom, int flags ) {
     if(!glGenVertexArrays) glGenVertexArrays = (void*)glfwGetProcAddressExtraCompat("glGenVertexArrays");
     if(!glBindVertexArray) glBindVertexArray = (void*)glfwGetProcAddressExtraCompat("glBindVertexArray");
 
+    glfwSwapInterval(1); // also check -1 
+
+    glfwSetKeyCallback(window, key_callback);
+
+#else
+
+    int sdl_init_flags = 0;
+    int sdl_window_flags = 0;
+    const char *window_title = "";
+    //int window_width = 1280, window_height = 600;
+    int msaa_samples = 4;
+
+#if __APPLE__ || 1 // @r-lyeh [1] for renderdoc
+    // GL 3.2 Core + GLSL 150
+    const char* glsl_version = "#version 150";
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG); // Always required on Mac
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+#else
+    // GL 3.0 + GLSL 130
+    const char* glsl_version = "#version 130";
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+
+    /*
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    */
+
+    /*
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaa_samples);
+    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, have_core);
+    */
+
+    #ifndef RELEASE
+    //SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+    #endif
+
+    /* flags
+    SDL_WINDOW_FULLSCREEN - fullscreen window
+    SDL_WINDOW_FULLSCREEN_DESKTOP - fullscreen window at the current desktop resolution
+    SDL_WINDOW_OPENGL - window usable with OpenGL context
+    SDL_WINDOW_VULKAN - window usable with a Vulkan instance
+    SDL_WINDOW_HIDDEN - window is not visible
+    SDL_WINDOW_BORDERLESS - no window decoration
+    SDL_WINDOW_RESIZABLE - window can be resized
+    SDL_WINDOW_MINIMIZED - window is minimized
+    SDL_WINDOW_MAXIMIZED - window is maximized
+    SDL_WINDOW_INPUT_GRABBED - window has grabbed input focus
+    SDL_WINDOW_ALLOW_HIGHDPI - window should be created in high-DPI mode if supported (>= SDL 2.0.1)
+    */
+
+    sdl_window_flags |= fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
+    sdl_window_flags |= fullscreen ? 0 : SDL_WINDOW_RESIZABLE;
+    sdl_window_flags |= fullscreen ? SDL_WINDOW_INPUT_GRABBED : 0; // grabbed -> mouse confined to window
+
+    window = SDL_CreateWindow(
+        window_title,
+        bounds.x + (bounds.w - appw) / 2, bounds.y + (bounds.h - apph) / 2, //SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+        appw /*window_width*/, apph /*window_height*/, SDL_WINDOW_OPENGL | sdl_window_flags
+    );
+
+    if( !window ) {
+        die_callback("Error: SDL_CreateWindow"); //, SDL_GetError());
+    }
+
+    glcontext = SDL_GL_CreateContext(window);
+
+    if( !glcontext ) {
+        die_callback("Error: SDL_GL_CreateContext"); //, SDL_GetError());
+    }
+
+    SDL_GL_MakeCurrent(window, glcontext);
+    SDL_GL_SetSwapInterval(1); // Enable vsync, also check -1
+
+    // Initialize OpenGL loader
+    // bool err = false;
+    // bool err = gl3wInit() != 0;
+    // bool err = glewInit() != GLEW_OK;
+    bool err = gladLoadGL() == 0;
+    if (err) {
+        die_callback("Error: Cannot initialize OpenGL loader");
+    }
+
+#endif
+
+    if (!window) {
+        die_callback("Error: Cannot create window");
+    }
+
+#if 0
+    // center
+    if( desktop ) {
+        glfwSetWindowPos(window , (desktop->width-appw)/2 , (desktop->height-apph)/2);
+    }
+#endif
+
     // Enable the debug callback
     if( have_debug ) {
         trap_gl();
     }
-
-    glfwSwapInterval(1); // also check -1 
 
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -286,11 +410,11 @@ int window_create( float zoom, int flags ) {
     return 1;
 }
 int window_update(int *w, int *h) {
-    if( glfwWindowShouldClose(window) ) {
+    if( should_quit ) {
         return 0;
     }
     int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
+    SDL_GL_GetDrawableSize(window, &width, &height);
     float ratio = width / (height + 1.f);
     render_update(width, height);
     mouse_update();
@@ -303,21 +427,29 @@ void render_capture( int w, int h, int comp, void *pixels );
 
 void window_swap( void **pixels ) {
     int w, h;
-    glfwGetFramebufferSize(window, &w, &h);
+    SDL_GL_GetDrawableSize(window, &w, &h);
 
     render_post(w, h);
 
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    SDL_GL_SwapWindow(window);
+    glFinish();
 
-    //    djgt_save_glcolorbuffer_png(GL_COLOR_ATTACHMENT0, GL_RGB, "out.png");
-    if( pixels && !glfwWindowShouldClose(window) ) {
+    // SDL_PumpEvents();
+    SDL_Event event;
+    while (SDL_PollEvent(&event)) {
+        if (event.type == SDL_QUIT)
+            should_quit = 1;
+        if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+            should_quit = 1;
+    }
+
+    if( pixels && !should_quit ) {
         *pixels = (unsigned char *)realloc(*pixels, 4 * w * h);
         render_capture(w,h,3,*pixels);
     }
 
     static double frames = 0, begin = FLT_MAX, fps = 0, prev_frame = 0;
-    double now = glfwGetTime();
+    double now = SDL_GetTicks() / 1000.0; // glfwGetTime();
     if( begin > now ) {
         begin = now;
         frames = 0;
@@ -331,7 +463,7 @@ void window_swap( void **pixels ) {
     }
     char buf[128];
     sprintf(buf, "%s%s%2dfps %5.2fms", title, title[0] ? " " : "", (int)fps, (now - prev_frame) * 1000.f);
-    glfwSetWindowTitle(window, buf);
+    SDL_SetWindowTitle(window, buf);
     ++frames;
     prev_frame = now;
 }
@@ -343,11 +475,11 @@ double *window_get( int variable ) {
     switch( variable ) {
         break; default:
         break; case WINDOW_WIDTH:
-            glfwGetFramebufferSize(window, &w, &h);
+            SDL_GL_GetDrawableSize(window, &w, &h); //glfwGetFramebufferSize(window, &w, &h);
             r[0] = w;
             return r;
         break; case WINDOW_HEIGHT:;
-            glfwGetFramebufferSize(window, &w, &h);
+            SDL_GL_GetDrawableSize(window, &w, &h); //glfwGetFramebufferSize(window, &w, &h);
             r[0] = h;
             return r;
     }

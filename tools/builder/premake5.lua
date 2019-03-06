@@ -18,7 +18,20 @@ project "engine"
 --  files {"../../src/**.c", "../../src/**.cpp", "../../src/**.h", "../../src/**.inl"}
     files {"../../engine/engine.c"}
     includedirs {"../../engine/"}
-    defines {"LINKAGE=EXPORT", "ENGINE_C", '_GLFW_WNDCLASSNAME=L\\"ENGINE\\"'}
+    defines {"LINKAGE=EXPORT", "ENGINE_C"}
+    filter "configurations:debug"
+        symbols "On"
+    filter "configurations:debugopt"
+        symbols "On"
+        optimize "On"
+    filter "configurations:release"
+        defines {"NDEBUG"}
+        symbols "Off"
+        optimize "On"
+    configuration "windows"
+        links { "user32", "gdi32", "../../engine/3rd/SDL2.lib" }
+    configuration "linux"
+        links { "pthread" }
     filter "configurations:debug"
         symbols "On"
     filter "configurations:debugopt"
@@ -38,7 +51,7 @@ project "editor"
     "../../editor/**.h*",
     "../../editor/*.c*",
     "../../editor/3rd/@ocornut/*.cpp",
-    "../../editor/3rd/@ocornut/examples/imgui_impl_glfw.cpp",
+    "../../editor/3rd/@ocornut/examples/imgui_impl_sdl.cpp",
     "../../editor/3rd/@ocornut/examples/imgui_impl_opengl3.cpp",
     "../../editor/3rd/@ocornut/examples/libs/gl3w/GL/gl3w.c",
     "../../editor/3rd/@ocornut/misc/freetype/*.cpp",
@@ -47,18 +60,17 @@ project "editor"
     }
     includedirs {
     "../../engine/",
-    "../../engine/framework/app/3rd/",
+    "../../engine/3rd/SDL2/",
     "../../editor/",
     "../../editor/imgui/",
     "../../editor/3rd/@ocornut/",
     "../../editor/3rd/@ocornut/examples/",
     "../../editor/3rd/@ocornut/examples/libs/gl3w/",
-    "../../editor/3rd/@ocornut/examples/example_glfw_opengl3/",
+    "../../editor/3rd/@ocornut/examples/example_sdl_opengl3/",
     }
-    -- links {"engine"}
     defines {"ENGINE_C"} -- "LINKAGE=STATIC",
     configuration "windows"
-        links { "user32", "gdi32" }
+        links { "user32", "gdi32", "../../engine/3rd/SDL2.lib" }
     configuration "linux"
         links { "pthread" }
     filter "configurations:debug"
@@ -170,3 +182,8 @@ project "launch"
         defines {"NDEBUG"}
         symbols "Off"
         optimize "On"
+
+-- copy a file from the objects directory to the target directory
+postbuildcommands {
+    -- '{COPY} "%{cfg.targetdir}/../engine/3rd/SDL2.dll" "%{cfg.targetdir}"',
+}

@@ -111,6 +111,10 @@ exit
 
         pushd "%~dp0%"
 
+            if exist _debug\launch.exe    copy /y engine\3rd\SDL2.dll _debug
+            if exist _release\launch.exe  copy /y engine\3rd\SDL2.dll _release
+            if exist _debugopt\launch.exe copy /y engine\3rd\SDL2.dll _debugopt
+
             if "0"=="%OK%" (
                 color
                 echo ^>^> launch
@@ -119,8 +123,8 @@ exit
                 if "%1"=="debugopt" shift
 
                 if "%1"=="debug" (
-                    if exist _debug\launch.exe start "" devenv /Run "_debug\launch.exe" %*
-                    if exist _release\launch.exe start "" devenv /Run "_release\launch.exe" %*
+                    if exist _debug\launch.exe    start "" devenv /Run "_debug\launch.exe" %*
+                    if exist _release\launch.exe  start "" devenv /Run "_release\launch.exe" %*
                     if exist _debugopt\launch.exe start "" devenv /Run "_debugopt\launch.exe" %*
                 ) else (
                     if exist _debug\launch.exe _debug\launch.exe %*
