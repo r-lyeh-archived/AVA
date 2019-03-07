@@ -350,6 +350,8 @@ int window_create( float zoom, int flags ) {
     SDL_WINDOW_ALLOW_HIGHDPI - window should be created in high-DPI mode if supported (>= SDL 2.0.1)
     */
 
+    sdl_window_flags |= SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
+
     sdl_window_flags |= fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
     sdl_window_flags |= fullscreen ? 0 : SDL_WINDOW_RESIZABLE;
     sdl_window_flags |= fullscreen ? SDL_WINDOW_INPUT_GRABBED : 0; // grabbed -> mouse confined to window
