@@ -1,8 +1,5 @@
-#ifdef __gl_portable_h__
-
-// do nothing
-
-#else
+#ifndef OPENGL_H
+#define OPENGL_H
 
 // { mini KHR
 
@@ -36,17 +33,27 @@ typedef float khronos_float_t;
 // } mini KHR
 
 #define GLAPI API
-#include "glad.h"
+#include "../3rd/glad.h"
+//#include "../3rd/gl3w.h"
+
+#include "../3rd/gl_portable/gl_portable.h"
+#include <stdint.h>
+typedef uint32_t GLuint;
+
+#endif
+
 
 #ifdef OPENGL_C /* GLAD_IMPLEMENTATION */
 #pragma once
-
-#include "glad.c"
 
 #ifdef _MSC_VER
 #pragma comment(lib, "opengl32.lib")
 #endif
 
-#endif // OPENGL_C
+#include "../3rd/glad.c"
+//#define GL3W_IMPLEMENTATION
+//#include "../3rd/gl3w.h"
 
-#endif // __gl_portable_h__
+#include "../3rd/gl_portable/gl_portable.c"
+
+#endif

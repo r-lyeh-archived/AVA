@@ -7,10 +7,8 @@ int main(int argc, char **argv) {
 
     window_create(0.25f, 0);
 
-    int w, h;
-    void *pixels = 0;
-    while( window_update(&w, &h) ) {
-        window_swap(&pixels);
+    while( window_update() ) {
+        window_swap(NULL);
     }
 
     window_destroy();

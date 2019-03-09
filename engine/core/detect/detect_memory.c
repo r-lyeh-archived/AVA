@@ -14,8 +14,8 @@
 
 #ifdef _MSC_VER //#if MSC
 #include <malloc.h>
-#define ALLOCA(type,name,sz) type *name = (type*)_alloca(sz * sizeof(type))
+#define ALLOCA(type,name,sz) type *name = (type*)memset(_alloca(sz * sizeof(type)), 0, (sz * sizeof(type))) // memset needed?
 #else
-#define ALLOCA(type,name,sz) type name[sz]
+#define ALLOCA(type,name,sz) type name[sz] = {0}
 #endif
 

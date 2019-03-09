@@ -611,6 +611,7 @@ void gfTextureSetPixels(
   glTextureSubImage3D(texture_id, 0, x, y, texture_layer, width, height, 1, format, GL_UNSIGNED_BYTE, pixels);
 }
 
+/*
 void gfTextureGetPixels(
   u32 texture_id,
   i32 texture_layer,
@@ -643,6 +644,7 @@ void gfTextureSaveToBmp(
   
   SDL_free(pixels);
 }
+*/
 
 u32 gfFboCreate(
   u32 depth_texture_id,
@@ -833,8 +835,8 @@ void gfWindow(
   if(SDL_Init(SDL_INIT_VIDEO | sdl_init_flags))
     gfError("Error: SDL_Init", SDL_GetError());
 
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaa_samples);
   SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
@@ -951,8 +953,8 @@ void gfWindow(
     "GL_ARB_conservative_depth",
     "GL_ARB_framebuffer_object",
     "GL_ARB_get_program_binary",
-//    "GL_ARB_direct_state_access",
-//    "GL_ARB_get_texture_sub_image",
+    "GL_ARB_direct_state_access",
+    "GL_ARB_get_texture_sub_image",
     "GL_ARB_texture_cube_map_array",
     "GL_ARB_separate_shader_objects",
     "GL_ARB_shading_language_420pack",
@@ -963,11 +965,9 @@ void gfWindow(
   };
   gfCheckExtensions(sizeof(extensions) / sizeof(extensions[0]), extensions);
   
-#if 0
   u32 vao;
   glCreateVertexArrays(1, &vao);
   glBindVertexArray(vao);
-#endif
 
   glBlendFunc(0x0302, 0x0303);
   glDepthRange(-1.0, 1.0);

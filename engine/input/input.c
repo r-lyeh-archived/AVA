@@ -26,7 +26,7 @@ int key( int key );
 #ifdef INPUT_C
 #pragma once
 
-#include "../app/window.c"
+#include "../window/window_app.c"
 
 static double mx, my, mb[3], mcursor = 1;
 static int mhas_imgui = 0;
@@ -35,8 +35,17 @@ static int mhas_imgui = 0;
 //static 
 void mouse_update() { // $
     int mxi, myi;
-    uint32_t state = SDL_GetMouseState(&mxi, &myi);
-    mx = mxi; my = myi;
+    uint32_t state;
+
+    SDL_SetRelativeMouseMode( !mcursor );
+
+    if( SDL_GetRelativeMouseMode() ) {
+        state = SDL_GetRelativeMouseState(&mxi, &myi);
+        mx += mxi; my += myi;
+    } else {
+        state = SDL_GetMouseState(&mxi, &myi);
+        mx = mxi; my = myi;
+    }
 
     mb[0] = state & SDL_BUTTON(SDL_BUTTON_LEFT);
     mb[1] = state & SDL_BUTTON(SDL_BUTTON_MIDDLE);

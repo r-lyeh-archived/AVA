@@ -966,7 +966,7 @@ void editor_draw() {
 
         // layer #0 (remoteview)
         ImGui::SetCursorPos(cursor_pos);
-        imgui_texture( remote_id, ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y, false); // R.width, R.height, false );
+        imgui_texture( remote_id, R.width, R.height, false ); // ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y, false); // R.width, R.height, false );
     }
     ImGui::End();
 

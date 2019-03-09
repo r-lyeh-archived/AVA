@@ -52,10 +52,8 @@ int main() {
     glEnableVertexAttribArray(vcol_location);
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*) (sizeof(float) * 2));
 
-    void *pixels = 0;
-    int width, height;
-    while (window_update(&width, &height)) {
-
+    while (window_update()) {
+        int *rect = window_size(), width = rect[0], height = rect[1];
         mat4 m, p, mvp;
         // model
         mat4_identity(m);
@@ -70,6 +68,7 @@ int main() {
         glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
+        static void *pixels = 0;
         window_swap( &pixels );
         network_sendbuf( pixels, width, height, 3, 332 );
     }

@@ -11,10 +11,17 @@
 #include "framework.c"
 #include "server.c"
 
+#ifdef _MSC_VER
+//#pragma comment(lib, "3rd/SDL2.lib")
+//#pragma comment(lib, "3rd/SDL2/lib/x64/SDL2.lib") // _WIN64
+//#pragma comment(lib, "3rd/SDL2/lib/x86/SDL2.lib") // _WIN32
+#endif
+
 
 API int init();
 
 int init() {
+
     // log early
     puts("; engine begin. last rebuilt: " __DATE__ " " __TIME__);
 
