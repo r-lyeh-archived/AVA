@@ -12,6 +12,7 @@ enum {
     WINDOW_LEGACY_OPENGL = 0x4,
     WINDOW_SQUARED = 0x8,
     WINDOW_NO_MOUSE = 0x10,
+    WINDOW_MSAA4 = 0x20,
 };
 
 API int window_create( float zoom /* 10.0f */, int flags );
@@ -162,6 +163,20 @@ void trap_gl() {
 
 #else
 
+void glDebugCallback(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, void * userdata) {
+    const char * GL_ERROR_SOURCE[] = { "API", "WINDOW SYSTEM", "SHADER COMPILER", "THIRD PARTY", "APPLICATION", "OTHER" };
+    const char * GL_ERROR_SEVERITY[] = { "HIGH", "MEDIUM", "LOW", "NOTIFICATION" };
+    const char * GL_ERROR_TYPE[] = { "ERROR", "DEPRECATED BEHAVIOR", "UNDEFINED DEHAVIOUR", "PORTABILITY", "PERFORMANCE", "OTHER" };
+
+    SDL_Log( "%s [ID: %u]\n", message, id );
+    /* "[SEVERITY: %s] [SOURCE: %s] [TYPE: %s]", GL_ERROR_SEVERITY[
+          severity != GL_DEBUG_SEVERITY_NOTIFICATION ?
+          severity  - GL_DEBUG_SEVERITY_HIGH : 3
+        ],
+        GL_ERROR_SOURCE[source - GL_DEBUG_SOURCE_API],
+        GL_ERROR_TYPE[type - GL_DEBUG_TYPE_ERROR], */
+}
+
 void trap_gl() {
 
 }
@@ -219,6 +234,8 @@ int window_create( float zoom, int flags ) {
     }
 #endif
 
+    flags |= WINDOW_LEGACY_OPENGL; // O:)
+
     window_flags = flags;
 
     // detect monitors
@@ -263,25 +280,27 @@ int window_create( float zoom, int flags ) {
     sdl_window_flags |= fullscreen ? SDL_WINDOW_INPUT_GRABBED : 0; // grabbed -> mouse confined to window
     // glfwWindowHint(GLFW_REFRESH_RATE, desktop->refreshRate);
 
-    int msaa_samples = 4;
+    if( flags & WINDOW_MSAA4 ) {
+        int msaa_samples = 4;
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaa_samples);
+    }
+
     /*
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaa_samples);
     SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
     */
+
     /*
     glfwWindowHint(GLFW_RED_BITS, desktop->redBits);
     glfwWindowHint(GLFW_GREEN_BITS, desktop->greenBits);
     glfwWindowHint(GLFW_BLUE_BITS, desktop->blueBits);
-    glfwWindowHint(GLFW_STENCIL_BITS, 32); // GLFW_DONT_CARE);
+    glfwWindowHint(GLFW_STENCIL_BITS, 32); // 0 == GLFW_DONT_CARE
     glfwWindowHint(GLFW_DEPTH_BITS, 0);
-    glfwWindowHint(GLFW_STENCIL_BITS, 0);
     */
-    /*
-    #ifndef RELEASE
+
+    // #ifndef RELEASE
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-    #endif
-    */
+    // #endif
 
     int have_debug = GL_FALSE;
     int have_core = flags & WINDOW_LEGACY_OPENGL ? SDL_GL_CONTEXT_PROFILE_COMPATIBILITY : SDL_GL_CONTEXT_PROFILE_CORE;
@@ -374,9 +393,12 @@ int window_create( float zoom, int flags ) {
 #endif
 
     // Enable the debug callback
-    if( have_debug ) {
-        trap_gl();
-    }
+    // #ifndef RELEASE
+    typedef void (*GLDEBUGPROC)(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, const void * userParam);
+    typedef void (*GLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC callback, const void * userParam);
+    void (*glDebugMessageCallback)(GLDEBUGPROC callback, const void * userParam) = (GLDEBUGMESSAGECALLBACKPROC)SDL_GL_GetProcAddress("glDebugMessageCallback");
+    glDebugMessageCallback((GLDEBUGPROC)glDebugCallback, NULL);
+    // #endif
 
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 

@@ -14,7 +14,7 @@ const float mesh_vertices[] = {
 #define countof(x) ( sizeof(x) / sizeof((x)[0]) )
 
 int main() {
-    window_create(0.75f, WINDOW_SQUARED);
+    window_create(0.75f, WINDOW_SQUARED | WINDOW_MSAA4);
 
     glEnable(GL_VERTEX_PROGRAM_ARB);
     glEnable(GL_FRAGMENT_PROGRAM_ARB);
