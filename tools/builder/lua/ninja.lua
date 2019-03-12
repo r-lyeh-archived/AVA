@@ -92,7 +92,7 @@ function ninja.generateSolution(sln)
 	p.w("")
 
 	p.w("# default target")
-	p.w("default " .. p.esc(cfg_first))
+	p.w("# default " .. p.esc(cfg_first) .. " ## @r-lyeh: removed")
 	p.w("")
 end
 

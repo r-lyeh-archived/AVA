@@ -394,7 +394,7 @@ int main() {
 
         static void *pixels = 0;
         window_swap(&pixels);
-        network_sendbuf( pixels, rect[0], rect[1], 3, 332 ); // 888, 332, 242, 7755
+        network_sendbuf( pixels, rect[0], rect[1], 3, 7755 ); // 888, 332, 242, 7755
 
         mouse_x_prev = mouse_x;
         mouse_y_prev = mouse_y;

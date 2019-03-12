@@ -103,7 +103,7 @@ int imgui_main(int, char**) // @r-lyeh
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
     // { @r-lyeh
-    const char *ini[] = { "editor.ini", "editor/editor.ini" };
+    const char *ini[] = { "editor.ini", "editor/editor.ini", "../editor/editor.ini" };
     for( int i = 0; i < IM_ARRAYSIZE(ini); ++i ) {
         auto fexist = [](const char *f) -> bool {
             FILE *fp = fopen(f, "rb");

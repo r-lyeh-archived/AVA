@@ -20,6 +20,33 @@
 
 API int init();
 
+static void os_exec_bg( void *cmdline ) {
+    os_exec( (const char*)cmdline );
+}
+
+static int run( const char *name, const char *proc, bool threaded ) {
+    char *dllname = va("%s.dll", name);
+    if( file_exist(dllname) ) {
+        puts(dllname);
+        void (*dllfunc)(void *) = dllquick(dllname, proc);
+        if( threaded ) {
+            return (detach( dllfunc, 0 ), 0);
+        } else {
+            return (dllfunc( 0 ), 0);
+        }
+    }
+    char *exename = va("%s.exe", name);
+    if( file_exist(exename) ) {
+        puts(exename);
+        if( threaded ) {
+            return (detach( os_exec_bg, (void *)exename ), 0);
+        } else {
+            return !!os_exec( exename );
+        }
+    }
+    return -1;
+}
+
 int init() {
 
     // log early
@@ -36,30 +63,27 @@ int init() {
     vfs_import("games/**");
     vfs_import("assets/**");
 
-    // optional editor launch
-    void (*editor)(void *) = dllquick( "editor.dll", "main" );
-    if( editor ) {
-        detach( editor, 0 );
-    }
+    // base path
+#ifdef _MSC_VER
+    _chdir( SDL_GetBasePath() );
+#else
+    chdir( SDL_GetBasePath() );
+#endif
 
+/*
     // optional game launch
-    void (*game)();
-    if( 0 != (game = dllquick( "game.dll", "main" ) ) ) {
-        game();
-    }
+    run("game", "main", 0);
 
     // optional game launch (ranges #0-128, #00-128, #000-128)
     for( int i = 0; i < 128; ++i ) {
-        if( 0 != (game = dllquick( va("game%d.dll", i), "main" ) ) ) {
-            game();
-        }
-        if( 0 != (game = dllquick( va("game%02d.dll", i), "main" ) ) ) {
-            game();
-        }
-        if( 0 != (game = dllquick( va("game%03d.dll", i), "main" ) ) ) {
-            game();
-        }
+        run(va("game%d", i), "main", 0);
+        run(va("game%02d", i), "main", 0);
+        run(va("game%03d", i), "main", 0);
     }
+*/
+
+    // editor launch
+    run("editor", "main", 0);
 
     // quit
     puts("; engine end");

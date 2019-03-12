@@ -111,28 +111,28 @@ exit
 
         pushd "%~dp0%"
 
-            if exist _debug\launch.exe    copy /y engine\3rd\SDL2.dll _debug 1>2> nul
-            if exist _release\launch.exe  copy /y engine\3rd\SDL2.dll _release 1>2> nul
-            if exist _debugopt\launch.exe copy /y engine\3rd\SDL2.dll _debugopt 1>2> nul
+            if exist _debug\editor.exe    copy /y engine\3rd\SDL2.dll _debug 1>2> nul
+            if exist _release\editor.exe  copy /y engine\3rd\SDL2.dll _release 1>2> nul
+            if exist _debugopt\editor.exe copy /y engine\3rd\SDL2.dll _debugopt 1>2> nul
 
             if "0"=="%OK%" (
                 rem color
-                echo ^>^> launch
+                rem echo ^>^> launch
 
                 if "%1"=="release" shift
                 if "%1"=="debugopt" shift
 
                 if "%1"=="debug" (
-                    if exist _debug\launch.exe    start "" devenv /Run "_debug\launch.exe" %*
-                    if exist _release\launch.exe  start "" devenv /Run "_release\launch.exe" %*
-                    if exist _debugopt\launch.exe start "" devenv /Run "_debugopt\launch.exe" %*
+                    if exist _debug\editor.exe    start "" devenv /Run "_debug\editor.exe" %*
+                    if exist _release\editor.exe  start "" devenv /Run "_release\editor.exe" %*
+                    if exist _debugopt\editor.exe start "" devenv /Run "_debugopt\editor.exe" %*
                 ) else (
-                    if exist _debug\launch.exe _debug\launch.exe %*
-                    if exist _release\launch.exe _release\launch.exe %*
-                    if exist _debugopt\launch.exe _debugopt\launch.exe %*
+                    if exist _debug\editor.exe    start _debug    && REM _debug\editor.exe %*
+                    if exist _release\editor.exe  start _release  && REM _release\editor.exe %*
+                    if exist _debugopt\editor.exe start _debugopt && REM _debugopt\editor.exe %*
                 )
 
-                echo ^<^< launch
+                rem echo ^<^< launch
             ) else (
                 :error
                 rem color 4f
@@ -142,7 +142,6 @@ exit
         popd
 
     REM exit
-
         echo Press any key to continue... && pause > nul
         rem color
         exit /b

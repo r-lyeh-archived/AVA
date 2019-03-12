@@ -28,9 +28,13 @@ bool dir_exists( const char *pathfile ) {
 #endif
 
 
+/*
 typedef unsigned char stbi_uc;
 extern "C" stbi_uc* stbi_load_from_memory( const stbi_uc *bin, int len, int *x, int *y, int *n, int comp );
 extern "C" void stbi_image_free( stbi_uc * );
+*/
+#define STB_IMAGE_IMPLEMENTATION
+#include "3rd/stb_image.h"
 
 
 

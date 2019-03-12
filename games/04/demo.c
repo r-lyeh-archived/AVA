@@ -30,7 +30,7 @@ static const char* fragment_shader_text =
 
 
 EXPORT
-int main() {
+int main(int argc, char **argv) {
     puts(";; hello from game 04");
 
     window_create( 25.f /*25%*/, 0 );
@@ -70,7 +70,7 @@ int main() {
 
         static void *pixels = 0;
         window_swap( &pixels );
-        network_sendbuf( pixels, width, height, 3, 332 );
+        network_sendbuf( pixels, width, height, 3, 7755 );
     }
 
     window_destroy();
