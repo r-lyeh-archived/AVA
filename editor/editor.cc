@@ -751,7 +751,7 @@ void editor_draw() {
     c->ratio = c->width / c->height;
 
     if( ImGui::Begin("Camera") ) {
-	    ImGui::SliderFloat("fov", &c->fov, 10, 120 );
+        ImGui::SliderFloat("fov", &c->fov, 10, 120 );
     }
     ImGui::End();
 
@@ -1032,7 +1032,15 @@ void editor_draw() {
 
         // layer #0 (remoteview)
         ImGui::SetCursorPos(cursor_pos);
-        imgui_texture( remote_id, R.width, R.height, false ); // ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y, false); // R.width, R.height, false );
+
+        float width = ImGui::GetContentRegionAvail().x, height = ImGui::GetContentRegionAvail().y;
+        float aspect = R.width / (float)(R.height + 1);
+
+        if( width < height ) {
+            imgui_texture( remote_id, width, width / aspect, false );
+        } else {
+            imgui_texture( remote_id, width * aspect, height, false );
+        }
     }
     ImGui::End();
 
@@ -1090,7 +1098,7 @@ void editor_draw() {
 
     static ImGui::Nodes nodes_;
     if( ImGui::Begin("Nodes") ) {
-    	nodes_.ProcessNodes();
+        nodes_.ProcessNodes();
     }
     ImGui::End();
 
