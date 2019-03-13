@@ -181,12 +181,12 @@ int main() {
     glGenPipelines(1, &pipeline);
     glCompilePipeline(pipeline, &pipeline_info);
 
-    image cubemap_px = {0}; image_loadfile( &cubemap_px, "data/cubemap/cubemap_px_right.png",  IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_nx = {0}; image_loadfile( &cubemap_nx, "data/cubemap/cubemap_nx_left.png",   IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_py = {0}; image_loadfile( &cubemap_py, "data/cubemap/cubemap_py_top.png",    IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_ny = {0}; image_loadfile( &cubemap_ny, "data/cubemap/cubemap_ny_bottom.png", IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_pz = {0}; image_loadfile( &cubemap_pz, "data/cubemap/cubemap_pz_front.png",  IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_nz = {0}; image_loadfile( &cubemap_nz, "data/cubemap/cubemap_nz_back.png",   IMAGE_RGBA | IMAGE_U8); 
+    image cubemap_px = {0}; image_loadfile( &cubemap_px, vfs_read("data/cubemap/cubemap_px_right.png"),  IMAGE_RGBA | IMAGE_U8); 
+    image cubemap_nx = {0}; image_loadfile( &cubemap_nx, vfs_read("data/cubemap/cubemap_nx_left.png"),   IMAGE_RGBA | IMAGE_U8); 
+    image cubemap_py = {0}; image_loadfile( &cubemap_py, vfs_read("data/cubemap/cubemap_py_top.png"),    IMAGE_RGBA | IMAGE_U8); 
+    image cubemap_ny = {0}; image_loadfile( &cubemap_ny, vfs_read("data/cubemap/cubemap_ny_bottom.png"), IMAGE_RGBA | IMAGE_U8); 
+    image cubemap_pz = {0}; image_loadfile( &cubemap_pz, vfs_read("data/cubemap/cubemap_pz_front.png"),  IMAGE_RGBA | IMAGE_U8); 
+    image cubemap_nz = {0}; image_loadfile( &cubemap_nz, vfs_read("data/cubemap/cubemap_nz_back.png"),   IMAGE_RGBA | IMAGE_U8); 
     int cubemap_w = cubemap_px.w, cubemap_h = cubemap_px.h;
 
     unsigned cubemap = 0;

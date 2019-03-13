@@ -36,14 +36,14 @@ typedef struct image {
     void (*deleter)(void *);
 } image;
 
-bool image_loadfile( image *, const char *pathfile, int flags );
-bool image_loadmem( image *img, const void *src, int srclen, int flags );
-bool image_destroy( image * );
+API bool image_loadfile( image *, const char *pathfile, int flags );
+API bool image_loadmem( image *img, const void *src, int srclen, int flags );
+API bool image_destroy( image * );
 
 // @todo: test me
-void image_bgr2rgb( image * );
-void image_mirror( image * );
-void image_flip( image * );
+API void image_bgr2rgb( image * );
+API void image_mirror( image * );
+API void image_flip( image * );
 
 #endif
 

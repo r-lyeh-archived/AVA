@@ -208,10 +208,8 @@ int window_create( float zoom, int flags ) {
     if( window ) {
         return 0;
     } else {
-        int sdl_init_flags = 0;
-        if( SDL_Init(SDL_INIT_VIDEO | sdl_init_flags) ) {
-            die_callback("Error: Cannot initalize application (SDL_Init)"); //, SDL_GetError());
-        }
+        // engine init
+        init();
 
 /* #if !EDITOR
 #ifdef _MSC_VER

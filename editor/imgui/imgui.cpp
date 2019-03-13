@@ -1,3 +1,29 @@
+/*
+#include "engine.h"
+*/
+/*
+#include <assert.h>
+#define API
+#define ASSERT assert
+#define EXPORT __declspec(dllexport)
+#define OSCRECV_C
+#include "network/network_oscrecv.c"
+#define SHAPE_C
+#include "render/render_shape.c"
+#include <stdint.h>
+#define GL(...) __VA_ARGS__
+*/
+
+#include <stdint.h>
+#define API
+#include "engine_minimal.c"
+#define OSCRECV_C
+#include "network/network_oscrecv.c"
+#define SHAPE_C
+#include "render/render_shape.c"
+#define GL(...) __VA_ARGS__
+
+#pragma comment(lib, "opengl32.lib")
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
@@ -30,21 +56,6 @@ using namespace ImGui;
 #define _USE_MATH_DEFINES
 #endif
 #include <math.h>
-
-
-/*
-#include "engine.h"
-*/
-#include <assert.h>
-#define API
-#define ASSERT assert
-#define EXPORT __declspec(dllexport)
-#define OSCRECV_C
-#include "network/network_oscrecv.c"
-#define SHAPE_C
-#include "render/render_shape.c"
-#include <stdint.h>
-#define GL(...) __VA_ARGS__
 
 
 // incl render/set_render

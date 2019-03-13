@@ -4,21 +4,21 @@
 
 // environment vars
 
-const char *env_get( const char *key );
-const char *env_set( const char *key, const char *value );
+API const char *env_get( const char *key );
+API const char *env_set( const char *key, const char *value );
 
 // environment folders
 
-char *env_arg0(); // appname()
-char *env_curr(); // envwork
-char *env_home();
-char *env_proc_();
-char *env_root(); // envexec, envgame
-char *env_save(); // envdata
-char *env_temp();
-char *env_user();
-const char *env_dir( const int folder );
-uint64_t env_free();
+API char *env_arg0(); // appname()
+API char *env_curr(); // envwork
+API char *env_home();
+API char *env_proc_();
+API char *env_root(); // envexec, envgame
+API char *env_save(); // envdata
+API char *env_temp();
+API char *env_user();
+API const char *env_dir( const int folder );
+API uint64_t env_free();
 
 #endif
 

@@ -21,53 +21,17 @@
 extern "C" {
 #endif
 
-#ifdef   CONFIG_H
-#include CONFIG_H
-#endif
+#include "engine_config.c"
+#include "engine_core.c"
+#include "engine_framework.c"
+#include "engine_server.c"
 
-// detect platform
-
-#include "core/detect/detect.c"
-
-// code annotations
-
-#define HEAP           // heap pointer. must free() after use
-#define TEMP           // temporary stack pointer. do not free() after use
-#define GC             // garbage collected pointer. do not free() after use
-#define FAT            // fat pointer (internal data at &[-1])
-
-// code tags
-
-#define TAG4(abcN) ((0[#abcN"00"]<<0)|(1[#abcN"00"]<<8)|(2[#abcN"00"]<<16)|(3[#abcN"00"]<<24))
-
-// code perf/profiling
-
-#ifndef $
-#define $ /* printf("%s:%d\n", __FUNCTION__,__LINE__); */
-#endif
-
-// string helpers
-
-#include <stdarg.h>
-#ifndef VSNPRINTF
-#define VSNPRINTF vsnprintf
-#endif
-API char *vl( const char *fmt, va_list vl );
-API char *va( const char *fmt, ... );
-
-// ----------------------------------------------------------------------------
-// modules
-
-#include "core/core.c"
-#include "framework.c"
-#include "server.c"
+API int init();
+API int loop();
+API int quit();
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* AVA_VERSION */
-
-// ----------------------------------------------------------------------------
-// #define warn(...)          ( fprintf(stderr, __VA_ARGS__), 1 )
-// #define die(...)           ( warn(__VA_ARGS__), exit(-__LINE__), 1 ) // use: test || die

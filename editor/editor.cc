@@ -477,10 +477,10 @@ int osc_socket;
 struct remote_render {
     // virtual framebuffer
     char *buffer[2];
-    int width, height, frame;
+    int width, height, frame, must_clear;
     // opengl
     GLuint texture_id;
-} R = { {0,0}, 256, 256, 0, 0 };
+} R = { {0,0}, 256, 256, 0, 0, 0 };
 
 void editor_init() {
     imgui_config();
@@ -495,6 +495,22 @@ void editor_init() {
 void editor_tick()
 {}
 
+auto is_pow2 = []( uint32_t v ) {
+    return !((~(~0U>>1)|v)&v -1); // from SO
+};
+auto next_pow2 = []( uint32_t v ) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    return ++v;
+};
+int align16(int x) {
+    return (x + (16 - 1)) & ~(16 - 1);
+}
+
 void editor_draw() {
 
 #if WITH_MAINMENU
@@ -507,10 +523,12 @@ void editor_draw() {
 
 #if WITH_SCENE
 
+    enum { NETWORK_BUFFER_MAXSIZE = 1920 * 1080 * 4 };
+
     // update network buffers
     if( !R.buffer[0] ) {
-        R.buffer[0] = (char*)calloc( 1, 1920 * 1080 * 4 );
-        R.buffer[1] = (char*)calloc( 1, 1920 * 1080 * 4 );
+        R.buffer[0] = (char*)calloc( 1, NETWORK_BUFFER_MAXSIZE );
+        R.buffer[1] = (char*)calloc( 1, NETWORK_BUFFER_MAXSIZE );
     }
     auto network_update = [&]() {
         // update osc server
@@ -525,28 +543,18 @@ void editor_draw() {
             //if( msg ) {
                 // @todo clear mem when remote viewport changes
                 // iii i b: w,h,fmt, y, blob
-                auto is_pow2 = []( uint32_t v ) {
-                    return !((~(~0U>>1)|v)&v -1); // from SO
-                };
-                auto next_pow2 = []( uint32_t v ) {
-                    v--;
-                    v |= v >> 1;
-                    v |= v >> 2;
-                    v |= v >> 4;
-                    v |= v >> 8;
-                    v |= v >> 16;
-                    return ++v;
-                };
-                int ow = msg->i[0]; int w = is_pow2(ow) ? ow : next_pow2(ow);
-                int oh = msg->i[1]; int h = is_pow2(oh) ? oh : next_pow2(oh);
+                int ow = msg->i[0];
+                int oh = msg->i[1];
                 int format = msg->i[2];
                 int y = msg->i[3];
                 int size = msg->i[4];
                 const char *data = msg->s[4];
-                R.width = w;
-                R.height = h;
+                R.must_clear |= (R.width != ow) || (R.height != oh);
+                R.width = ow;
+                R.height = oh;
+                int w = align16(ow); // w = is_pow2(ow) ? ow : next_pow2(ow);
                 char *buf = &R.buffer[R.frame][ (0 + y * w) * 3 ];
-                if( format == 888 ) memcpy( &R.buffer[R.frame][ (0 + y * w) * 3 ], data, ow*3 );
+                if( format == 888 ) memcpy( buf, data, ow*3 );
                 if( format == 332 ) for( int x = 0; x < ow; ++x ) {
 #if 1
                     unsigned char p = data[x];
@@ -690,10 +698,17 @@ void editor_draw() {
         // #if OPENGL >= 3
         // glGenerateMipmap(GL_TEXTURE_2D);
         // #endif
-        void *pixels = R.buffer[R.frame];
-        int mip = 0, w = R.width, h = R.height;
         int texture_fmt = GL_RGB; // incl. compressed formats
         int image_fmt = GL_RGB, pixel_fmt = GL_UNSIGNED_BYTE;
+        int mip = 0;
+        int w = R.width; w = align16(w); //w = is_pow2(w) ? w : next_pow2(w);
+        int h = R.height; h = align16(h); //h = is_pow2(h) ? h : next_pow2(h);
+        void *pixels = R.buffer[R.frame];
+        if( R.must_clear ) {
+            memset( R.buffer[0], 0, 1920*1080*4 );
+            memset( R.buffer[1], 0, 1920*1080*4 );
+            R.must_clear = 0;
+        }
         glTexImage2D(GL_TEXTURE_2D, mip, texture_fmt, w, h, 0, image_fmt, pixel_fmt, pixels);
     }
 
@@ -1034,13 +1049,7 @@ void editor_draw() {
         ImGui::SetCursorPos(cursor_pos);
 
         float width = ImGui::GetContentRegionAvail().x, height = ImGui::GetContentRegionAvail().y;
-        float aspect = R.width / (float)(R.height + 1);
-
-        if( width < height ) {
-            imgui_texture( remote_id, width, width / aspect, false );
-        } else {
-            imgui_texture( remote_id, width * aspect, height, false );
-        }
+        imgui_texture( remote_id, width, height, false );
     }
     ImGui::End();
 

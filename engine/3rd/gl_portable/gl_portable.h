@@ -282,10 +282,10 @@ struct GL_GRAPHICS_PIPELINE_STATE_INFO {
   GlBool32             colorBlendColorWriteEnableA;
 };
 
-void glGenPipelines(int n, unsigned *pipelines);
-void glDeletePipelines(int n, const unsigned *pipelines);
-void glBindPipeline(unsigned pipeline);
-void glCompilePipeline(unsigned pipeline, const struct GL_GRAPHICS_PIPELINE_STATE_INFO *pipeline_info);
+API void glGenPipelines(int n, unsigned *pipelines);
+API void glDeletePipelines(int n, const unsigned *pipelines);
+API void glBindPipeline(unsigned pipeline);
+API void glCompilePipeline(unsigned pipeline, const struct GL_GRAPHICS_PIPELINE_STATE_INFO *pipeline_info);
 
 #ifdef __cplusplus
 }

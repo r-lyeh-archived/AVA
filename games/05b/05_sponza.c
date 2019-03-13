@@ -46,7 +46,7 @@ extern const int   submesh_vertex_end[];
 #define countof(x) ( sizeof(x) / sizeof((x)[0]) )
 
 int main() {
-    window_create(0.75f, WINDOW_NO_MOUSE);
+    window_create(0.75f, 0);
 
     glEnable(GL_VERTEX_PROGRAM_ARB);
     glEnable(GL_FRAGMENT_PROGRAM_ARB);
@@ -172,7 +172,7 @@ int main() {
     ALLOCA(image, textures_mem, mesh_texture_names_count);
 
     for (int i = 1; i < mesh_texture_names_count; i += 1) {
-        image_loadfile( &textures_mem[i], mesh_texture_names[i], IMAGE_RGBA | IMAGE_U8);
+        image_loadfile( &textures_mem[i], vfs_read(mesh_texture_names[i]), IMAGE_RGBA | IMAGE_U8);
     }
 
     ALLOCA(void *, textures, SUBMESH_COUNT);
@@ -321,15 +321,21 @@ int main() {
     for (float pos_x = 0, pos_y = 7, pos_z = 0, rot_x = 0, rot_y = 0; window_update(); ) {
         int *rect = window_size();
 
-        double mouse_x = 0;
-        double mouse_y = 0;
         static double mouse_x_prev = 0;
         static double mouse_y_prev = 0;
-        mouse_x = mouse('X');
-        mouse_y = mouse('Y');
-
-        float mouse_disp_x = (float)(mouse_x_prev - mouse_x) * 0.0035f;
-        float mouse_disp_y = (float)(mouse_y - mouse_y_prev) * 0.0035f;
+        double mouse_x = mouse('X');
+        double mouse_y = mouse('Y');
+        float mouse_disp_x = 0;
+        float mouse_disp_y = 0;
+        if( mouse('R') ) {
+            set_mouse('hide');
+            mouse_disp_x = (float)(mouse_x_prev - mouse_x) * 0.0035f;
+            mouse_disp_y = (float)(mouse_y - mouse_y_prev) * 0.0035f;
+        } else {
+            set_mouse('show');
+        }
+        mouse_x_prev = mouse_x;
+        mouse_y_prev = mouse_y;
 
         rot_x += mouse_disp_x;
         rot_y += mouse_disp_y;
@@ -395,9 +401,6 @@ int main() {
         static void *pixels = 0;
         window_swap(&pixels);
         network_sendbuf( pixels, rect[0], rect[1], 3, 7755 ); // 888, 332, 242, 7755
-
-        mouse_x_prev = mouse_x;
-        mouse_y_prev = mouse_y;
     }
 
     window_destroy();

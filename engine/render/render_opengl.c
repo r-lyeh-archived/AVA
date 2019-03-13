@@ -32,7 +32,9 @@ typedef float khronos_float_t;
 
 // } mini KHR
 
+#ifndef GLAPI
 #define GLAPI API
+#endif
 #include "../3rd/glad.h"
 //#include "../3rd/gl3w.h"
 

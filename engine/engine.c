@@ -7,18 +7,14 @@
 #define SERVER_C
 #endif
 
-#include "core/core.c"
-#include "framework.c"
-#include "server.c"
-
-#ifdef _MSC_VER
-//#pragma comment(lib, "3rd/SDL2.lib")
-//#pragma comment(lib, "3rd/SDL2/lib/x64/SDL2.lib") // _WIN64
-//#pragma comment(lib, "3rd/SDL2/lib/x86/SDL2.lib") // _WIN32
-#endif
-
+#include "engine_config.c"
+#include "engine_core.c"
+#include "engine_framework.c"
+#include "engine_server.c"
 
 API int init();
+API int loop();
+API int quit();
 
 static void os_exec_bg( void *cmdline ) {
     os_exec( (const char*)cmdline );
@@ -48,12 +44,27 @@ static int run( const char *name, const char *proc, bool threaded ) {
 }
 
 int init() {
+    static int ever = 0;
+    if( ever ) return 0;
+    ever = 1;
 
     // log early
     puts("; engine begin. last rebuilt: " __DATE__ " " __TIME__);
 
+    // init sdl
+    int sdl_init_flags = 0;
+    if( SDL_Init(SDL_INIT_VIDEO | sdl_init_flags) ) {
+        die_callback("Error: Cannot initalize application (SDL_Init)"); //, SDL_GetError());
+    }
+
     // cwd
+    // cwd base path
     // if( exist("../debug") && exist("../../games/") ) cwd("../../games/");
+#ifdef _MSC_VER
+    _chdir( SDL_GetBasePath() );
+#else
+    chdir( SDL_GetBasePath() );
+#endif
 
     // icon
 
@@ -63,11 +74,12 @@ int init() {
     vfs_import("games/**");
     vfs_import("assets/**");
 
-    // base path
-#ifdef _MSC_VER
-    _chdir( SDL_GetBasePath() );
-#else
-    chdir( SDL_GetBasePath() );
+#if 1 // DEBUG
+    // in case binary is present in any _debug/, _debugopt/, _release/ folder
+    vfs_import("../data/**");
+    vfs_import("../game/**");
+    vfs_import("../games/**");
+    vfs_import("../assets/**");
 #endif
 
 /*
@@ -81,13 +93,19 @@ int init() {
         run(va("game%03d", i), "main", 0);
     }
 */
+    return 1;
+}
 
+int loop() {
     // editor launch
     run("editor", "main", 0);
+    return 1;
+}
 
-    // quit
+int quit() {
+    // teardown
     puts("; engine end");
-    return 0;
+    return 1;
 }
 
 // #ifdef _MSC_VER

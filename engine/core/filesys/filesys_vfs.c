@@ -8,6 +8,8 @@
 
 API void            vfs_import( const char *pathmask );
 API const char *    vfs_read( const char *file );
+//API int             vfs_size( const char *file );
+//API int             vfs_exists( const char *file );
 
 #endif
 
@@ -46,6 +48,7 @@ const char *vfs_read( const char *file ) {
             }
         }
     }
+    printf("error: cannot find '%s' in '%s'\n", file, dir_registry ? dir_registry : "");
     return file;
 }
 #endif

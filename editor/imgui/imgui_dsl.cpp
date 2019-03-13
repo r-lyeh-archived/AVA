@@ -49,7 +49,7 @@ if( ImGui::BeginMenu( ("" #__VA_ARGS__)[0] == '\0' ? ICON_MD_EXPAND_MORE "  " x 
     THEN ImGui::MenuItemCheckbox(x, &booleans[x][__COUNTER__ - 1]);
 #   define CHECK(x) \
     clicked = ImGui::CheckBoxFont(x, &booleans[x][__COUNTER__], ICON_MD_CHECK_BOX, ICON_MD_CHECK_BOX_OUTLINE_BLANK);
-#   define SELECT(x) \
+#   define SELECTABLE(x) \
     clicked = ImGui::Selectable(x, &booleans[x][__COUNTER__], ImGuiSelectableFlags_DontClosePopups);
 #   define SUBMENU(x, ...) \
 if( ImGui::BeginMenu( ("" #__VA_ARGS__)[0] == '\0' ? x : __VA_ARGS__ "  " x ) )

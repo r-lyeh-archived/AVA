@@ -8,10 +8,10 @@
 
 typedef void(*console_cmd)();
 
-void console_add(const char* name, console_cmd func, void* user_data);
-void console_del(const char* name);
-void console_run1(const char* name, void *arg1 );
-void console_run2(const char* name, void *arg1, void *arg2 );
+API void console_add(const char* name, console_cmd func, void* user_data);
+API void console_del(const char* name);
+API void console_run1(const char* name, void *arg1 );
+API void console_run2(const char* name, void *arg1, void *arg2 );
 
 #endif
 

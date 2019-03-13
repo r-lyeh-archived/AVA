@@ -1,8 +1,8 @@
 #ifndef EXEC_H
 #define EXEC_H
 
-/*HEAP*/ char *os_exec( const char *cmd );
-bool os_task( const char *cmd, int *progress );
+API /*HEAP*/ char *os_exec( const char *cmd );
+API bool os_task( const char *cmd, int *progress );
 
 #endif
 

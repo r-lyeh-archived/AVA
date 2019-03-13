@@ -4,10 +4,10 @@
 #define DLL_H
 #include <stdbool.h>
 
-bool dllopen( int plug_id, const char *filename );
-void *dllfind( int plug_id, const char *name );
-void dllclose( int plug_id);
-void* dllquick( const char *filename, const char *symbol );
+API bool dllopen( int plug_id, const char *filename );
+API void *dllfind( int plug_id, const char *name );
+API void dllclose( int plug_id);
+API void* dllquick( const char *filename, const char *symbol );
 
 #endif
 

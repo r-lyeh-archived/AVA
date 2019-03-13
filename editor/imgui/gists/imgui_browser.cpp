@@ -64,6 +64,7 @@ int tinydir( const char *path, std::function<void (const char *fname,bool is_dir
 #include <stdint.h>
 #include <time.h>
 #include <functional>
+#include <thread>
 struct filedir {
     bool is_dir;
     std::string name;
@@ -74,7 +75,8 @@ struct filedir {
     uint64_t    owner;
     uint64_t    color;
 };
-std::vector<filedir> dir_cache[2];
+enum { TYPE_DIR, TYPE_FILE, TYPE_COUNT };
+std::vector<filedir> dir_cache[TYPE_COUNT];
 int bs_viewmode = 0;
 bool bs_refreshed = false;
 bool bs_strmatch( const char *text, const char *pattern ) {
@@ -125,8 +127,8 @@ int imgui_browser( char path[256] ) {
 
             dir_cache[!is_dir].push_back( f );
         };
-        dir_cache[0].clear(); dir_cache[0].push_back( filedir { true, "../" } );
-        dir_cache[1].clear();
+        dir_cache[TYPE_DIR].clear(); dir_cache[TYPE_DIR].push_back( filedir { true, "../" } );
+        dir_cache[TYPE_FILE].clear();
         tinydir( path, callback );
     }
     auto draw_entry = [&]( const filedir &f, bool is_dir ) -> int {
@@ -305,20 +307,26 @@ int imgui_browser( char path[256] ) {
         columns = columns < 1 || bs_viewmode == 0 ? 1 : columns;
         ImGui::Columns(columns, false);
 
-        for( auto &f : dir_cache[0] ) {
+        for( auto &f : dir_cache[TYPE_DIR] ) {
+            // ignore if filter does not match
             if( filter[2] && !bs_strmatch(f.name.c_str(), filter)) continue;
+
+            // draw && enter path if clicked
             if( draw_entry(f, 1) ) {
                 bs_refreshed = false;
                 strcat(path, f.name.c_str() /*MD icon*/ );
                 update_path(path);
             }
-
             ImGui::NextColumn();
         }
-        for( auto &f : dir_cache[1] ) {
+        for( auto &f : dir_cache[TYPE_FILE] ) {
+            // ignore if filter does not match
             if( filter[2] && !bs_strmatch(f.name.c_str(), filter)) continue;
-            draw_entry(f, 0);
 
+            // draw && exec if clicked
+            if( draw_entry(f, 0) ) {
+                std::thread( [](std::string n) { system( n.c_str() ); }, f.name ).detach();
+            }
             ImGui::NextColumn();
         }
 

@@ -7,9 +7,9 @@
 // @todo: if(click2(mouse, 'X'))
 // instead of 'DX', 'RX', 'CL', 'LL' etc...
 
-void mouse_update();
-double mouse(int key);   // 'X', 'Y', 'L', 'M', 'R', 'show', 'hide',
-void set_mouse(int key); // 'show', 'hide'
+API void mouse_update();
+API double mouse(int key);   // 'X', 'Y', 'L', 'M', 'R', 'show', 'hide',
+API void set_mouse(int key); // 'show', 'hide'
 
 /*
    '*',    '+',    ',',    '-',    '.',    '/',    ';',    '=',    '[',    ']',    '`',
@@ -18,7 +18,7 @@ void set_mouse(int key); // 'show', 'hide'
    'PAUS', 'PGDN', 'PGUP', 'PRNT', 'RGHT', 'SCRL', 'LSHF', 'RSHF', 'SPC' , 'LSUP', 'RSUP',
    'TAB' , 'TICK', 'UP'  , 
 */
-int key( int key );
+API int key( int key );
 
 
 
@@ -37,8 +37,6 @@ void mouse_update() { // $
     int mxi, myi;
     uint32_t state;
 
-    SDL_SetRelativeMouseMode( !mcursor );
-
     if( SDL_GetRelativeMouseMode() ) {
         state = SDL_GetRelativeMouseState(&mxi, &myi);
         mx += mxi; my += myi;
@@ -50,16 +48,6 @@ void mouse_update() { // $
     mb[0] = state & SDL_BUTTON(SDL_BUTTON_LEFT);
     mb[1] = state & SDL_BUTTON(SDL_BUTTON_MIDDLE);
     mb[2] = state & SDL_BUTTON(SDL_BUTTON_RIGHT);
-    // show or hide+lock
-    if( mcursor ) {
-        if( mhas_imgui ) {
-            SDL_ShowCursor(SDL_DISABLE);
-        } else {
-            SDL_ShowCursor(SDL_ENABLE);
-        }
-    } else {
-        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    }
 }
 // @todo: delta(mouse('X')), repeat(mouse('X')), click(mouse('L'), click2(mouse('L')
 // @todo: for all inputs!
@@ -84,10 +72,24 @@ double mouse(int key) { // $
 void set_mouse(int key) { // $
     switch(key) {
         default: return;
-        break; case 'show': mcursor = 1;
+        break; case 'show': {
+            if( !mcursor ) {
+                mcursor = 1;
+
+                SDL_ShowCursor(SDL_ENABLE);
+                SDL_SetRelativeMouseMode(SDL_DISABLE);
+            }
+        }
         break; case 'hide':
             if( mcursor ) {
-                mcursor = 0, mouse_update(), mouse_update();
+                mcursor = 0;
+
+                SDL_ShowCursor(SDL_DISABLE);
+                SDL_SetRelativeMouseMode(SDL_ENABLE);
+
+                // consume relative, so next call (mouse_update) is nearly 0
+                int mxi, myi;
+                SDL_GetRelativeMouseState(&mxi, &myi);
             }
     }
 }

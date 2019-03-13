@@ -44,7 +44,7 @@ exit
         if "%1"=="clean" (
             if exist _debug    rd /q /s _debug    && if exist _debug    echo "error cannot clean up _debug"    && goto error
             if exist _debugopt rd /q /s _debugopt && if exist _debugopt echo "error cannot clean up _debugopt" && goto error
-            if exist _release  rd /q /s _release  && if exist _release  echo "error cannot clean up _build"    && goto error
+            if exist _release  rd /q /s _release  && if exist _release  echo "error cannot clean up _release"  && goto error
             if exist _project  rd /q /s _project  && if exist _project  echo "error cannot clean up _project"  && goto error
             echo Cleaning up. && exit /b
         )
@@ -107,7 +107,7 @@ exit
 
         popd
 
-    REM launch
+    REM editor
 
         pushd "%~dp0%"
 
@@ -117,7 +117,7 @@ exit
 
             if "0"=="%OK%" (
                 rem color
-                rem echo ^>^> launch
+                echo ^>^> editor
 
                 if "%1"=="release" shift
                 if "%1"=="debugopt" shift
@@ -127,12 +127,12 @@ exit
                     if exist _release\editor.exe  start "" devenv /Run "_release\editor.exe" %*
                     if exist _debugopt\editor.exe start "" devenv /Run "_debugopt\editor.exe" %*
                 ) else (
-                    if exist _debug\editor.exe    start _debug    && REM _debug\editor.exe %*
-                    if exist _release\editor.exe  start _release  && REM _release\editor.exe %*
-                    if exist _debugopt\editor.exe start _debugopt && REM _debugopt\editor.exe %*
+                    if exist _debug\editor.exe    pushd _debug && editor.exe %* && popd
+                    if exist _release\editor.exe  pushd _release && editor.exe %* && popd
+                    if exist _debugopt\editor.exe pushd _debugopt && editor.exe %* && popd
                 )
 
-                rem echo ^<^< launch
+                echo ^<^< editor
             ) else (
                 :error
                 rem color 4f
