@@ -18,7 +18,8 @@
 
 // code tags
 
-#define TAG4(abcN) ((0[#abcN"00"]<<0)|(1[#abcN"00"]<<8)|(2[#abcN"00"]<<16)|(3[#abcN"00"]<<24))
+#define TYPE(abcd) ((0[#abcd"0000"]<<0)|(1[#abcd"0000"]<<8)|(2[#abcd"0000"]<<16)|(3[#abcd"0000"]<<24))
+#define TAG4(abcN) TYPE(abcN)
 
 // code perf/profiling
 

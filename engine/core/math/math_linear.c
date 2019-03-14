@@ -624,8 +624,8 @@ static INLINE void quat_from_mat4x4(quat q, mat4x4 M)
 // change #3
 #ifndef vec4
 #include "math_cast.c"
-#define vec2(x, y      ) cast(vec2, (x), (y),         )
-#define vec3(x, y, z   ) cast(vec3, (x), (y), (z),    )
-#define vec4(x, y, z, w) cast(vec4, (x), (y), (z), (w))
-#define quat(x, y, z, w) cast(quat, (x), (y), (z), (w))
+#define vec2(x, y      ) CAST(vec2, (x), (y),         )
+#define vec3(x, y, z   ) CAST(vec3, (x), (y), (z),    )
+#define vec4(x, y, z, w) CAST(vec4, (x), (y), (z), (w))
+#define quat(x, y, z, w) CAST(quat, (x), (y), (z), (w))
 #endif
