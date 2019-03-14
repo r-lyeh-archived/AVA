@@ -1,5 +1,5 @@
 // original linmath.h header by @datenwolf (WTFPL2 licensed)
-// 3 changes: inline -> INLINE + mat4x4 -> mat4 aliasing + cast macros at bottom of file.
+// 3 changes: inline -> INLINE + mat4x4 -> mat4 aliasing + cast macros.
 
 #ifndef LINMATH_H
 #define LINMATH_H
@@ -36,6 +36,15 @@
 #define mat4_translate_in_place     mat4x4_translate_in_place
 #define mat4_transpose              mat4x4_transpose
 #define mat4o_mul_quat              mat4x4o_mul_quat
+#endif
+
+// change #3
+#ifndef vec4
+#include "math_cast.c"
+#define vec2(x, y      ) CAST(vec2, (x), (y),         )
+#define vec3(x, y, z   ) CAST(vec3, (x), (y), (z),    )
+#define vec4(x, y, z, w) CAST(vec4, (x), (y), (z), (w))
+#define quat(x, y, z, w) CAST(quat, (x), (y), (z), (w))
 #endif
 
 #ifndef _USE_MATH_DEFINES
@@ -619,13 +628,4 @@ static INLINE void quat_from_mat4x4(quat q, mat4x4 M)
     q[3] = (M[p[2]][p[1]] - M[p[1]][p[2]])/(2.f*r);
 }
 
-#endif
-
-// change #3
-#ifndef vec4
-#include "math_cast.c"
-#define vec2(x, y      ) CAST(vec2, (x), (y),         )
-#define vec3(x, y, z   ) CAST(vec3, (x), (y), (z),    )
-#define vec4(x, y, z, w) CAST(vec4, (x), (y), (z), (w))
-#define quat(x, y, z, w) CAST(quat, (x), (y), (z), (w))
 #endif

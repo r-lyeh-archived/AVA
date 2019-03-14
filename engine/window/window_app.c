@@ -20,6 +20,7 @@ API void window_title( const char *title );
 API int window_update();
 API int* window_size();
 API void window_swap( void **pixels );
+API void window_timings();
 API void window_destroy();
 
 enum {
@@ -462,32 +463,39 @@ void window_swap( void **pixels ) {
         render_capture(w,h,3,*pixels);
     }
 
-    static double frames = 0, begin = FLT_MAX, fps = 0, prev_frame = 0;
+    if( title[0] ) {
+        SDL_SetWindowTitle(window, title);
+    }
+}
+
+void window_timings() {
+    static double num_frames = 0, begin = FLT_MAX, fps = 0, prev_frame = 0;
+    static int c = 0; char barcode = "/|\\-"[c=(c+1)&3];
+
     double now = SDL_GetTicks() / 1000.0; // glfwGetTime();
     if( begin > now ) {
         begin = now;
-        frames = 0;
+        num_frames = 0;
     }
     if( (now - begin) >= 0.25f ) {
-        fps = frames * (1.f / (now - begin));
+        fps = num_frames * (1.f / (now - begin));
     }
     if( (now - begin) > 1 ) {
         begin = now + ((now - begin) - 1);
-        frames = 0;
+        num_frames = 0;
     }
-    if( title[0] ) {
-        SDL_SetWindowTitle(window, title);
-    } else {
-        char buf[128] = {0};
-        #ifdef _MSC_VER
-        sprintf(buf, "%s %2dfps %5.2fms", __argv[0], (int)fps, (now - prev_frame) * 1000.f);
-        #else
-        sprintf(buf, "%2dfps %5.2fms", (int)fps, (now - prev_frame) * 1000.f);
-        #endif
-        SDL_SetWindowTitle(window, buf + (buf[0] == ' '));
-    }
-    ++frames;
     prev_frame = now;
+    ++num_frames;
+
+#ifdef _MSC_VER
+    const char *appname = __argv[0];
+#else
+    const char *appname = "";
+#endif
+
+    char buf[128] = {0};
+    sprintf(buf, "%s %.2ffps %.2fms %c", appname, fps, (now - prev_frame) * 1000.f, barcode);
+    window_title(buf + (buf[0] == ' '));
 }
 
 double *window_get( int variable ) {

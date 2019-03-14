@@ -21,17 +21,9 @@ API void shader_bind( unsigned shader );
 typedef GLuint Shader;
 typedef GLuint Buffer;
 typedef GLuint VAO;
-typedef GLuint Uniform;
 typedef GLuint Attribute;
 
 API Attribute get_attribute_location( Shader p, const char *name );
-API Uniform get_uniform_location( Shader p, const char *name );
-API void set_uniform_int(Uniform u, int i);
-API void set_uniform_float(Uniform u, float f);
-API void set_uniform_vec2(Uniform u, float v[2]);
-API void set_uniform_vec3(Uniform u, float v[3]);
-API void set_uniform_vec4(Uniform u, float v[4]);
-API void set_uniform_mat4(Uniform u, float m[16]);
 
 #define GLSL(...) #__VA_ARGS__
 
@@ -295,17 +287,5 @@ Attribute get_attribute_location( Shader p, const char *name ) {
     glUseProgram(0);
     return rc;
 }
-Uniform get_uniform_location( Shader p, const char *name ) {
-    glUseProgram(p);
-    Uniform rc = glGetUniformLocation(p, name);
-    glUseProgram(0);
-    return rc;
-}
-void set_uniform_int(Uniform u, int i)        { glUniform1i(u, i); }
-void set_uniform_float(Uniform u, float f)    { glUniform1f(u, f); }
-void set_uniform_vec2(Uniform u, float v[2])  { glUniform2fv(u, 1, v); }
-void set_uniform_vec3(Uniform u, float v[3])  { glUniform3fv(u, 1, v); }
-void set_uniform_vec4(Uniform u, float v[4])  { glUniform4fv(u, 1, v); }
-void set_uniform_mat4(Uniform u, float m[16]) { glUniformMatrix4fv(u, 1, GL_TRUE, m); }
 
 #endif
