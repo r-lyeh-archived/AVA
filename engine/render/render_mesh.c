@@ -112,8 +112,8 @@ typedef struct buffer {
     size_t size;
 } buffer;
 
-API renderable_t *mesh( void *renderable, int flags, int num_elems, const buffer *buffers );
-API renderable_t *mesh_loadfile( void *renderable, const char *filename );
+API renderable_t *mesh( struct renderable_t* r, int flags, int num_elems, const buffer *buffers );
+API renderable_t *mesh_loadfile( struct renderable_t* r, const char *filename );
 
 #endif
 
@@ -127,12 +127,11 @@ API renderable_t *mesh_loadfile( void *renderable, const char *filename );
 #include "engine.h" // filesys, math
 
 renderable_t *
-mesh( void *renderable, int flags, int num_elems, const buffer *buffers ) {
+mesh( renderable_t* r, int flags, int num_elems, const buffer *buffers ) {
     GLenum E = GL_ELEMENT_ARRAY_BUFFER;
     GLenum V = GL_ARRAY_BUFFER;
     GLenum S = GL_STATIC_DRAW;
 
-    renderable_t *r = (renderable_t*) renderable;
     memset(r, 0, sizeof(renderable_t)); // comment?
 
     struct datatype {
@@ -181,7 +180,7 @@ mesh( void *renderable, int flags, int num_elems, const buffer *buffers ) {
                 glEnableVertexAttribArray(i);
                 glVertexAttribPointer(i, datatype[i].elements, datatype[i].format, datatype[i].normalized, stride, ((char*)0+offset[i]));
 
-                printf("enabled att#%d (len:%d%c) (norm:%d)\n", i, datatype[i].elements, datatype[i].format == GL_FLOAT ? 'f':'u', datatype[i].normalized);
+                //printf("enabled att#%d (len:%d%c) (norm:%d)\n", i, datatype[i].elements, datatype[i].format == GL_FLOAT ? 'f':'u', datatype[i].normalized);
             }
         }
     } else {
@@ -195,7 +194,7 @@ mesh( void *renderable, int flags, int num_elems, const buffer *buffers ) {
                 glEnableVertexAttribArray(i);
                 glVertexAttribPointer(i, datatype[i].elements, datatype[i].format, datatype[i].normalized, 0, (char*)0);
 
-                printf("enabled att#%d (len:%d%c) (norm:%d)\n", i, datatype[i].elements, datatype[i].format == GL_FLOAT ? 'f':'u', datatype[i].normalized);
+                //printf("enabled att#%d (len:%d%c) (norm:%d)\n", i, datatype[i].elements, datatype[i].format == GL_FLOAT ? 'f':'u', datatype[i].normalized);
             }
         }
     }
@@ -204,9 +203,7 @@ mesh( void *renderable, int flags, int num_elems, const buffer *buffers ) {
     return r;
 }
 
-void renderable_draw(void *renderable) {
-    renderable_t *r = (renderable_t*)renderable;
-
+void renderable_draw(renderable_t* r) {
     glBindVertexArray(r->vao);
     /**/ if( r->ibo16 ) glDrawElements(GL_TRIANGLES, r->elementCount, GL_UNSIGNED_SHORT, (char*)0); // with index16
     else if( r->ibo32 ) glDrawElements(GL_TRIANGLES, r->elementCount, GL_UNSIGNED_INT,   (char*)0); // with index32
@@ -214,8 +211,7 @@ void renderable_draw(void *renderable) {
     glBindVertexArray(0);
 }
 
-void renderable_destroy( void *renderable ) {
-    renderable_t *r = (renderable_t*)renderable;
+void renderable_destroy( renderable_t* r ) {
     for( int i = 0; i < sizeof(r->vbo) / sizeof(r->vbo[0]); ++i ) {
         glDeleteBuffers(1, &r->vbo[i]);
     }
@@ -223,7 +219,7 @@ void renderable_destroy( void *renderable ) {
     glDeleteBuffers(1, &r->ibo32);
     glDeleteVertexArrays(1, &r->vao);
 
-    memset( r, 0, sizeof(renderable));
+    memset( r, 0, sizeof(renderable_t));
 }
 
 // -----------------------------------------------------------------------------

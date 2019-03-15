@@ -5,6 +5,9 @@
 #include "../engine/core/math/math.c"
 #include "../engine/render/render_shape.c"
 
+#if 0
+// commented out because of m_math.h
+
 #define X(v3) 0[v3]
 #define Y(v3) 1[v3]
 #define Z(v3) 2[v3]
@@ -302,3 +305,7 @@ void im3d_demo() {
     }
     ImGui::End();
 }
+
+#endif
+
+void im3d_demo() {}

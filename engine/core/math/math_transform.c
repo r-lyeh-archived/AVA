@@ -2,25 +2,28 @@
 #define TRANSFORM_H
 #include "math_linear.c"
 
-API float* transform( mat4x4 r, float position[3], float rotquat[4], float scale[3] );
+API float* transform( mat44 r, float position[3], float rotquat[4], float scale[3] );
 
 #endif
 
 #ifdef TRANSFORM_C
 #pragma once
 
-float* transform( mat4x4 r, float position[3], float rotquat[4], float scale[3] ) {
-	mat4x4_from_quat(r, rotquat);
-	mat4x4_scale_aniso(r, r, scale[0], scale[1], scale[2]);
-	mat4x4_translate_in_place(r, position[0], position[1], position[2]);
-	return &r[0][0];
+float* transform( mat44 r, float position[3], float rotquat[4], float scale[3] ) {
+/*
+    // commented out because of m_math.h
+    mat44_from_quat(r, rotquat);
+*/
+    scaling44(r, scale[0], scale[1], scale[2]);
+    translate44(r, position[0], position[1], position[2]);
+    return r;
 }
 
 /*
-static __inline
-float* transform( mat4x4 m, vec3 position, quat rotation, vec3 scaling) {
-    mat4x4 r;
-    mat4x4_from_quat(r, rotation);
+static m_inline
+float* transform( mat44 m, vec3 position, quat rotation, vec3 scaling) {
+    mat44 r;
+    mat44_from_quat(r, rotation);
 
     m[0][0] = r[0][0] * scaling.x;
     m[1][0] = r[1][0] * scaling.x;

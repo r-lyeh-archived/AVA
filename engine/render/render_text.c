@@ -11,7 +11,7 @@
 
 // instantiate text mesh
 
-API void text(void *renderable, int font_id, const char *text );
+API void text(struct renderable_t *r, int font_id, const char *text );
 
 
 #ifdef RENDER_C
@@ -22,8 +22,7 @@ API void text(void *renderable, int font_id, const char *text );
 #include "engine.h" // realloc + unicode
 
 
-void text(void *renderable, int font_id, const char *text ) {
-    renderable_t *r = (renderable_t*)renderable;
+void text(renderable_t *r, int font_id, const char *text ) {
     font_t *f = &fonts[ font_id ];
 if(!f) { /* init on demand */ font_mem(0, 0, 0, 0); f = &fonts[0]; }
 

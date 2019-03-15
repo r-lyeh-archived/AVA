@@ -92,14 +92,14 @@ int fillglyph(vec3 *positions, vec2 *uvs, font_t *f, uint32_t character, float *
     float ymin = -quad.y1;
     float ymax = -quad.y0;
 
-    vec3set( positions[0], xmin, ymin, 0);
-    vec3set( positions[1], xmin, ymax, 0);
-    vec3set( positions[2], xmax, ymax, 0);
-    vec3set( positions[3], xmax, ymin, 0);
-    vec2set( uvs[0], quad.s0, quad.t1);
-    vec2set( uvs[1], quad.s0, quad.t0);
-    vec2set( uvs[2], quad.s1, quad.t0);
-    vec2set( uvs[3], quad.s1, quad.t1);
+    positions[0] = vec3(xmin, ymin, 0);
+    positions[1] = vec3(xmin, ymax, 0);
+    positions[2] = vec3(xmax, ymax, 0);
+    positions[3] = vec3(xmax, ymin, 0);
+    uvs[0] = vec2(quad.s0, quad.t1);
+    uvs[1] = vec2(quad.s0, quad.t0);
+    uvs[2] = vec2(quad.s1, quad.t0);
+    uvs[3] = vec2(quad.s1, quad.t1);
 
     return 1;
 }

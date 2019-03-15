@@ -15,8 +15,8 @@ typedef struct renderer_t {
 
 typedef renderer_t material_t;
 
-API void renderer_enable(void *renderer, float camproj[16]);
-API void renderer_destroy(void *renderer);
+API void renderer_enable(renderer_t *r, float *camproj);
+API void renderer_destroy(renderer_t *r);
 
 // -----------------------------------------------------------------------------
 
@@ -24,7 +24,7 @@ typedef struct transform_t {
     vec3 position;
     vec3 rotation;
     vec3 scale;
-    mat4x4 matrix;
+    mat44 matrix;
 } transform_t;
 
 typedef struct renderable_t {
@@ -39,11 +39,11 @@ typedef struct renderable_t {
     GLuint hidden; //alpha;
 } renderable_t;
 
-API renderable_t*renderable(void *renderable, int flags);
-API void renderable_draw(void *renderable);
-API void renderable_destroy( void *renderable );
+API renderable_t*renderable(renderable_t *r, int flags);
+API void renderable_draw(renderable_t *r);
+API void renderable_destroy( renderable_t *r );
 
-API void draw(void *renderable, float transform[16]);
+API void draw(renderable_t *r, float *transform);
 
 // gpu timer
 
@@ -56,11 +56,9 @@ API int64_t gputime();
 #ifdef RENDERER_C
 #pragma once
 
-renderer_t *g_r;
+renderer_t *g_r = 0;
 
-void renderer_enable(void *renderer, float camproj[16]) {
-    renderer_t *r = (renderer_t*)renderer;
-
+void renderer_enable(renderer_t *r, float *camproj) {
     // mark renderer as global renderer
     g_r = r;
 
@@ -83,9 +81,7 @@ void renderer_enable(void *renderer, float camproj[16]) {
     glUniform1i(r->u_texture, unit);
 }
 
-void renderer_destroy(void *renderer) {
-    renderer_t *r = (renderer_t*)renderer;
-
+void renderer_destroy(renderer_t *r) {
     glDeleteTextures(1, &r->texture);
     glDeleteProgram(r->shader);
 
@@ -96,16 +92,13 @@ void renderer_destroy(void *renderer) {
 // ----------------------------------------------------------------------------
 
 renderable_t*
-renderable(void *renderable, int flags){
-    renderable_t *r = (renderable_t*) renderable;
+renderable(renderable_t *r, int flags){
     memset(r, 0, sizeof(renderable_t));
 
     return r;
 }
 
-void draw(void *renderable, float transform[16]) {
-    renderable_t *r = (renderable_t*)renderable;
-
+void draw(renderable_t *r, float *transform) {
     r->tick++;
     if( r->hidden || (r->age && r->tick > r->age) ) {
         return;

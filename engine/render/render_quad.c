@@ -1,4 +1,4 @@
-API void quad( void *renderable );
+API void quad( struct renderable_t *r );
 
 // ----------------------------------------------------------------------------
 
@@ -7,8 +7,7 @@ API void quad( void *renderable );
 #include "render_mesh.c"
 #include "render_renderer.c"
 
-void quad( void *renderable ) {
-    renderable_t *r = (renderable_t*)renderable;
+void quad( renderable_t *r ) {
 
     // A--B ; quad CDAB becomes triangle CAB and CBD.
     // | /| 

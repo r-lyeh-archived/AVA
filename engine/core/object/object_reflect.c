@@ -21,7 +21,7 @@
 //
 // - @todo: reflect* reflect_find()
 // - @todo: code annotations? "display-name", "min", "max", "range", "default"
-// - @todo: declare TYPEDEF(vec3, float[3]), TYPEDEF(mat4x4, vec4[4]/*float[16]*/)
+// - @todo: declare TYPEDEF(vec3, float[3]), TYPEDEF(mat4, vec4[4]/*float[16]*/)
 
 typedef struct reflect {
     union {

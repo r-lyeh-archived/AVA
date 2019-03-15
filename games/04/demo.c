@@ -54,18 +54,22 @@ int main(int argc, char **argv) {
 
     while (window_update()) {
         int *rect = window_size(), width = rect[0], height = rect[1];
-        mat4 m, p, mvp;
-        // model
-        mat4_identity(m);
-        mat4_rotate_Z(m, m, (float)(now_ms() / 1000.f));
-        // proj
-        float ratio = width / (float)height;
-        mat4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-        // mvp
-        mat4_mul(mvp, p, m);
+        float ratio = width / (height+1.f);
 
-        glUseProgram(program);
-        glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
+        // model
+        mat44 m;
+        rotation44(m, deg((float)now_ms()/1000), 0,0,1 );
+
+        // proj
+        mat44 p;
+        ortho44(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+
+        // modelviewproj
+        mat44 mvp;
+        multiply44(mvp, p, m);
+
+        // draw
+        shader_bind_mat44(program, "MVP"/*mvp_location*/, mvp);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         static void *pixels = 0;

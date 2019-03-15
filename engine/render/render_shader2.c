@@ -14,7 +14,7 @@ API void shader_bind_float(unsigned program, const char *uniform, float f);
 API void shader_bind_vec2(unsigned program, const char *uniform, float v[2]);
 API void shader_bind_vec3(unsigned program, const char *uniform, float v[3]);
 API void shader_bind_vec4(unsigned program, const char *uniform, float v[4]);
-API void shader_bind_mat4(unsigned program, const char *uniform, float m[16]);
+API void shader_bind_mat44(unsigned program, const char *uniform, float m[16]);
 
 API const char *shader_default_diffuse_fs();
 API const char *shader_default_fullscreen_vs();
@@ -32,7 +32,7 @@ void shader_bind_float(unsigned program, const char *name, float f)    { glUsePr
 void shader_bind_vec2(unsigned program, const char *name, float v[2])  { glUseProgram(program); glUniform2fv(glGetUniformLocation(program,name), 1, v); }
 void shader_bind_vec3(unsigned program, const char *name, float v[3])  { glUseProgram(program); glUniform3fv(glGetUniformLocation(program,name), 1, v); }
 void shader_bind_vec4(unsigned program, const char *name, float v[4])  { glUseProgram(program); glUniform4fv(glGetUniformLocation(program,name), 1, v); }
-void shader_bind_mat4(unsigned program, const char *name, float m[16]) { glUseProgram(program); glUniformMatrix4fv(glGetUniformLocation(program,name), 1, GL_TRUE, m); }
+void shader_bind_mat44(unsigned program, const char *name, float m[16]) { glUseProgram(program); glUniformMatrix4fv(glGetUniformLocation(program,name), 1, GL_FALSE/*GL_TRUE*/, m); }
 
 void shader_bind_int1(GLuint program, const char *uniform, int value) {
     glUseProgram(program);

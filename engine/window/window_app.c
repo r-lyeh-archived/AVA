@@ -17,11 +17,11 @@ enum {
 
 API int window_create( float zoom /* 10.0f */, int flags );
 API void window_title( const char *title );
-API int window_update();
-API int* window_size();
+API int window_update(void);
+API int* window_size(void);
 API void window_swap( void **pixels );
-API void window_timings();
-API void window_destroy();
+API void window_timings(void);
+API void window_destroy(void);
 
 enum {
     WINDOW_WIDTH,
@@ -484,8 +484,6 @@ void window_timings() {
         begin = now + ((now - begin) - 1);
         num_frames = 0;
     }
-    prev_frame = now;
-    ++num_frames;
 
 #ifdef _MSC_VER
     const char *appname = __argv[0];
@@ -496,6 +494,9 @@ void window_timings() {
     char buf[128] = {0};
     sprintf(buf, "%s %.2ffps %.2fms %c", appname, fps, (now - prev_frame) * 1000.f, barcode);
     window_title(buf + (buf[0] == ' '));
+
+    prev_frame = now;
+    ++num_frames;
 }
 
 double *window_get( int variable ) {
