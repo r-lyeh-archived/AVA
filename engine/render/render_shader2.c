@@ -26,13 +26,16 @@ API const char *shader_default_fullscreen_vs();
 #ifdef SHADER2_C
 #pragma once
 #include "render_opengl.c"
+#include <stdlib.h>
 
-void shader_bind_int(unsigned program, const char *name, int i)        { glUseProgram(program); glUniform1i(glGetUniformLocation(program,name), i); }
-void shader_bind_float(unsigned program, const char *name, float f)    { glUseProgram(program); glUniform1f(glGetUniformLocation(program,name), f); }
-void shader_bind_vec2(unsigned program, const char *name, float v[2])  { glUseProgram(program); glUniform2fv(glGetUniformLocation(program,name), 1, v); }
-void shader_bind_vec3(unsigned program, const char *name, float v[3])  { glUseProgram(program); glUniform3fv(glGetUniformLocation(program,name), 1, v); }
-void shader_bind_vec4(unsigned program, const char *name, float v[4])  { glUseProgram(program); glUniform4fv(glGetUniformLocation(program,name), 1, v); }
-void shader_bind_mat44(unsigned program, const char *name, float m[16]) { glUseProgram(program); glUniformMatrix4fv(glGetUniformLocation(program,name), 1, GL_FALSE/*GL_TRUE*/, m); }
+#define UNIFORM_LOC(program,name) (name[0] >= '0' && name[0] <= '9' ? atoi(name) : glGetUniformLocation(program,name))
+
+void shader_bind_int(unsigned program, const char *name, int i)        { glUseProgram(program); glUniform1i(UNIFORM_LOC(program,name), i); }
+void shader_bind_float(unsigned program, const char *name, float f)    { glUseProgram(program); glUniform1f(UNIFORM_LOC(program,name), f); }
+void shader_bind_vec2(unsigned program, const char *name, float v[2])  { glUseProgram(program); glUniform2fv(UNIFORM_LOC(program,name), 1, v); }
+void shader_bind_vec3(unsigned program, const char *name, float v[3])  { glUseProgram(program); glUniform3fv(UNIFORM_LOC(program,name), 1, v); }
+void shader_bind_vec4(unsigned program, const char *name, float v[4])  { glUseProgram(program); glUniform4fv(UNIFORM_LOC(program,name), 1, v); }
+void shader_bind_mat44(unsigned program, const char *name, float m[16]) { glUseProgram(program); glUniformMatrix4fv(UNIFORM_LOC(program,name), 1, GL_FALSE/*GL_TRUE*/, m); }
 
 void shader_bind_int1(GLuint program, const char *uniform, int value) {
     glUseProgram(program);
