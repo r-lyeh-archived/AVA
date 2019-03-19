@@ -608,15 +608,6 @@ void editor_draw() {
         c->YAngle += mouse_diff.y * mouse_speed;
     }
 
-#if 0
-    // orbit
-    c->Distance = 8;
-    float eye[] = { cosf(c->XAngle) * cosf(c->YAngle) * c->Distance, sinf(c->YAngle) * c->Distance, sinf(c->XAngle) * cosf(c->YAngle) * c->Distance };
-    float at[] = { 0.f, 0.f, 0.f };
-    float up[] = { 0.f, 1.f, 0.f };
-    LookAt(eye, at, up, c->transform);
-#endif
-
 #if 1
 
     if( 1 ) { // if cam active
@@ -640,10 +631,13 @@ void editor_draw() {
         float delta = 1/60.f;
         float look_mult = 0.1f;
         float move_mult = 1 * delta; // 1 (speed); also (key('LSHF') ? 3 : 1) * delta;
-        vec2 look_delta = scale2(vec2(mouse_diff.x, mouse_diff.y), look_mult);
+        vec2 look_delta = scale2(vec2(mouse_now.x, mouse_now.y), 1);
         vec3 move_delta = scale3(vec3(vkd-vka,vke-vkc,vkw-vks), move_mult);
 
-        flycamera(c->transform, &cam_pos, &cam_rot, move_delta, look_delta );
+        static camera cc, *cam = 0;
+        if( !cam ) { cam = &cc; camera_make(cam, 0.25f, false, true ); }
+        camera_fps( cam, move_delta, look_delta );
+        copy44(c->transform, cam->view);
 
         PRINTF("Cam: %f %f %f (%ff,%ff,%ff,%ff) (%05.2fº pitch, %05.2fº roll, %05.2fº yaw)\n", cam_pos.x, cam_pos.y, cam_pos.z, cam_quat.x, cam_quat.y, cam_quat.z, cam_quat.w, p*rad2deg,r*rad2deg,y*rad2deg);
      }

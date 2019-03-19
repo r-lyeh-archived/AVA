@@ -1,17 +1,114 @@
-// assumes look_delta is already multiplied by sensitivity (like, +0.02)
-// assumes move_delta is already multiplied by frame delta time and acceleration factor.
-// position is vec3(right, up, forward) convention. rotation is (xdelta, ydelta).
+#ifndef CAMERA_H
+#define CAMERA_H
 
-API void flycamera(
-    mat44 cam_view,
-    vec3 *position, vec2 *rotation,
-    vec3 move_delta, vec2 look_delta );
+#include <stdbool.h>
+#include "math_linear.c"
+
+typedef struct camera {
+    vec3 position;
+    vec3 right, up, forward;
+
+    float last_x, last_y, yaw, pitch;
+    float sensitivity, invert_x, invert_y;
+    float enabled;
+
+    mat44 view;
+} camera;
+
+API void camera_make(camera *cam, float sensitivity, bool invert_x, bool invert_y);
+API void camera_active(camera *cam, bool enabled);
+
+API void camera_fps(camera *cam, vec3 keyboard, vec2 mouse);
+API void camera_orbit(camera *cam, float distance, vec2 mouse);
+
+#endif
 
 
 #ifdef CAMERA_C
 #pragma once
 
-#include "math_linear.c"
+void camera_make(camera *cam, float sensitivity, bool invert_x, bool invert_y) {
+    cam->position = vec3(0, 0, -3);
+
+    cam->right = vec3(1, 0, 0);
+    cam->up = vec3(0, 1, 0);
+    cam->forward = vec3(0, 0, 1);
+
+    cam->last_x = 0;
+    cam->last_y = 0;
+    cam->yaw = 0;
+    cam->pitch = 0;
+
+    cam->sensitivity = sensitivity;
+    cam->invert_x = invert_x ? -1 : 1;
+    cam->invert_y = invert_y ? -1 : 1;
+    cam->enabled = 1;
+
+    identity44(cam->view);
+}
+
+void camera_active(camera *cam, bool enabled) {
+    cam->enabled = enabled;
+}
+
+void camera_fps(camera* cam, vec3 keyboard, vec2 mouse) {
+    // look: update angles
+    float offset_x = ( mouse.x - cam->last_x ) * cam->sensitivity * cam->invert_x;
+    float offset_y = ( mouse.y - cam->last_y ) * cam->sensitivity * cam->invert_y;
+
+    cam->last_x = mouse.x;
+    cam->last_y = mouse.y;
+
+    if( cam->enabled ) {
+        cam->yaw += offset_x;
+        cam->pitch += offset_y;
+
+        // look: limit pitch angle [-89..89]
+        cam->pitch = cam->pitch > 89 ? 89 : cam->pitch < -89 ? -89 : cam->pitch;
+
+        // look: update forward vector
+        cam->forward = norm3( vec3(
+            cos(rad(cam->yaw)) * cos(rad(cam->pitch)),
+            sin(rad(cam->pitch)), 
+            sin(rad(cam->yaw)) * cos(rad(cam->pitch))
+        ) );
+
+        // look: recompute right vector
+        cam->right = norm3(cross3(cam->forward, cam->up));
+
+        // move: offset position
+        float right = keyboard.x, top = keyboard.y, front = keyboard.z;
+        cam->position = add3(cam->position, mul3(cam->forward, vec3(front, front, front)));
+        cam->position = add3(cam->position, mul3(cam->up, vec3(top, top, top)));
+        cam->position = add3(cam->position, mul3(cam->right, vec3(right, right, right)));
+    }
+
+    // compute view matrix
+    lookat44(cam->view, cam->position, add3(cam->position, cam->forward), cam->up);
+}
+
+void camera_orbit( camera *cam, float distance, vec2 mouse ) {
+    // look: update angles
+    float offset_x = ( mouse.x - cam->last_x ) * cam->sensitivity * cam->invert_x;
+    float offset_y = ( mouse.y - cam->last_y ) * cam->sensitivity * cam->invert_y;
+
+    cam->last_x = mouse.x;
+    cam->last_y = mouse.y;
+
+    if( cam->enabled ) {
+        cam->yaw += offset_x;
+        cam->pitch += offset_y;
+
+        // look: limit pitch angle [-89..89]
+        cam->pitch = cam->pitch > 89 ? 89 : cam->pitch < -89 ? -89 : cam->pitch;
+    }
+
+    // compute view matrix
+    float x = rad(cam->yaw), y = rad(cam->pitch), cx = cosf(x), cy = cosf(y), sx = sinf(x), sy = sinf(y);
+    lookat44(cam->view, vec3( cx*cy*distance, sy*distance, sx*cy*distance ), vec3(0,0,0), vec3(0,1,0) );
+}
+
+// old api
 
 void flycamera(
     mat44 cam_view,
@@ -39,54 +136,8 @@ void flycamera(
     multiply44(cam_view, inverseRotation, inverseTranslation); // = inverse(translation(position) * rotationYX);
 }
 
-#include <math.h>
-#include <assert.h>
+// ideas
 
-#if 0
-    enum CAMERA_MODE {
-        CAMERA_FPS,
-        CAMERA_ORTHO,
-        CAMERA_DOF6, // FLY
-        CAMERA_ARCBALL,
-    };
-    enum CAMERA_COORD {
-        
-    };
-    lerp(cam1, cam2);
-    present(lerp(cam1.render,cam2.render)); // crossfade
-    camera_manager->setactive(cam2);
-#endif
-
-
-#if 0
-    enum CAMERA_MODE {
-        CAMERA_PERSPECTIVE,
-        CAMERA_ORTHOGRAPHIC,
-    };
-    enum CAMERA_DISTANCE {
-        CAMERA_REVERSEZ,
-    };
-    enum CAMERA_ORIGIN {
-        CAMERA_TOPLEFT = 0x1,
-        CAMERA_BOTTOMLEFT = 0x2,
-        CAMERA_CENTERED = 0x4,
-    };
-    enum CAMERA_RANGE {
-        CAMERA_UNIT = 0x10,
-        CAMERA_RESOLUTION = 0x20,
-    };
-
-    // get camera projection matrix
-    static inline
-    float* cameraproj(float proj[16], int flags) {
-        mat4 proj;
-        if( flags & CAMERA_ORTHOGRAPHIC ) {
-            /**/ if( flags & (CAMERA_TOPLEFT|CAMERA_UNIT))          mat4_ortho(proj, -1, +1, -1, +1, -1, 1 );       // 0,0 top-left, 1-1 bottom-right
-            else if( flags & (CAMERA_TOPLEFT|CAMERA_RESOLUTION))    mat4_ortho(proj, -w/2, w/2, h/2, -h/2, -1, 1 ); // 0,0 top-left, w-h bottom-right
-            else if( flags & (CAMERA_BOTTOMLEFT|CAMERA_RESOLUTION)) mat4_ortho(proj, 0, w, 0, h, -1, 1 );           // 0,0 bottom-left, w-h top-right
-        }
-        return proj;
-    }
-#endif
+void camera_lerp();
 
 #endif

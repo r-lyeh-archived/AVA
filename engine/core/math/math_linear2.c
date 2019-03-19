@@ -197,6 +197,9 @@ static m_inline void scale44(float *m, float x, float y, float z) { // !!! ok, i
 static m_inline void identity44(float *m) {
     scaling44(m, 1,1,1);
 }
+static m_inline void copy44(float *m, float *a) {
+    for( int i = 0; i < 16; ++i ) m[i] = a[i];
+}
 static m_inline void multiply44(float *out, const float *a, const float *b) {
     for (int y = 0; y < 4; y++)
         for (int x = 0; x < 4; x++)

@@ -17,9 +17,8 @@
 #define VIEWPORT2_H
 
 API void viewport_color(uint8_t r, uint8_t g, uint8_t b);
-
-API void viewport_split( float width_delta, float height_delta );
-API void viewport_change( int slot );
+API void viewport_clear( int color, int depth );
+API void viewport_select( int slot, float width_delta, float height_delta );
 
 #endif
 
@@ -37,7 +36,7 @@ typedef struct vec4b {
 
 static vec4b viewport[4];
 
-void viewport_split( float width_delta, float height_delta ) {
+void viewport_select( int slot, float width_delta, float height_delta ) {
     int *rect = window_size();
     int screen_width = rect[0], screen_height = rect[1];
     int split_x = rect[0] * width_delta, split_y = rect[1] * height_delta;
@@ -49,26 +48,31 @@ void viewport_split( float width_delta, float height_delta ) {
     viewport[1] = vec4b( split_x,       0, screen_width-split_x-1,               split_y-1 );
     viewport[2] = vec4b( 0,       split_y,              split_x-1, screen_height-split_y-1 );
     viewport[3] = vec4b( split_x, split_y, screen_width-split_x-1, screen_height-split_y-1 );
-}
-void viewport_color(uint8_t r, uint8_t g, uint8_t b) {
-    glClearColor(r/255.0, g/255.0, b/255.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-}
-void viewport_change( int slot ) {
+
+    // apply
+
     float sh = window_size()[1];
     float x = viewport[slot&3].x;
     float y = viewport[slot&3].y;
     float w = viewport[slot&3].z;
     float h = viewport[slot&3].w;
 
-    // glViewport(x, y, w, h); // bottom-left
-    glViewport(x, sh-y-h, w, h); // top-left
+    // top-left
+    glViewport(x, sh-y-h, w, h); 
+
+    // bottom-left
+    // glViewport(x, y, w, h)
+
+    // ideas
+    // if( flags & (TOPLEFT|UNIT))          ortho44(proj, -1, +1, -1, +1, -1, 1 );       // 0,0 top-left, 1-1 bottom-right
+    // if( flags & (TOPLEFT|RESOLUTION))    ortho44(proj, -w/2, w/2, h/2, -h/2, -1, 1 ); // 0,0 top-left, w-h bottom-right
+    // if( flags & (BOTTOMLEFT|RESOLUTION)) ortho44(proj, 0, w, 0, h, -1, 1 );           // 0,0 bottom-left, w-h top-right
 }
-/*
-bool viewport_rect( int slot ) {
-    // rect present if w*h > 0. useful function?
-    return (viewport[slot&3].z * viewport[slot&3].w) > 0;
+void viewport_color(uint8_t r, uint8_t g, uint8_t b) {
+    glClearColor(r/255.0, g/255.0, b/255.0, 1.0);
 }
-*/
+void viewport_clear(int color, int depth) {
+    glClear((color ? GL_COLOR_BUFFER_BIT : 0) | (depth ? GL_DEPTH_BUFFER_BIT : 0));
+}
 
 #endif
