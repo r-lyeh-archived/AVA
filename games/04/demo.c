@@ -53,16 +53,13 @@ int main(int argc, char **argv) {
     glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*) (sizeof(float) * 2));
 
     while (window_update()) {
-        int *rect = window_size(), width = rect[0], height = rect[1];
-        float ratio = width / (height+1.f);
-
         // model
         mat44 m;
         rotation44(m, deg((float)now_ms()/1000), 0,0,1 );
 
         // proj
         mat44 p;
-        ortho44(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        ortho44(p, -window_aspect(), window_aspect(), -1.f, 1.f, 1.f, -1.f);
 
         // modelviewproj
         mat44 mvp;
@@ -74,7 +71,7 @@ int main(int argc, char **argv) {
 
         static void *pixels = 0;
         window_swap( &pixels );
-        network_sendbuf( pixels, width, height, 3, 7755 );
+        network_sendbuf( pixels, window_width(), window_height(), 3, 7755 );
     }
 
     window_destroy();
