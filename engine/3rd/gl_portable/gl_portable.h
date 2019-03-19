@@ -255,6 +255,7 @@ struct GL_GRAPHICS_PIPELINE_STATE_INFO {
   GlBool32             rasterizationDepthBiasEnable;
   float                rasterizationDepthBiasConstantFactor;
   float                rasterizationDepthBiasSlopeFactor;
+  float                rasterizationLineWidth;
   GlBool32             multisampleEnable;
   GlBool32             multisampleAlphaToCoverageEnable;
   GlBool32             multisampleAlphaToOneEnable;

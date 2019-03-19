@@ -4,6 +4,7 @@
 void glCullFace(unsigned mode);
 void glFrontFace(unsigned mode);
 void glPolygonOffset(float factor, float units);
+void glLineWidth(float width);
 void glDepthMask(unsigned char flag);
 void glDepthFunc(unsigned func);
 void glStencilOp(unsigned fail, unsigned zfail, unsigned zpass);
@@ -47,6 +48,7 @@ void glCompilePipeline(unsigned pipeline, const struct GL_GRAPHICS_PIPELINE_STAT
   glFrontFace(pipeline_info->rasterizationFrontFace);
   pipeline_info->rasterizationDepthBiasEnable == 1 ? glEnable(0x8037) : glDisable(0x8037); // GL_POLYGON_OFFSET_FILL
   glPolygonOffset(pipeline_info->rasterizationDepthBiasConstantFactor, pipeline_info->rasterizationDepthBiasSlopeFactor);
+  glLineWidth(pipeline_info->rasterizationLineWidth);
   pipeline_info->multisampleEnable == 1 ? glEnable(0x809D)  : glDisable(0x809D); // GL_MULTISAMPLE
   pipeline_info->multisampleAlphaToCoverageEnable == 1 ? glEnable(0x809E) : glDisable(0x809E); // GL_SAMPLE_ALPHA_TO_COVERAGE
   pipeline_info->multisampleAlphaToOneEnable == 1 ? glEnable(0x809F) : glDisable(0x809F); // GL_SAMPLE_ALPHA_TO_ONE

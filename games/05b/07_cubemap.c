@@ -96,6 +96,7 @@ int main() {
     pipeline_skybox_info.rasterizationDepthBiasEnable          = 0;
     pipeline_skybox_info.rasterizationDepthBiasConstantFactor  = 0;
     pipeline_skybox_info.rasterizationDepthBiasSlopeFactor     = 0;
+    pipeline_skybox_info.rasterizationLineWidth                = 1;
     pipeline_skybox_info.multisampleEnable                     = 0;
     pipeline_skybox_info.multisampleAlphaToCoverageEnable      = 0;
     pipeline_skybox_info.multisampleAlphaToOneEnable           = 0;
@@ -149,6 +150,7 @@ int main() {
     pipeline_info.rasterizationDepthBiasEnable          = 0;
     pipeline_info.rasterizationDepthBiasConstantFactor  = 0;
     pipeline_info.rasterizationDepthBiasSlopeFactor     = 0;
+    pipeline_info.rasterizationLineWidth                = 1;
     pipeline_info.multisampleEnable                     = 1;
     pipeline_info.multisampleAlphaToCoverageEnable      = 0;
     pipeline_info.multisampleAlphaToOneEnable           = 0;

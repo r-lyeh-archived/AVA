@@ -61,6 +61,7 @@ int main() {
     pipeline_info.rasterizationDepthBiasEnable          = 0;
     pipeline_info.rasterizationDepthBiasConstantFactor  = 0;
     pipeline_info.rasterizationDepthBiasSlopeFactor     = 0;
+    pipeline_info.rasterizationLineWidth                = 1;
     pipeline_info.multisampleEnable                     = 1;
     pipeline_info.multisampleAlphaToCoverageEnable      = 0;
     pipeline_info.multisampleAlphaToOneEnable           = 0;
