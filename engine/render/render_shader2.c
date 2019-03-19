@@ -4,6 +4,7 @@
 // shader
 
 // API unsigned shader( const char *vert, const char *frag );
+API unsigned shader2(const char *vp, const char *fp, int num_attributes, const char **attributes);
 
 API void shader_bind_int1(unsigned program, const char *uniform, int value);
 API void shader_bind_texture(unsigned program, unsigned texture, unsigned unit);
@@ -77,5 +78,72 @@ const char *shader_default_fullscreen_vs() {
     "   gl_Position = vec4(2.0*uv - 1.0, 0.0, 1.0);\n"
     "}\n";
 }
+
+#include <stdint.h>
+#include <stdio.h>
+
+static GLuint shader_load(GLenum type, const char *source) {
+    GLuint shader = glCreateShader(type);
+    if (shader) {
+        glShaderSource(shader, 1, &source, NULL);
+        glCompileShader(shader);
+        GLint compiled;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+        if (compiled) {
+            return shader;
+        }
+        GLint loglen = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &loglen);
+        if (loglen) {
+            ALLOCA(GLchar, infoLog, loglen);
+            glGetShaderInfoLog(shader, loglen, NULL, infoLog);
+            fprintf(stderr, "%s\n", infoLog);
+        }
+        glDeleteShader(shader);
+    }
+    return 0;
+}
+
+unsigned shader2(const char *vp, const char *fp, int num_attributes, const char **attributes) {
+    GLuint vertexShader = shader_load(GL_VERTEX_SHADER, vp);
+    if( vertexShader ) {
+        GLuint fragmentShader = shader_load(GL_FRAGMENT_SHADER, fp);
+        if (fragmentShader) {
+            GLuint program = glCreateProgram();
+            if (program) {
+                glAttachShader(program, vertexShader);
+                glAttachShader(program, fragmentShader);
+                
+                for (int i = 0; i < num_attributes; i++) {
+                    glBindAttribLocation(program, i, attributes[i]);
+                }
+
+                glLinkProgram(program);
+
+                GLint linked;
+                glGetProgramiv(program, GL_LINK_STATUS, &linked);
+                if (linked) {
+                    glDeleteShader(vertexShader);
+                    glDeleteShader(fragmentShader);
+                    return program;
+                }
+
+                GLint infoLen = 0;
+                glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
+                if (infoLen) {
+                    ALLOCA(GLchar, infoLog, infoLen);
+                    glGetProgramInfoLog(program, infoLen, NULL, infoLog);
+                    fprintf(stderr, "%s\n", infoLog);
+                }
+                glDeleteProgram(program);
+            }
+            glDeleteShader(fragmentShader);
+        }
+        glDeleteShader(vertexShader);
+    }
+    fprintf(stderr, "Could not create program!\n");
+    return 0;
+}
+
 
 #endif

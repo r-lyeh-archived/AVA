@@ -727,7 +727,7 @@ void ddraw_text2d( vec2 center, const char *fmt, ... ) {
     float scale = 3;
     identity44(r->tf.matrix);
 #if 1
-    scale44(r->tf.matrix, scale / window_get(WINDOW_WIDTH)[0], scale / window_get(WINDOW_HEIGHT)[0], 1);
+    scale44(r->tf.matrix, (float)scale / window_width(), (float)scale / window_height(), 1);
     translate44( r->tf.matrix, center.x, center.y, 0 );
 #endif
 }
@@ -800,7 +800,7 @@ void ddraw_render2d( float *pm, float *vm ) {
 
             mat44 m;
             identity44(m);
-            scale44(m, scale / window_get(WINDOW_WIDTH)[0], scale / window_get(WINDOW_HEIGHT)[0], 1);
+            scale44(m, scale / window_width(), scale / window_height(), 1);
             translate44( m, 0, -p * spacing,0 );
             renderable_t r = {0};
             text(&r, ddraw_font, ddraw__console[i] );
