@@ -23,13 +23,20 @@ API void window_swap( void **pixels );
 API void window_timings(void);
 API void window_destroy(void);
 
-enum {
-    WINDOW_WIDTH,
-    WINDOW_HEIGHT,
-};
+API int window_width();
+API int window_height();
+API float window_aspect();
 
-API double *window_get( int variable );
-
+API int window_is_minimized();
+API int window_is_maximized();
+API int window_is_fullscreen();
+API int window_is_fullscreen_desktop();
+API int window_is_visible();
+API int window_is_resizable();
+API int window_is_borderless();
+API int window_has_input_focus();
+API int window_has_input_grabbed();
+API int window_has_mouse_focus();
 
 #endif
 
@@ -499,19 +506,20 @@ void window_timings() {
     ++num_frames;
 }
 
-double *window_get( int variable ) {
-    static double r[2] = {0};
 
-    switch( variable ) {
-        break; default:
-        break; case WINDOW_WIDTH:
-            r[0] = window_size()[0];
-            return r;
-        break; case WINDOW_HEIGHT:;
-            r[0] = window_size()[1];
-            return r;
-    }
-    return r[0] = 0, r;
-}
+int window_width() { return window_size()[0]; }
+int window_height() { return window_size()[1]; }
+float window_aspect() { int *rect = window_size(); return rect[0]/(rect[1]+0.001f); }
+
+int window_is_minimized() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED ); }
+int window_is_maximized() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_MAXIMIZED ); }
+int window_is_fullscreen() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN ); }
+int window_is_fullscreen_desktop() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP ); }
+int window_is_visible() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_SHOWN ); }
+int window_is_resizable() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_RESIZABLE ); }
+int window_is_borderless() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_BORDERLESS ); }
+int window_has_input_focus() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_INPUT_FOCUS ); }
+int window_has_input_grabbed() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_INPUT_GRABBED ); }
+int window_has_mouse_focus() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_MOUSE_FOCUS ); }
 
 #endif
