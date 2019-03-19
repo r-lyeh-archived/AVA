@@ -106,18 +106,32 @@ static m_inline vec4  norm4    (vec4   a          ) { return div4(a, len4(a)); }
 static m_inline int   finite4  (vec4   a          ) { return m_finite(a.x) && m_finite(a.y) && m_finite(a.z) && m_finite(a.w); }
 
 
-static m_inline void copy44(float *m, const float *a ) {
-    for (int i=0; i<16; i++) m[i] = a[i];
+static m_inline void ortho44(float *m, float l, float r, float b, float t, float n, float f) {
+    m[ 0] = 2/(r-l);      m[ 1] = 0;            m[ 2] = 0;            m[ 3] = 0;
+    m[ 4] = 0;            m[ 5] = 2/(t-b);      m[ 6] = 0;            m[ 7] = 0;
+    m[ 8] = 0;            m[ 9] = 0;            m[10] = -2/(f-n);     m[11] = 0;
+    m[12] = -(r+l)/(r-l); m[13] = -(t+b)/(t-b); m[14] = -(f+n)/(f-n); m[15] = 1;
 }
-static m_inline void identity44(float *m) {
-    mat44 i = { 1,0,0,0,  0,1,0,0,  0,0,1,0,  0,0,0,1 };
-    copy44(m, i);
+static m_inline void frustum44(float *m, float l, float r, float b, float t, float n, float f) {
+    m[ 0] = 2*n/(r-l);   m[ 1] = 0;           m[ 2] = 0;               m[ 3] = 0;
+    m[ 4] = 0;           m[ 5] = 2.*n/(t-b);  m[ 6] = 0;               m[ 7] = 0;
+    m[ 8] = (r+l)/(r-l); m[ 9] = (t+b)/(t-b); m[10] = -(f+n)/(f-n);    m[11] = -1;
+    m[12] = 0;           m[13] = 0;           m[14] = -2*(f*n)/(f-n);  m[15] = 0;
 }
-static m_inline void multiply44(float *out, const float *a, const float *b) {
-    for (int y = 0; y < 4; y++)
-        for (int x = 0; x < 4; x++)
-            out[y*4 + x] = a[x] * b[y*4] + a[4 + x] * b[y*4 + 1] + a[8 + x] * b[y*4 + 2] + a[12 + x] * b[y*4 + 3];
+static m_inline void perspective44(float *m, float fovy_degrees, float aspect, float nearp, float farp) {
+    float y = tanf(fovy_degrees * M__PI / 360) * nearp, x = y * aspect;
+    frustum44(m, -x, x, -y, y, nearp, farp);
 }
+static m_inline void lookat44(float *m, vec3 eye, vec3 center, vec3 up) {
+    vec3 f = norm3(sub3(center, eye));
+    vec3 s = norm3(cross3(f, up));
+    vec3 u = cross3(s, f);
+    m[ 0] = s.x;           m[ 1] = u.x;           m[ 2] = -f.x;         m[ 3] = 0;
+    m[ 4] = s.y;           m[ 5] = u.y;           m[ 6] = -f.y;         m[ 7] = 0;
+    m[ 8] = s.z;           m[ 9] = u.z;           m[10] = -f.z;         m[11] = 0;
+    m[12] = -dot3(s, eye); m[13] = -dot3(u, eye); m[14] = dot3(f, eye); m[15] = 1;
+}
+
 static m_inline void translation44(float *m, float x, float y, float z) { // identity4 + translate4
     m[ 0] = 1.0f; m[ 1] = 0.0f; m[ 2] = 0.0f; m[ 3] = 0.0f;
     m[ 4] = 0.0f; m[ 5] = 1.0f; m[ 6] = 0.0f; m[ 7] = 0.0f;
@@ -131,75 +145,20 @@ static m_inline void translate44(float *m, float x, float y, float z) { // trans
     m[14] += dot4(vec4(m[2],m[6],m[10],m[14]),t); // row4(M,2)
     m[15] += dot4(vec4(m[3],m[7],m[11],m[15]),t); // row4(M,3)
 }
-static m_inline void rotation44(float *m, float angle_deg, float x, float y, float z) {
+static m_inline void rotation44(float *m, float degrees, float x, float y, float z) {
     if(len3sq(vec3(x,y,z)) < (1e-4 * 1e-4)) return;
 
-    float rads = angle_deg * M__PI / 180.0f;
-    float c = cosf(rads), s = sinf(rads), c1 = 1.0f - c;
+    float radians = degrees * M__PI / 180.0f;
+    float c = cosf(radians), s = sinf(radians), c1 = 1.0f - c;
     m[ 0] = x*x*c1 + c;   m[ 1] = y*x*c1 + z*s; m[ 2] = x*z*c1 - y*s; m[ 3] = 0.0f;
     m[ 4] = x*y*c1 - z*s; m[ 5] = y*y*c1 + c;   m[ 6] = y*z*c1 + x*s; m[ 7] = 0.0f;
     m[ 8] = x*z*c1 + y*s; m[ 9] = y*z*c1 - x*s; m[10] = z*z*c1 + c;   m[11] = 0.0f;
     m[12] = 0.0f;         m[13] = 0.0f;         m[14] = 0.0f;         m[15] = 1.0f;
 }
-static m_inline void transpose44(float *m, const float *a) { // M[i][j] = A[j][i];
-    m[ 0] = a[0]; m[ 1] = a[4]; m[ 2] = a[ 8]; m[ 3] = a[12];
-    m[ 4] = a[1]; m[ 5] = a[5]; m[ 6] = a[ 9]; m[ 7] = a[13];
-    m[ 8] = a[2]; m[ 9] = a[6]; m[10] = a[10]; m[11] = a[14];
-    m[12] = a[3]; m[13] = a[7]; m[14] = a[11]; m[15] = a[15];
-}
-static m_inline void ortho44(float *m, float l, float r, float b, float t, float n, float f) {
-    m[ 0] = 2/(r-l);      m[ 1] = 0;            m[ 2] = 0;            m[ 3] = 0;
-    m[ 4] = 0;            m[ 5] = 2/(t-b);      m[ 6] = 0;            m[ 7] = 0;
-    m[ 8] = 0;            m[ 9] = 0;            m[10] = -2/(f-n);     m[11] = 0;
-    m[12] = -(r+l)/(r-l); m[13] = -(t+b)/(t-b); m[14] = -(f+n)/(f-n); m[15] = 1;
-}
-static m_inline void perspective44(float *m, float fovy_deg, float aspect, float nearp, float farp) {
-    float f = 1.0f / tanf(fovy_deg * M__PI / 360.0f);
-    float iDist = 1.0f / (farp - nearp);
-    m[ 0] = f / aspect; m[ 1] = 0.0f; m[ 2] = 0.0f;                         m[ 3] = 0.0f;
-    m[ 4] = 0.0f;       m[ 5] = f;    m[ 6] = 0.0f;                         m[ 7] = 0.0f;
-    m[ 8] = 0.0f;       m[ 9] = 0.0f; m[10] = -(farp + nearp) * iDist;      m[11] = -1.0f;
-    m[12] = 0.0f;       m[13] = 0.0f; m[14] = -2.0f * farp * nearp * iDist; m[15] = 0.0f;
-}
-static m_inline void lookat44(float *m, vec3 eye, vec3 center, vec3 up) {
-    vec3 f = norm3(sub3(center, eye));
-    vec3 s = norm3(cross3(f, up));
-    vec3 u = cross3(s, f);
-    m[ 0] = s.x;           m[ 1] = u.x;           m[ 2] = -f.x;         m[ 3] = 0;
-    m[ 4] = s.y;           m[ 5] = u.y;           m[ 6] = -f.y;         m[ 7] = 0;
-    m[ 8] = s.z;           m[ 9] = u.z;           m[10] = -f.z;         m[11] = 0;
-    m[12] = -dot3(s, eye); m[13] = -dot3(u, eye); m[14] = dot3(f, eye); m[15] = 1;
-}
-static m_inline vec3 transform44(const float *m, const vec3 p) {
-    float d = 1.0f / (m[3] * p.x + m[7] * p.y + m[11] * p.z + m[15]);
-    return vec3(
-        d * (m[0] * p.x + m[4] * p.y + m[ 8] * p.z + m[12]),
-        d * (m[1] * p.x + m[5] * p.y + m[ 9] * p.z + m[13]),
-        d * (m[2] * p.x + m[6] * p.y + m[10] * p.z + m[14])
-    );
-}
-
-// !!! ok, i guess
-static m_inline void scaling44(float *m, float x, float y, float z) {
-    float n[16] = {
-        x,0,0,0,
-        0,y,0,0,
-        0,0,z,0,
-        0,0,0,1,
-    };
-    copy44(m, n);
-}
-// !!! ok, i guess
-static m_inline void scale44(float *m, float x, float y, float z) {
-    m[ 0] *= x; m[ 1] *= x; m[ 2] *= x; m[ 3] *= x;
-    m[ 4] *= y; m[ 5] *= y; m[ 6] *= y; m[ 7] *= y;
-    m[ 8] *= z; m[ 9] *= z; m[10] *= z; m[11] *= z;
-}
-// !!! ok, i guess
-static m_inline void rotate44(float *m, float angle_deg, float x, float y, float z) {
+static m_inline void rotate44(float *m, float degrees, float x, float y, float z) { // !!! ok, i guess
     if(len3sq(vec3(x,y,z)) < (1e-4 * 1e-4)) return;
 
-    float c = cosf(rad(angle_deg)), s = -sinf(rad(angle_deg)), c1 = 1 - c;
+    float c = cosf(rad(degrees)), s = -sinf(rad(degrees)), c1 = 1 - c;
     float m00 = m[ 0],  m01 = m[ 1],  m02 = m[ 2], m03 = m[ 3],
           m04 = m[ 4],  m05 = m[ 5],  m06 = m[ 6], m07 = m[ 7],
           m08 = m[ 8],  m09 = m[ 9],  m10 = m[10], m11 = m[11];
@@ -223,8 +182,33 @@ static m_inline void rotate44(float *m, float angle_deg, float x, float y, float
     m[10] = r02 * m02 + r06 * m06 + r10 * m10;
     m[11] = r02 * m03 + r06 * m07 + r10 * m11;
 }
-// !!! ok, i guess
-static m_inline void invert44(mat44 T, mat44 M) {
+static m_inline void scaling44(float *m, float x, float y, float z) { // !!! ok, i guess
+    m[ 0] = x; m[ 1] = 0; m[ 2] = 0; m[ 3] = 0;
+    m[ 4] = 0; m[ 5] = y; m[ 6] = 0; m[ 7] = 0;
+    m[ 8] = 0; m[ 9] = 0; m[10] = z; m[11] = 0;
+    m[12] = 0; m[13] = 0; m[14] = 0; m[15] = 1;
+}
+static m_inline void scale44(float *m, float x, float y, float z) { // !!! ok, i guess
+    m[ 0] *= x; m[ 1] *= x; m[ 2] *= x; m[ 3] *= x;
+    m[ 4] *= y; m[ 5] *= y; m[ 6] *= y; m[ 7] *= y;
+    m[ 8] *= z; m[ 9] *= z; m[10] *= z; m[11] *= z;
+}
+
+static m_inline void identity44(float *m) {
+    scaling44(m, 1,1,1);
+}
+static m_inline void multiply44(float *out, const float *a, const float *b) {
+    for (int y = 0; y < 4; y++)
+        for (int x = 0; x < 4; x++)
+            out[y*4 + x] = a[x] * b[y*4] + a[4 + x] * b[y*4 + 1] + a[8 + x] * b[y*4 + 2] + a[12 + x] * b[y*4 + 3];
+}
+static m_inline void transpose44(float *m, const float *a) { // M[i][j] = A[j][i];
+    m[ 0] = a[0]; m[ 1] = a[4]; m[ 2] = a[ 8]; m[ 3] = a[12];
+    m[ 4] = a[1]; m[ 5] = a[5]; m[ 6] = a[ 9]; m[ 7] = a[13];
+    m[ 8] = a[2]; m[ 9] = a[6]; m[10] = a[10]; m[11] = a[14];
+    m[12] = a[3]; m[13] = a[7]; m[14] = a[11]; m[15] = a[15];
+}
+static m_inline void invert44(mat44 T, mat44 M) { // !!! ok, i guess
     float s[6], c[6];
     s[0] = M[0*4+0]*M[1*4+1] - M[1*4+0]*M[0*4+1];
     s[1] = M[0*4+0]*M[1*4+2] - M[1*4+0]*M[0*4+2];
@@ -265,13 +249,15 @@ static m_inline void invert44(mat44 T, mat44 M) {
         T[3*4+3] = ( M[2*4+0] * s[3] - M[2*4+1] * s[1] + M[2*4+2] * s[0]) * idet;
     }
 }
-// !!! untested. alternate way to create a perspective projection matrix.
-static m_inline void frustum44(float *m, float l, float r, float b, float t, float n, float f) {
-    m[ 0] = 2*n/(r-l);   m[ 1] = 0;           m[ 2] = 0;               m[ 3] = 0;
-    m[ 4] = 0;           m[ 5] = 2.*n/(t-b);  m[ 6] = 0;               m[ 7] = 0;
-    m[ 8] = (r+l)/(r-l); m[ 9] = (t+b)/(t-b); m[10] = -(f+n)/(f-n);    m[11] = -1;
-    m[12] = 0;           m[13] = 0;           m[14] = -2*(f*n)/(f-n);  m[15] = 0;
+static m_inline vec3 transform44(const float *m, const vec3 p) {
+    float d = 1.0f / (m[3] * p.x + m[7] * p.y + m[11] * p.z + m[15]);
+    return vec3(
+        d * (m[0] * p.x + m[4] * p.y + m[ 8] * p.z + m[12]),
+        d * (m[1] * p.x + m[5] * p.y + m[ 9] * p.z + m[13]),
+        d * (m[2] * p.x + m[6] * p.y + m[10] * p.z + m[14])
+    );
 }
+
 
 // !!! for debugging
 #include <stdio.h>
