@@ -205,6 +205,11 @@ static m_inline void multiply44(float *out, const float *a, const float *b) {
         for (int x = 0; x < 4; x++)
             out[y*4 + x] = a[x] * b[y*4] + a[4 + x] * b[y*4 + 1] + a[8 + x] * b[y*4 + 2] + a[12 + x] * b[y*4 + 3];
 }
+static m_inline void multiply344(float *out, const float *a, const float *b, const float *c) {
+    float m[16];
+    multiply44(m, a, b);
+    multiply44(out, m, c);
+}
 static m_inline void transpose44(float *m, const float *a) { // M[i][j] = A[j][i];
     m[ 0] = a[0]; m[ 1] = a[4]; m[ 2] = a[ 8]; m[ 3] = a[12];
     m[ 4] = a[1]; m[ 5] = a[5]; m[ 6] = a[ 9]; m[ 7] = a[13];
