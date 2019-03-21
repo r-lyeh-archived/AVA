@@ -1,13 +1,13 @@
-API void quad( struct renderable_t *r );
+API void quad( struct rendernode *r );
 
 // ----------------------------------------------------------------------------
 
 #ifdef MESH_C
 #pragma once
 #include "render_mesh.c"
-#include "render_renderer.c"
+//#include "render_renderer.c"
 
-void quad( renderable_t *r ) {
+void quad( rendernode *r ) {
 
     // A--B ; quad CDAB becomes triangle CAB and CBD.
     // | /| 
@@ -47,7 +47,7 @@ void quad( renderable_t *r ) {
         { uvs, sizeof(uvs) },
     };
 
-    mesh( r, VERTEX_P|VERTEX_C|VERTEX_U, 6, buffers );
+    mesh( &r->mesh1, VERTEX_P|VERTEX_C|VERTEX_U, 6, buffers );
 }
 
 #endif

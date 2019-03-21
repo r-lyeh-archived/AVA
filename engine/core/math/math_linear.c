@@ -10,6 +10,28 @@
 
 
 #if 0
+
+// check ands, vurtun, nlguillemot also
+
+// @glampert
+void aabb_meshgl(mesh_gl *m, vec3 bbmin, vec3 bbmax ) {
+    bbmin[0] = bbmin[1] = bbmin[2] = FLT_MAX;
+    bbmax[0] = bbmax[1] = bbmax[2] = FLT_MIN;
+
+    float *v = (float *)m->vertex_data;
+    int stride = vertex_size(m->vertex_type);
+
+    int vertex_count = m->vertex_bytes / vertex_size(m->vertex_type);
+
+    for( int i = 0; i < vertex_count; i++ ) {
+        for( int j = 0; j < 3; j++ ) {
+            if( v[j] < bbmin[j] ) bbmin[j] = v[j];
+            if( v[j] > bbmax[j] ) bbmax[j] = v[j];
+        }
+        v += stride;
+    }
+}
+
 static m_inline void mat4_add(mat44 M, mat44 a, mat44 b) {
     int i;
     for(i=0; i<4; ++i)
@@ -151,19 +173,6 @@ static m_inline void mat4_from_quat(mat44 M, quat q) {
     M[3*4+3] = 1.f;
 }
 
-
-#if 0
-
-// out is vec4
-void CreatePerspectiveProjection(float * proj, float aspect, float fov_y_rad, float n, float f) {
-    float d = 1.f / (float)tan(fov_y_rad * 0.5f);
-    proj[0] = d / aspect;
-    proj[1] = d;
-    proj[2] = f / (n - f);
-    proj[3] = (f * n) / (n - f);
-}
-
-#endif
 
 
 #if 0

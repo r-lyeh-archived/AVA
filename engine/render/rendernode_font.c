@@ -1,11 +1,21 @@
-// milestone 1: font loading, glyph atlasing, vertex building, basic shaders, unicode blocks, utf8 handling, text transforms.
-// milestone 2: color, outline.
-// milestone 3: sdf, ref: https://github.com/tangrams/fontstash-es/blob/master/fontstash/shaders.h
-
 #ifndef FONT_H
 #define FONT_H
+#include "render_material2.c"
 
-enum FONT_SETTINGS {
+/* proposal:
+    int font_id = font("Roboto-Regular.ttf");
+    // [...]
+
+    textFont(font_id);
+    textAlign(ALIGN_CENTER);
+    textSize(30);
+    textLeading(5);
+    text("test everything here", width/2, height/2);
+*/
+
+// build font
+
+enum FONT_FLAGS {
     FONT_ATLAS_1024 = 0x1,
     FONT_ATLAS_2048 = 0x2,
     FONT_ATLAS_4096 = 0x4,
@@ -27,9 +37,18 @@ enum FONT_SETTINGS {
     FONT_DEFAULTS = FONT_ATLAS_1024 | FONT_OVERSAMPLE_Y | FONT_RANGE_EU,
 };
 
-typedef struct font_t {
-    renderer_t r;
+API int font( const char *fontfile, int fontSize, int flags );
+API int font_mem( const void *fontData, int fileSize, int fontSize, int flags );
 
+// instantiate text mesh
+
+API void font_mesh(rendernode *r, int font_id, const char *text );
+API material *font_material();
+
+// @todo: rethink this
+
+typedef struct font_t {
+    int id;
     int size;
     int atlasWidth;
     int atlasHeight;
@@ -42,14 +61,11 @@ typedef struct font_t {
     int *lookup; // unicode2index lookup table
 
     void* charInfo;
+
+    unsigned texture_id;
 } font_t;
 
-extern font_t *fonts;
-
-// build font
-
-API int font( const char *fontfile, int fontSize, int flags );
-API int font_mem( const void *fontData, int fileSize, int fontSize, int flags );
+API void font_create(font_t*, const char *fontfile, int fontsize, int fontflags );
 
 #endif
 
@@ -57,10 +73,7 @@ API int font_mem( const void *fontData, int fileSize, int fontSize, int flags );
 
 #ifdef FONT_C
 #pragma once
-#include "render_renderer.c"
-#include "render_shader.c"
-#include "engine.h" // filesys
-#include "render_texture.c"
+#include "engine.h"
 
 #define STB_RECT_PACK_IMPLEMENTATION
 #include "3rd/stb_rect_pack.h"
@@ -70,11 +83,14 @@ API int font_mem( const void *fontData, int fileSize, int fontSize, int flags );
 extern const char bm_mini_ttf[];
 extern const unsigned bm_mini_ttf_length;
 
-// ----------------------------------------------------------------------------
+// old api below
 
-typedef struct mesh_t {
-    renderable_t r;
-} mesh_t;
+// milestone 1: font loading, glyph atlasing, vertex building, basic shaders, unicode blocks, utf8 handling, text transforms.
+// milestone 2: color, outline.
+// milestone 3: sdf, ref: https://github.com/tangrams/fontstash-es/blob/master/fontstash/shaders.h
+
+static font_t *fonts = 0;
+static int fonts_count = 0;
 
 // ----------------------------------------------------------------------------
 
@@ -147,8 +163,45 @@ static const uint32_t unicode_ranges[] = {
     0
 };
 
-font_t *fonts = 0;
-int fonts_count = 0;
+material* font_material() {
+    static material m, *init = 0;
+    if( !init ) {
+        init = &m;
+        const char* vs = 
+            VS130
+            "/* render_font.c */\n"
+            "layout (location = 0) in vec3 att_position;\n"
+            "layout (location = 1) in vec4 att_inColor0;\n"
+            "layout (location = 2) in vec2 att_texCoord0;\n"
+            "uniform mat4 u_M, u_VP;\n"
+            "out vec4 v_color0;\n"
+            "out vec2 v_uv0;\n"
+            "void main() {\n"
+            "    gl_Position = u_VP * u_M * vec4( att_position.xyz, 1.0 );\n"
+            "    v_color0 = att_inColor0;\n"
+            "    v_uv0 = att_texCoord0;\n"
+            "}\n";
+        const char* fs = 
+            FS130
+            "/* render_font.c */\n"
+            "uniform sampler2D u_mainTex;\n"
+            "in vec4 v_color0;\n"
+            "in vec2 v_uv0;\n"
+            "void main() {\n"
+            "    vec4 c = texture(u_mainTex, v_uv0);\n"
+            "    fragColor = v_color0 * vec4(c.r, c.r, c.r, c.r);\n"
+            "}\n";
+        material_create(&m);
+        m.shader = shader(vs, fs);
+        m.u_VP = glGetUniformLocation(m.shader, "u_VP");
+        m.u_M = glGetUniformLocation(m.shader, "u_M");
+        m.u_texture = glGetUniformLocation(m.shader, "u_mainTex");
+        m.two_sided = 1;
+        m.alpha_enable = 1;
+        m.alpha_src = GL_SRC_ALPHA, m.alpha_dst = GL_ONE_MINUS_SRC_ALPHA;
+    }
+    return &m;
+}
 
 int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
     static int seen = 0;
@@ -170,37 +223,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
     fonts = (font_t*)realloc( fonts, sizeof(font_t) * (id+1) );
     font_t *f = &fonts[ id ];
     memset(f, 0, sizeof(font_t));
-
-    // initProgram()
-    const char* vs = 
-        VS130
-        "/* render_font.c */\n"
-        "layout (location = 0) in vec3 att_position;\n"
-        "layout (location = 1) in vec4 att_inColor0;\n"
-        "layout (location = 2) in vec2 att_texCoord0;\n"
-        "uniform mat4 u_worldMatrix;\n"
-        "uniform mat4 u_viewProjMatrix;\n"
-        "out vec4 v_color0;\n"
-        "out vec2 v_uv0;\n"
-        "void main() {\n"
-        "    gl_Position = u_viewProjMatrix * u_worldMatrix * vec4( att_position.xyz, 1.0 );\n"
-        "    v_color0 = att_inColor0;\n"
-        "    v_uv0 = att_texCoord0;\n"
-        "}\n";
-    const char* fs = 
-        FS130
-        "/* render_font.c */\n"
-        "uniform sampler2D u_mainTex;\n"
-        "in vec4 v_color0;\n"
-        "in vec2 v_uv0;\n"
-        "void main() {\n"
-        "    vec4 c = texture(u_mainTex, v_uv0);\n"
-        "    fragColor = v_color0 * vec4(c.r, c.r, c.r, c.r);\n"
-        "}\n";
-    f->r.shader = shader(vs, fs);
-    f->r.u_viewProjMatrix = glGetUniformLocation(f->r.shader, "u_viewProjMatrix");
-    f->r.u_worldMatrix = glGetUniformLocation(f->r.shader, "u_worldMatrix");
-    f->r.u_texture = glGetUniformLocation(f->r.shader, "u_mainTex");
+    f->id = id;
 
     // font
     int atlasSize =
@@ -259,7 +282,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
     img.h = f->atlasHeight;
     img.channels = 1;
     img.pixels = atlasData;
-    f->r.texture = texture_mem(img, 0 /* |TEXTURE_NEAREST */ /* gl3: |TEXTURE_MIPMAPS */ /* gl2: |TEXTURE_ANISOTROPY*/);
+    f->texture_id = texture_mem(img, 0 /* |TEXTURE_NEAREST */ /* gl3: |TEXTURE_MIPMAPS */ /* gl2: |TEXTURE_ANISOTROPY*/);
 
     free(atlasData);
 
@@ -291,16 +314,116 @@ int font( const char *fontfile, int fontSize, int flags ) {
     return id;
 }
 
-void font_quit( int font_id ) {
+void font_destroy( int font_id ) {
     font_t *f = &fonts[ font_id ];
 
-    renderer_destroy(&f->r);
+    texture_destroy( &f->texture_id );
     free( f->charInfo );
     free( f->lookup );
 
-    font_t clear = {0};
-    *f = clear;
+    font_t zero = {0};
+    *f = zero;
 }
+
+void font_mesh(rendernode *r, int font_id, const char *text ) {
+    font_t *f = &fonts[ font_id ];
+if(!f) { /* init on demand */ font_mem(0, 0, 0, 0); f = &fonts[0]; }
+
+    // utf8 to utf32
+
+    uint32_t *text32 = string32( text );
+    int count = strlen32( text32 );
+
+    // setup vertex+index data
+
+#if 1
+    // 4 verts, 6 edges/2 polys
+    int vlen = 4 * count; void *vertices = (void*)malloc( vlen * sizeof(vec3) );
+    int ulen = 4 * count; void *uvs      = (void*)malloc( ulen * sizeof(vec2) );
+    int clen = 4 * count; void *colors   = (void*)malloc( clen * sizeof(uint32_t) );
+    int ilen = 6 * count; void *indexes  = (void*)malloc( ilen * sizeof(uint16_t) );
+#else
+    static const int k_maxstrlen = 1024;
+    static GLfloat vertdata[...];
+    static GLuint idxdata[...];
+#endif
+
+    struct Vec3  { vec3 v; } *v = (struct Vec3 *)vertices;
+    struct Vec2  { vec2 v; } *u = (struct Vec2 *)uvs;
+    struct Col32 { uint32_t v; } *c = (struct Col32*)colors;
+    struct Idx16 { uint16_t i; } *i = (struct Idx16*)indexes;
+
+    uint16_t lastIndex = 0;
+    float offsetX = 0, offsetY = 0;
+    for( int s = 0; s < count; ++s ) {
+        uint32_t unicode = text32[s] & 0xffff;
+        // handle line breaks
+        if( unicode == '\r' || unicode == '\n' ) {
+            offsetX = 0;
+            offsetY += f->spaceY;
+            continue;
+        }
+        // handle tabs
+        if( unicode == '\t' ) {
+            offsetX += f->spaceX * 4;
+            continue;
+        }
+        // handle regular text
+        if( fillglyph( &v->v, &u->v, f, unicode, &offsetX, &offsetY ) ) {
+            v += 4;
+            u += 4;
+
+#if 0
+            c[0].v = 0xFF0000FF; // R
+            c[1].v = 0xFF00FF00; // G
+            c[2].v = 0xFFFF0000; // B
+            c[3].v = 0xFFFFFFFF; // W
+#else
+            c[0].v = 0xFFFFFFFF; // W
+            c[1].v = 0xFFFFFFFF; // W
+            c[2].v = 0xFFFFFFFF; // W
+            c[3].v = 0xFFFFFFFF; // W
+#endif
+            c += 4;
+
+            uint16_t idx[] = { 
+                lastIndex, lastIndex + 1, lastIndex + 2,
+                lastIndex, lastIndex + 2, lastIndex + 3,
+            };
+            memcpy( i, idx, sizeof(idx) );
+            i += 6;
+
+            lastIndex += 4;
+        }
+    }
+
+    // setup rendernode
+
+#if 1
+    buffer buffers[] = {
+        {indexes, MSIZE(indexes)},
+        {vertices, MSIZE(vertices)},
+        {colors, MSIZE(colors)},
+        {uvs, MSIZE(uvs)},
+    };
+    mesh(&r->mesh1, VERTEX_P|VERTEX_C|VERTEX_U | 16, ilen, buffers );
+#else
+    r->mesh = malloc( sizeof(mesh2) );
+    mesh2_create(r->mesh, vertices );
+#endif
+
+    free(vertices);
+    free(colors);
+    free(uvs);
+    free(indexes);
+    free(text32);
+}
+
+void font_create(font_t*f, const char *fontfile, int fontsize, int fontflags ) {
+    unsigned id = font(fontfile, fontsize, fontflags);
+    *f = fonts[id];
+}
+
 
 // ----------------------------------------------------------------------------
 

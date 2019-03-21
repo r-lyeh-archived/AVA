@@ -78,7 +78,7 @@ API void texture_destroy( unsigned *id );
 
 #ifdef TEXTURE_C
 #pragma once
-#include "render_renderer.c"
+#include "render_opengl.c"
 
 /*static*/ unsigned texture_count = 0;
 /*static*/ unsigned texture_budget = 0;

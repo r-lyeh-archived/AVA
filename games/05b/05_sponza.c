@@ -136,6 +136,7 @@ int main() {
     pipeline_with_blend_info.rasterizationDepthBiasEnable          = 0;
     pipeline_with_blend_info.rasterizationDepthBiasConstantFactor  = 0;
     pipeline_with_blend_info.rasterizationDepthBiasSlopeFactor     = 0;
+    pipeline_with_blend_info.rasterizationLineWidth                = 1;
     pipeline_with_blend_info.multisampleEnable                     = 1;
     pipeline_with_blend_info.multisampleAlphaToCoverageEnable      = 1;
     pipeline_with_blend_info.multisampleAlphaToOneEnable           = 0;

@@ -27,7 +27,7 @@ API  int ddraw_menu( int submenu_id, const char **lines );
 API void ddraw_text2d( vec2 center, const char *fmt, ... );
 API void ddraw_text3d( vec3 center, const char *fmt, ... );
 API void ddraw_console( const char *fmt, ... );
-API void ddraw_render2d( /*int shader, int camera*/ float *projmatrix, float *viewmatrix );
+API void ddraw_render2d();
 
 // void pushScale(x);
 // void popScale();
@@ -60,11 +60,11 @@ void ddraw_lineEx( vec3 src, vec3 dst, vec4 col );
 
 #ifdef DDRAW_C
 #pragma once
-#include "render_renderer.c"
-#include "render_text.c"
-#include "render_font.c"
+#include "render_opengl.c"
+#include "rendernode_base.c"
+#include "rendernode_font.c"
 #include "engine.h" // app/window
-#include "render_ddraw.c"
+//#include "render_ddraw.c"
 
 // find/compute basis/triad/axes from single normal
 
@@ -677,11 +677,11 @@ void ddraw_console(const char *fmt, ...) {
 
 // ----------------------------------------------------------------------------
 
-static renderable_t shapes[1024] = {0};
+static rendernode shapes[1024] = {0};
 static int instanced_shapes = 0;
 
 static
-renderable_t *ddraw_find_slot() {
+rendernode *ddraw_find_slot() {
     // find dead slot
     if( instanced_shapes < 1024 ) {
         return &shapes[instanced_shapes++];
@@ -695,9 +695,9 @@ void ddraw_clear() {
     for( int i = 0; i < instanced_shapes; ++i ) {
         // bool is_defunct = shapes[i].age && shapes[i].tick > shapes[i].age;
         // bool is_volatile = !shapes[i].age;
-        renderable_destroy(&shapes[i]);
+        rendernode_destroy(&shapes[i]);
     }
-    memset( shapes, 0, sizeof(renderable_t) * 1024 );
+    memset( shapes, 0, sizeof(rendernode) * 1024 );
     instanced_shapes = 0;
 }
 
@@ -706,7 +706,7 @@ void ddraw_clear() {
 int ddraw_font = 0;
 
 void ddraw_text2d( vec2 center, const char *fmt, ... ) {
-    renderable_t *r = ddraw_find_slot();
+    rendernode *r = ddraw_find_slot();
     if( !r ) return;
 
     //fmt = FORMAT(fmt);
@@ -720,7 +720,7 @@ void ddraw_text2d( vec2 center, const char *fmt, ... ) {
 #endif
 
     // create mesh
-    text( r, ddraw_font, fmt );
+    font_mesh( r, ddraw_font, fmt );
 
     // @todo: fix this
     // create transform
@@ -769,28 +769,40 @@ int ddraw_menu( int submenu_id, const char **options ) {
 
 // ----------------------------------------------------------------------------
 
-void ddraw_render2d( float *pm, float *vm ) {
-    // texts
-    mat44 proj;
-    ortho(proj, ORTHO_CENTERED | ORTHO_NORMALIZED );
-    renderer_enable(&fonts[ddraw_font].r, proj);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE); // additive: 1 * src_color + 1 * fb_color
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // decal: src_color.a * src_color + (1 - src_color.a) * fb_color
-    //glBlendFunc(GL_DST_COLOR, GL_ZERO); // modulate: fb_color * src_color + 0 * fb_color
-
-    for( int i = 0; i < instanced_shapes; ++i ) {
-        draw(&shapes[i], shapes[i].tf.matrix);
+void ddraw_render2d() {
+    // setup material
+    static material mat, *init = 0;
+    if( !init ) {
+        mat = *font_material();
+        mat.texture = fonts[ddraw_font].texture_id;
+        mat.alpha_enable = 1;
+        mat.alpha_src = GL_ONE;
+        mat.alpha_dst = GL_ONE;
     }
 
-    // update console
-    ortho(proj, ORTHO_TOPLEFT | ORTHO_NORMALIZED);
-    renderer_enable(&fonts[ddraw_font].r, proj);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE); // additive: 1 * src_color + 1 * fb_color
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // decal: src_color.a * src_color + (1 - src_color.a) * fb_color
-    //glBlendFunc(GL_DST_COLOR, GL_ZERO); // modulate: fb_color * src_color + 0 * fb_color
+    // setup matrices
+    mat44 view;
+    identity44(view);
 
+    mat44 proj2d;
+    ortho(proj2d, ORTHO_CENTERED | ORTHO_NORMALIZED );
+
+    mat44 projview2d_center;
+    multiply44(projview2d_center, view, proj2d);
+
+    mat44 projview2d_topleft;
+    ortho(proj2d, ORTHO_TOPLEFT | ORTHO_NORMALIZED);
+    multiply44(projview2d_topleft, view, proj2d);
+
+    // texts
+    material_enable(&mat, projview2d_center);
+    for( int i = 0; i < instanced_shapes; ++i ) {
+        shapes[i].material = &mat;
+        rendernode_draw(&shapes[i], shapes[i].tf.matrix);
+    }
+
+    // draw console
+    material_enable(&mat, projview2d_topleft);
     float spacing = fonts[ddraw_font].spaceY;
     for(int l = ddraw__line; l < ddraw__line + 16; ++l) {
         int p = l - ddraw__line;
@@ -802,10 +814,12 @@ void ddraw_render2d( float *pm, float *vm ) {
             identity44(m);
             scale44(m, scale / window_width(), scale / window_height(), 1);
             translate44( m, 0, -p * spacing,0 );
-            renderable_t r = {0};
-            text(&r, ddraw_font, ddraw__console[i] );
-            draw(&r, m);
-            renderable_destroy(&r);
+
+            rendernode r = { 0 };
+            font_mesh(&r, ddraw_font, ddraw__console[i]);
+            r.material = &mat;
+            rendernode_draw(&r, m);
+            rendernode_destroy(&r);
         }
     }
 

@@ -1,9 +1,10 @@
 #ifndef APP_H
 #define APP_H
 
-#include "../render/render.c" // OPENGL
+#include "../render/render_opengl.c" // OPENGL
+
 #define SDL_MAIN_HANDLED
-#include "../3rd/SDL2/SDL.h" // SDL2
+#include "../3rd/SDL2/SDL.h" // eSDL2
 // #include "../3rd/glfast.h" // SDL2+OPENGL(subset)
 
 extern SDL_Window *window;
@@ -22,6 +23,8 @@ API int* window_size(void);
 API void window_swap( void **pixels );
 API void window_timings(void);
 API void window_destroy(void);
+
+API void window_opengl(void);
 
 API int window_width();
 API int window_height();
@@ -48,6 +51,42 @@ API int window_has_mouse_focus();
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
+
+API void renderer_init();
+API void renderer_update(int width, int height);
+API void renderer_post(int width, int height);
+API void renderer_capture( int w, int h, int comps, void *pixels );
+API void renderer_quit();
+
+void renderer_init() {
+    #if 1 //def OPENGL3
+    GLuint vao = 0;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    #endif
+    glEnableVertexAttribArray(0);
+
+    glClearColor(0.4,0.4,0.4,1);
+}
+void renderer_update(int width, int height) {
+    glViewport(0, 0, width, height);
+    //glClearColor(1,0,1,1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+void renderer_post(int width, int height) {
+//  text_draw(width, height);
+}
+void renderer_quit() {
+//  text_quit();
+}
+void renderer_capture( int w, int h, int comps, void *pixels ) {
+    // @todo, bench against http://roxlu.com/2014/048/fast-pixel-transfers-with-pixel-buffer-objects
+    // should we switch tech?
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, w, h, comps == 3 ? GL_RGB : GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+}
+
+
 
 int (*printf_handler)(const char *fmt, ...) = printf;
 
@@ -116,7 +155,7 @@ static void* glfwGetProcAddressExtraCompat(const char *name) {
 #define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  0x824E
 
 #if 0
-static void APIENTRY glDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+static void APIENTRY glDebug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
     /*
     // whitelisted codes
     if( id == 131169 ) return;
@@ -126,7 +165,7 @@ static void APIENTRY glDebugCallback(GLenum source, GLenum type, GLuint id, GLen
     */
 
     if( severity == GL_DEBUG_SEVERITY_HIGH ) {
-        printf_handler("!glDebugCallback: %s (%d) (source=%s, type=%s, severity=%s) #OPENGL\n", message, id,
+        printf_handler("!glDebug: %s (%d) (source=%s, type=%s, severity=%s) #OPENGL\n", message, id,
             source == GL_DEBUG_SOURCE_API               ? "API" :
             source == GL_DEBUG_SOURCE_APPLICATION       ? "Application" :
             source == GL_DEBUG_SOURCE_OTHER             ? "Other" :
@@ -160,7 +199,7 @@ void trap_gl() {
     if( flags & GL_CONTEXT_FLAG_DEBUG_BIT ) {
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback((GLDEBUGPROC)glDebugCallback, /*NULL*/0);
+        glDebugMessageCallback((GLDEBUGPROC)glDebug, /*NULL*/0);
         //GL( glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, /*NULL*/0, GL_TRUE) );
         printf_handler("%s #OPENGL\n", "Debug output initialized.");
     } else {
@@ -171,7 +210,7 @@ void trap_gl() {
 
 #else
 
-void glDebugCallback(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, void * userdata) {
+void glDebug(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, void * userdata) {
     const char * GL_ERROR_SOURCE[] = { "API", "WINDOW SYSTEM", "SHADER COMPILER", "THIRD PARTY", "APPLICATION", "OTHER" };
     const char * GL_ERROR_SEVERITY[] = { "HIGH", "MEDIUM", "LOW", "NOTIFICATION" };
     const char * GL_ERROR_TYPE[] = { "ERROR", "DEPRECATED BEHAVIOR", "UNDEFINED DEHAVIOUR", "PORTABILITY", "PERFORMANCE", "OTHER" };
@@ -183,6 +222,12 @@ void glDebugCallback(uint32_t source, uint32_t type, uint32_t id, uint32_t sever
         ],
         GL_ERROR_SOURCE[source - GL_DEBUG_SOURCE_API],
         GL_ERROR_TYPE[type - GL_DEBUG_TYPE_ERROR], */
+
+#ifdef _WIN32
+	if (IsDebuggerPresent()) {
+		breakpoint();
+	}
+#endif
 }
 
 void trap_gl() {
@@ -203,7 +248,7 @@ void window_title( const char *title_ ) {
 }
 
 void window_destroy(void) {
-    render_quit();
+    renderer_quit();
     if(window) {
         SDL_DestroyWindow(window);
         window = 0;
@@ -212,6 +257,40 @@ void window_destroy(void) {
     // if( num_active_windows == 0 )
     // glfwTerminate(); // exit(0)
 }
+
+void window_opengl(void) {
+#  if defined __gl3w_h_
+    gl3w_init();
+#elif defined __glad_h_
+    // gladLoadGLLoader((GLADloadproc) glfwGetProcAddressExtraCompat);
+
+    // Initialize OpenGL loader
+    // bool err = false;
+    // bool err = gl3wInit() != 0;
+    // bool err = glewInit() != GLEW_OK;
+    bool err = gladLoadGL() == 0;
+    if (err) {
+        die_callback("Error: Cannot initialize OpenGL loader");
+    }
+#else
+    puts("warning: no opengl loader found");
+#endif
+
+    // intel gma hd
+    // if(!glGenVertexArrays) glGenVertexArrays = (void*)glfwGetProcAddressExtraCompat("glGenVertexArrays");
+    // if(!glBindVertexArray) glBindVertexArray = (void*)glfwGetProcAddressExtraCompat("glBindVertexArray");
+
+    SDL_GL_SetSwapInterval(1); // Enable vsync, also check -1
+
+    // Enable the debug callback
+    // #ifndef RELEASE
+    typedef void (*GLDEBUGPROC)(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, const void * userParam);
+    typedef void (*GLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC callback, const void * userParam);
+    void (*glDebugMessageCallback)(GLDEBUGPROC callback, const void * userParam) = (GLDEBUGMESSAGECALLBACKPROC)SDL_GL_GetProcAddress("glDebugMessageCallback");
+    glDebugMessageCallback((GLDEBUGPROC)glDebug, NULL);
+    // #endif
+}
+
 int window_create( float zoom, int flags ) {
     if( window ) {
         return 0;
@@ -366,28 +445,7 @@ int window_create( float zoom, int flags ) {
 
     SDL_GL_MakeCurrent(window, glcontext);
 
-#  if defined __gl3w_h_
-    gl3w_init();
-#elif defined __glad_h_
-    // gladLoadGLLoader((GLADloadproc) glfwGetProcAddressExtraCompat);
-
-    // Initialize OpenGL loader
-    // bool err = false;
-    // bool err = gl3wInit() != 0;
-    // bool err = glewInit() != GLEW_OK;
-    bool err = gladLoadGL() == 0;
-    if (err) {
-        die_callback("Error: Cannot initialize OpenGL loader");
-    }
-#else
-    puts("warning: no opengl loader found");
-#endif
-
-    // intel gma hd
-    // if(!glGenVertexArrays) glGenVertexArrays = (void*)glfwGetProcAddressExtraCompat("glGenVertexArrays");
-    // if(!glBindVertexArray) glBindVertexArray = (void*)glfwGetProcAddressExtraCompat("glBindVertexArray");
-
-    SDL_GL_SetSwapInterval(1); // Enable vsync, also check -1
+    window_opengl();
 
     //glfwSetKeyCallback(window, key_callback);
 
@@ -398,17 +456,9 @@ int window_create( float zoom, int flags ) {
     }
 #endif
 
-    // Enable the debug callback
-    // #ifndef RELEASE
-    typedef void (*GLDEBUGPROC)(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, const void * userParam);
-    typedef void (*GLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC callback, const void * userParam);
-    void (*glDebugMessageCallback)(GLDEBUGPROC callback, const void * userParam) = (GLDEBUGMESSAGECALLBACKPROC)SDL_GL_GetProcAddress("glDebugMessageCallback");
-    glDebugMessageCallback((GLDEBUGPROC)glDebugCallback, NULL);
-    // #endif
-
     //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    render_init();
+    renderer_init();
 
     //glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropy);
     //glGetIntegerv(GL_MAX_SAMPLES, &max_supported_samples);
@@ -430,19 +480,19 @@ int window_update() {
     int *rect = window_size();
     int width = rect[0], height = rect[1];
     float ratio = width / (height + 1.f);
-    render_update(width, height);
+    renderer_update(width, height);
     mouse_update();
 
     return 1;
 }
 
-void render_capture( int w, int h, int comp, void *pixels );
+void renderer_capture( int w, int h, int comp, void *pixels );
 
 void window_swap( void **pixels ) {
     int *rect = window_size();
     int w = rect[0], h = rect[1];
 
-    render_post(w, h);
+    renderer_post(w, h);
 
     SDL_GL_SwapWindow(window);
     glFinish();
@@ -467,7 +517,7 @@ void window_swap( void **pixels ) {
 
     if( pixels && !should_quit ) {
         *pixels = (unsigned char *)realloc(*pixels, 4 * w * h);
-        render_capture(w,h,3,*pixels);
+        renderer_capture(w,h,3,*pixels);
     }
 
     if( title[0] ) {

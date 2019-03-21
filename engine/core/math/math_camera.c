@@ -15,8 +15,8 @@ typedef struct camera {
     mat44 view;
 } camera;
 
-API void camera_make(camera *cam, float sensitivity, bool invert_x, bool invert_y);
-API void camera_active(camera *cam, bool enabled);
+API void camera_create(camera *cam, float sensitivity, bool invert_x, bool invert_y);
+API void camera_enable(camera *cam, bool enabled);
 
 API void camera_fps(camera *cam, vec3 keyboard, vec2 mouse);
 API void camera_orbit(camera *cam, float distance, vec2 mouse);
@@ -27,7 +27,7 @@ API void camera_orbit(camera *cam, float distance, vec2 mouse);
 #ifdef CAMERA_C
 #pragma once
 
-void camera_make(camera *cam, float sensitivity, bool invert_x, bool invert_y) {
+void camera_create(camera *cam, float sensitivity, bool invert_x, bool invert_y) {
     cam->position = vec3(0, 0, -3);
 
     cam->right = vec3(1, 0, 0);
@@ -47,7 +47,7 @@ void camera_make(camera *cam, float sensitivity, bool invert_x, bool invert_y) {
     identity44(cam->view);
 }
 
-void camera_active(camera *cam, bool enabled) {
+void camera_enable(camera *cam, bool enabled) {
     cam->enabled = enabled;
 }
 

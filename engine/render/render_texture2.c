@@ -1,6 +1,14 @@
 #ifndef TEXTURE2_H
 #define TEXTURE2_H
 
+typedef struct texture2 {
+    const char *debug;
+
+    int id, width, height;
+    unsigned target; // GL_TEXTURE_2D, 3D, CUBEMAP
+    unsigned format; // pixel format
+} texture2;
+
 API unsigned texture_make_rgb(int texture_width, int texture_height, unsigned char *texture_data);
 API void     texture_patch_rgb(unsigned texture, int x, int y, int w, int h, unsigned char *texture_data);
 

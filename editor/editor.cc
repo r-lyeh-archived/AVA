@@ -635,7 +635,7 @@ void editor_draw() {
         vec3 move_delta = scale3(vec3(vkd-vka,vke-vkc,vkw-vks), move_mult);
 
         static camera cc, *cam = 0;
-        if( !cam ) { cam = &cc; camera_make(cam, 0.25f, false, true ); }
+        if( !cam ) { cam = &cc; camera_create(cam, 0.25f, false, true ); }
         camera_fps( cam, move_delta, look_delta );
         copy44(c->transform, cam->view);
 

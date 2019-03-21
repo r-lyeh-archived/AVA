@@ -1,7 +1,8 @@
 #ifndef MESH_H
 #define MESH_H
-#include <stdint.h>
-#include "render_renderer.c"
+
+//#include <stdint.h>
+//#include "render_renderer_DEPRECATED.c"
 
 /*
 enum {
@@ -112,8 +113,16 @@ typedef struct buffer {
     size_t size;
 } buffer;
 
-API renderable_t *mesh( struct renderable_t* r, int flags, int num_elems, const buffer *buffers );
-API renderable_t *mesh_loadfile( struct renderable_t* r, const char *filename );
+typedef struct mesh_t {
+    int elementCount;
+    int smallIndex;
+    GLuint vao;
+    GLuint ibo16, ibo32;
+    GLuint vbo[16];
+} mesh_t;
+
+API mesh_t *mesh( struct mesh_t* r, int flags, int num_elems, const buffer *buffers );
+API mesh_t *mesh_loadfile( struct mesh_t* r, const char *filename );
 
 #endif
 
@@ -121,18 +130,20 @@ API renderable_t *mesh_loadfile( struct renderable_t* r, const char *filename );
 
 #ifdef MESH_C
 #pragma once
-#include "render_renderer.c"
+//#include "render_renderer.c"
+//#include "render_mesh.c"
 #include <float.h>
-#include "render_mesh.c"
 #include "engine.h" // filesys, math
 
-renderable_t *
-mesh( renderable_t* r, int flags, int num_elems, const buffer *buffers ) {
+
+
+mesh_t *
+mesh( mesh_t* r, int flags, int num_elems, const buffer *buffers ) {
     GLenum E = GL_ELEMENT_ARRAY_BUFFER;
     GLenum V = GL_ARRAY_BUFFER;
     GLenum S = GL_STATIC_DRAW;
 
-    memset(r, 0, sizeof(renderable_t)); // comment?
+    memset(r, 0, sizeof(mesh_t)); // comment?
 
     struct datatype {
         int mask;
@@ -203,25 +214,6 @@ mesh( renderable_t* r, int flags, int num_elems, const buffer *buffers ) {
     return r;
 }
 
-void renderable_draw(renderable_t* r) {
-    glBindVertexArray(r->vao);
-    /**/ if( r->ibo16 ) glDrawElements(GL_TRIANGLES, r->elementCount, GL_UNSIGNED_SHORT, (char*)0); // with index16
-    else if( r->ibo32 ) glDrawElements(GL_TRIANGLES, r->elementCount, GL_UNSIGNED_INT,   (char*)0); // with index32
-    else                glDrawArrays(GL_TRIANGLES, 0, r->elementCount);                             // without index
-    glBindVertexArray(0);
-}
-
-void renderable_destroy( renderable_t* r ) {
-    for( int i = 0; i < sizeof(r->vbo) / sizeof(r->vbo[0]); ++i ) {
-        glDeleteBuffers(1, &r->vbo[i]);
-    }
-    glDeleteBuffers(1, &r->ibo16);
-    glDeleteBuffers(1, &r->ibo32);
-    glDeleteVertexArrays(1, &r->vao);
-
-    memset( r, 0, sizeof(renderable_t));
-}
-
 // -----------------------------------------------------------------------------
 
 int vertex_size( int vertex_type ) {
@@ -244,29 +236,6 @@ int index_size( int index_type ) {
 
 // ----------------------------------------------------------------------------
 
-#if 0 // ok
-
-// @glampert
-void aabb_meshgl(mesh_gl *m, vec3 bbmin, vec3 bbmax ) {
-    bbmin[0] = bbmin[1] = bbmin[2] = FLT_MAX;
-    bbmax[0] = bbmax[1] = bbmax[2] = FLT_MIN;
-
-    float *v = (float *)m->vertex_data;
-    int stride = vertex_size(m->vertex_type);
-
-    int vertex_count = m->vertex_bytes / vertex_size(m->vertex_type);
-
-    for( int i = 0; i < vertex_count; i++ ) {
-        for( int j = 0; j < 3; j++ ) {
-            if( v[j] < bbmin[j] ) bbmin[j] = v[j];
-            if( v[j] > bbmax[j] ) bbmax[j] = v[j];
-        }
-        v += stride;
-    }
-}
-
-#endif
-
 /*
 
 mesh_gl *loadmem_bob_meshgl(mesh_gl *self, const char *data, size_t length) {
@@ -274,7 +243,7 @@ mesh_gl *loadmem_bob_meshgl(mesh_gl *self, const char *data, size_t length) {
 
 */
 
-renderable_t *mesh_loadmem_bob(renderable_t *self, const char *data, size_t length) {
+mesh_t *mesh_loadmem_bob(mesh_t *self, const char *data, size_t length) {
     // .bob format (little-endian):
     // [bytes_vp:4][bytes_vt:4][bytes_vn:4][bytes_idx:4][P3f...][U2f...][N3f...][IDX32...]
     uint32_t bytes_vp = ((uint32_t*)data)[0];
@@ -306,7 +275,7 @@ renderable_t *mesh_loadmem_bob(renderable_t *self, const char *data, size_t leng
     return self;
 }
 
-renderable_t *mesh_loadmem_ibo(renderable_t *self, const char *data, size_t length) {
+mesh_t *mesh_loadmem_ibo(mesh_t *self, const char *data, size_t length) {
 
 #if 1
     // convert p3n3u2 stream (.ibo) to p3u2n3 stream
@@ -353,7 +322,7 @@ renderable_t *mesh_loadmem_ibo(renderable_t *self, const char *data, size_t leng
     return self;
 }
 
-renderable_t *mesh_loadfile(renderable_t *self, const char *pathfile) {
+mesh_t *mesh_loadfile(mesh_t *self, const char *pathfile) {
     return mesh_loadmem_bob(self, file_read_(pathfile), file_size_(pathfile));
 }
 
