@@ -116,10 +116,13 @@ void console(void *userdata) {
     #endif
     }
 
+    /*
     AUTORUN {
         atexit( console_bye );
         detach( console, 0 );
     }
+    */
+
 #endif
 
 #endif
