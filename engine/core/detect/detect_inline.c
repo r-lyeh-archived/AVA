@@ -2,8 +2,6 @@
 
 #pragma once
 
-#if defined(__GNUC__)
-#define INLINE inline
-#elif defined(_MSC_VER)
-#define INLINE __inline
+#if defined _MSC_VER && !defined(__cplusplus)
+#define inline __inline
 #endif
