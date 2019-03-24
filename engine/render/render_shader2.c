@@ -82,6 +82,13 @@ const char *shader_default_fullscreen_vs() {
 #include <stdint.h>
 #include <stdio.h>
 
+#if 0
+    /**/ if (ext == "comp") return glCreateShader(GL_COMPUTE_SHADER);
+    else if (ext == "frag") return glCreateShader(GL_FRAGMENT_SHADER);
+    else if (ext == "geom") return glCreateShader(GL_GEOMETRY_SHADER);
+    else if (ext == "vert") return glCreateShader(GL_VERTEX_SHADER);
+#endif
+
 static GLuint shader_load(GLenum type, const char *source) {
     GLuint shader = glCreateShader(type);
     if (shader) {

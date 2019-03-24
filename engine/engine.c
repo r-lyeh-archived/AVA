@@ -108,11 +108,6 @@ int quit() {
     return 1;
 }
 
-// #ifdef _MSC_VER
-// #define __thread __declspec(thread)
-// #else
-// #define __inline inline
-// #endif
 #include <stdarg.h>
 #include <assert.h>
 static THREAD_LOCAL char vl_buf[2048];
