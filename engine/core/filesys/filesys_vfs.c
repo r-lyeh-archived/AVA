@@ -7,7 +7,8 @@
 #define VFS_H
 
 API void            vfs_import( const char *pathmask );
-API const char *    vfs_read( const char *file );
+API char *          vfs_read( const char *file );
+API const char *    vfs_find( const char *file );
 //API int             vfs_size( const char *file );
 //API int             vfs_exists( const char *file );
 
@@ -39,7 +40,7 @@ static bool append( const char *str ) {
 void vfs_import( const char *pathmask ) {
     dir_ls( pathmask, append );
 }
-const char *vfs_read( const char *file ) {
+const char *vfs_find( const char *file ) {
     char *found = dir_registry ? strstr(dir_registry, va("%s\n", file)) : 0;
     if( found ) {
         for( char *back = found; back > dir_registry; --back ) {
@@ -50,6 +51,9 @@ const char *vfs_read( const char *file ) {
     }
     printf("error: cannot find '%s' in '%s'\n", file, dir_registry ? dir_registry : "");
     return file;
+}
+char *vfs_read( const char *file ) {
+    return file_read( vfs_find(file) );
 }
 #endif
 
