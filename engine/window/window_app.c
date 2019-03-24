@@ -215,16 +215,17 @@ void glDebug(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int
     const char * GL_ERROR_SEVERITY[] = { "HIGH", "MEDIUM", "LOW", "NOTIFICATION" };
     const char * GL_ERROR_TYPE[] = { "ERROR", "DEPRECATED BEHAVIOR", "UNDEFINED DEHAVIOUR", "PORTABILITY", "PERFORMANCE", "OTHER" };
 
+	severity = severity == GL_DEBUG_SEVERITY_NOTIFICATION ? 3 : severity - GL_DEBUG_SEVERITY_HIGH;
+	source = source - GL_DEBUG_SOURCE_API;
+	type = type - GL_DEBUG_TYPE_ERROR;
+
     SDL_Log( "%s [ID: %u]\n", message, id );
-    /* "[SEVERITY: %s] [SOURCE: %s] [TYPE: %s]", GL_ERROR_SEVERITY[
-          severity != GL_DEBUG_SEVERITY_NOTIFICATION ?
-          severity  - GL_DEBUG_SEVERITY_HIGH : 3
-        ],
-        GL_ERROR_SOURCE[source - GL_DEBUG_SOURCE_API],
-        GL_ERROR_TYPE[type - GL_DEBUG_TYPE_ERROR], */
+    /* "[SEVERITY: %s] [SOURCE: %s] [TYPE: %s]", GL_ERROR_SEVERITY[severity],
+        GL_ERROR_SOURCE[source],
+        GL_ERROR_TYPE[type], */
 
 #ifdef _WIN32
-	if (IsDebuggerPresent()) {
+	if (type <= 2 && debugging()) {
 		breakpoint();
 	}
 #endif
