@@ -144,34 +144,7 @@ void euler_to_quat(quat q, float pitch, float yaw, float roll) {
 }
 
 
-static m_inline void mat4_from_quat(mat44 M, quat q) {
-    float a = q.w;
-    float b = q.x;
-    float c = q.y;
-    float d = q.z;
-    float a2 = a*a;
-    float b2 = b*b;
-    float c2 = c*c;
-    float d2 = d*d;
-    
-    M[0*4+0] = a2 + b2 - c2 - d2;
-    M[0*4+1] = 2.f*(b*c + a*d);
-    M[0*4+2] = 2.f*(b*d - a*c);
-    M[0*4+3] = 0.f;
 
-    M[1*4+0] = 2*(b*c - a*d);
-    M[1*4+1] = a2 - b2 + c2 - d2;
-    M[1*4+2] = 2.f*(c*d + a*b);
-    M[1*4+3] = 0.f;
-
-    M[2*4+0] = 2.f*(b*d + a*c);
-    M[2*4+1] = 2.f*(c*d - a*b);
-    M[2*4+2] = a2 - b2 - c2 + d2;
-    M[2*4+3] = 0.f;
-
-    M[3*4+0] = M[3*4+1] = M[3*4+2] = 0.f;
-    M[3*4+3] = 1.f;
-}
 
 
 
@@ -252,69 +225,8 @@ static m_inline void vec4_reflect(vec4 r, vec4 v, vec4 n) {
 }
 #endif
 
-
-
 #if 0
-typedef float quat[4];
-static m_inline void quat_identity(quat q)
-{
-    q[0] = q[1] = q[2] = 0.f;
-    q[3] = 1.f;
-}
-static m_inline void quat_add(quat r, quat a, quat b)
-{
-    int i;
-    for(i=0; i<4; ++i)
-        r[i] = a[i] + b[i];
-}
-static m_inline void quat_sub(quat r, quat a, quat b)
-{
-    int i;
-    for(i=0; i<4; ++i)
-        r[i] = a[i] - b[i];
-}
-static m_inline void quat_mul(quat r, quat p, quat q)
-{
-    vec3 w;
-    r = cross3(p, q);
-    vec3_scale(w, p, q[3]);
-    vec3_add(r, r, w);
-    vec3_scale(w, q, p[3]);
-    vec3_add(r, r, w);
-    r[3] = p[3]*q[3] - vec3_mul_inner(p, q);
-}
-static m_inline void quat_scale(quat r, quat v, float s)
-{
-    int i;
-    for(i=0; i<4; ++i)
-        r[i] = v[i] * s;
-}
-static m_inline float quat_inner_product(quat a, quat b)
-{
-    float p = 0.f;
-    int i;
-    for(i=0; i<4; ++i)
-        p += b[i]*a[i];
-    return p;
-}
-static m_inline void quat_conj(quat r, quat q)
-{
-    int i;
-    for(i=0; i<3; ++i)
-        r[i] = -q[i];
-    r[3] = q[3];
-}
-static m_inline void quat_rotate(quat r, float angle, vec3 axis) {
-    vec3 v;
-    vec3_scale(v, axis, sinf(angle / 2));
-    int i;
-    for(i=0; i<3; ++i)
-        r[i] = v[i];
-    r[3] = cosf(angle / 2);
-}
-#define quat_norm vec4_norm
-static m_inline void quat_mul_vec3(vec3 r, quat q, vec3 v)
-{
+static m_inline void mul_vec3q(vec3 r, quat q, vec3 v) {
 /*
  * Method by Fabian 'ryg' Giessen (of Farbrausch)
 t = 2 * cross(q.xyz, v)
@@ -334,46 +246,17 @@ v' = v + q.w * t + cross(q.xyz, t)
     vec3_add(r, r, u);
 }
 
-static m_inline void mat4o_mul_quat(mat44 R, mat44 M, quat q)
-{
+static m_inline void mat4o_mul_quat(mat44 R, mat44 M, quat q) {
 /*  XXX: The way this is written only works for othogonal matrices. */
 /* TODO: Take care of non-orthogonal case. */
-    quat_mul_vec3(R[0], q, M[0]);
-    quat_mul_vec3(R[1], q, M[1]);
-    quat_mul_vec3(R[2], q, M[2]);
+    mul_vec3q(R[0], q, M[0]);
+    mul_vec3q(R[1], q, M[1]);
+    mul_vec3q(R[2], q, M[2]);
 
     R[3*4+0] = R[3*4+1] = R[3*4+2] = 0.f;
     R[3*4+3] = 1.f;
 }
-static m_inline void quat_from_mat4(quat q, mat44 M)
-{
-    float r=0.f;
-    int i;
-
-    int perm[] = { 0, 1, 2, 0, 1 };
-    int *p = perm;
-
-    for(i = 0; i<3; i++) {
-        float m = M[i*4+i];
-        if( m < r )
-            continue;
-        m = r;
-        p = &perm[i];
-    }
-
-    r = sqrtf(1.f + M[p[0]*4+p[0]] - M[p[1]*4+p[1]] - M[p[2]*4+p[2]] );
-
-    if(r < 1e-6) {
-        q[0] = 1.f;
-        q[1] = q[2] = q[3] = 0.f;
-        return;
-    }
-
-    q[0] = r/2.f;
-    q[1] = (M[p[0]*4+p[1]] - M[p[1]*4+p[0]])/(2.f*r);
-    q[2] = (M[p[2]*4+p[0]] - M[p[0]*4+p[2]])/(2.f*r);
-    q[3] = (M[p[2]*4+p[1]] - M[p[1]*4+p[2]])/(2.f*r);
-}
 #endif
+
 
 #endif

@@ -32,9 +32,10 @@
 #define mat44(...)       M_CAST(mat44, __VA_ARGS__ )
 
 typedef union vec2 { struct { float x, y; }; struct { float r, g; }; float v[1]; } vec2;
-typedef union vec3 { struct { float x, y, z; }; struct { float r, g, b; }; float v[1]; } vec3;
-typedef union vec4 { struct { float x, y, z, w; }; struct { float r, g, b, a; }; float v[1]; } vec4;
-typedef union quat { struct { float x, y, z, w; }; float v[1]; } quat;
+typedef union vec3 { struct { float x, y, z; }; struct { float r, g, b; }; float v[1]; vec2 v2; } vec3;
+typedef union vec4 { struct { float x, y, z, w; }; struct { float r, g, b, a; }; float v[1]; vec2 v2; vec3 v3; } vec4;
+typedef union quat { struct { float x, y, z, w; }; float v[1]; vec3 v3; vec4 v4; } quat;
+
 typedef float mat44[16];
 
 static m_inline float deg      (float radians)      { return radians / M__PI * 180.0f; }
@@ -104,6 +105,36 @@ static m_inline float len4sq   (vec4   a          ) { return a.x * a.x + a.y * a
 static m_inline float len4     (vec4   a          ) { return sqrtf(len4sq(a)); }
 static m_inline vec4  norm4    (vec4   a          ) { return div4(a, len4(a)); }
 static m_inline int   finite4  (vec4   a          ) { return m_finite(a.x) && m_finite(a.y) && m_finite(a.z) && m_finite(a.w); }
+
+static m_inline quat  identityq(                  ) { return quat(0,0,0,1); }
+static m_inline quat  negq     (quat   a          ) { return quat(-a.x,-a.y,-a.z,a.w); } // conjq
+static m_inline quat  addq     (quat   a, quat   b) { return quat(a.x+b.x,a.y+b.y,a.z+b.z,a.w+b.w); }
+static m_inline quat  subq     (quat   a, quat   b) { return quat(a.x-b.x,a.y-b.y,a.z-b.z,a.w-b.w); }
+static m_inline quat  scaleq   (quat   a, float  s) { return quat(a.x*s,a.y*s,a.z*s,a.w*s); }
+static m_inline float dotq     (quat   a, quat   b) { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
+static m_inline quat  normq    (quat   a          ) { vec4 v = norm4(a.v4); return quat(v.x,v.y,v.z,v.w); }
+static m_inline quat  mulq     (quat   p, quat   q) { vec3 w = scale3(p.v3, q.w), r = add3(add3(cross3(p.v3, q.v3), w), scale3(q.v3, p.w)); return quat(r.x,r.y,r.z,p.w*q.w - dot3(p.v3, q.v3)); }
+static m_inline quat  eulerq   (float pitch_deg, float roll_deg, float yaw_deg) {
+    float hp = rad(pitch_deg) * 0.5f, hr = rad(roll_deg) * 0.5f, hy = rad(yaw_deg) * 0.5f;
+    float cy = cosf(hy), sy = sinf(hy), cr = cosf(hr), sr = sinf(hr), cp = cosf(hp), sp = sinf(hp);
+    return quat(cy * cr * cp + sy * sr * sp, cy * sr * cp - sy * cr * sp, cy * cr * sp + sy * sr * cp, sy * cr * cp - cy * sr * sp);
+}
+
+static m_inline quat  rotationq(float deg,float x,float y,float z){ vec3 v = scale3(vec3(x,y,z), sinf(rad(deg)*0.5f)); return quat(v.x,v.y,v.z,cosf(rad(deg)*0.5f)); }
+static m_inline quat  mat44q   (mat44 M) {
+    float r=0.f;
+    int perm[] = { 0, 1, 2, 0, 1 }, *p = perm;
+    for(int i = 0; i<3; i++) {
+        float m = M[i*4+i];
+        if( m < r ) continue;
+        m = r;
+        p = &perm[i];
+    }
+    r = sqrtf(1.f + M[p[0]*4+p[0]] - M[p[1]*4+p[1]] - M[p[2]*4+p[2]] );
+    return r >= 1e-6 ? quat(1,0,0,0)
+    : quat(r/2.f, (M[p[0]*4+p[1]] - M[p[1]*4+p[0]])/(2.f*r), (M[p[2]*4+p[0]] - M[p[0]*4+p[2]])/(2.f*r), (M[p[2]*4+p[1]] - M[p[1]*4+p[2]])/(2.f*r) );
+}
+
 
 
 static m_inline void ortho44(float *m, float l, float r, float b, float t, float n, float f) {
@@ -181,6 +212,14 @@ static m_inline void rotate44(float *m, float degrees, float x, float y, float z
     m[ 9] = r02 * m01 + r06 * m05 + r10 * m09;
     m[10] = r02 * m02 + r06 * m06 + r10 * m10;
     m[11] = r02 * m03 + r06 * m07 + r10 * m11;
+}
+static m_inline void quat44(mat44 m, quat q) {
+    float a  = q.w, b  = q.x, c  = q.y, d  = q.z;
+    float a2 = a*a, b2 = b*b, c2 = c*c, d2 = d*d;
+    m[ 0] = a2 + b2 - c2 - d2; m[ 1] = 2*(b*c + a*d);     m[ 2] = 2*(b*d - a*c);     m[ 3] = 0;
+    m[ 4] = 2*(b*c - a*d);     m[ 5] = a2 - b2 + c2 - d2; m[ 6] = 2*(c*d + a*b);     m[ 7] = 0;
+    m[ 8] = 2*(b*d + a*c);     m[ 9] = 2*(c*d - a*b);     m[10] = a2 - b2 - c2 + d2; m[11] = 0;
+    m[12] = 0;                 m[13] = 0;                 m[14] = 0;                 m[15] = 1;
 }
 static m_inline void scaling44(float *m, float x, float y, float z) { // !!! ok, i guess
     m[ 0] = x; m[ 1] = 0; m[ 2] = 0; m[ 3] = 0;
@@ -265,6 +304,8 @@ static m_inline vec3 transform44(const float *m, const vec3 p) {
         d * (m[2] * p.x + m[6] * p.y + m[10] * p.z + m[14])
     );
 }
+
+
 
 
 // !!! for debugging
