@@ -372,9 +372,9 @@ int window_create( float zoom, int flags ) {
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaa_samples);
     }
 
-    /*
-    SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
-    */
+    if(1) {
+        SDL_GL_SetAttribute(SDL_GL_FRAMEBUFFER_SRGB_CAPABLE, 1);
+    }
 
     /*
     glfwWindowHint(GLFW_RED_BITS, desktop->redBits);
@@ -515,6 +515,9 @@ void window_swap( void **pixels ) {
             */
         }
     }
+
+    // input
+    memcpy(scancodes, SDL_GetKeyboardState(NULL), SDL_NUM_SCANCODES * sizeof(uint8_t));
 
     if( pixels && !should_quit ) {
         *pixels = (unsigned char *)realloc(*pixels, 4 * w * h);

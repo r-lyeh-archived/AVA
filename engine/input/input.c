@@ -8,7 +8,7 @@
 // instead of 'DX', 'RX', 'CL', 'LL' etc...
 
 API void mouse_update();
-API double mouse(int key);   // 'X', 'Y', 'L', 'M', 'R', 'show', 'hide',
+API float mouse(int key);   // 'X', 'Y', 'L', 'M', 'R', 'show', 'hide',
 API void set_mouse(int key); // 'show', 'hide'
 
 /*
@@ -18,7 +18,7 @@ API void set_mouse(int key); // 'show', 'hide'
    'PAUS', 'PGDN', 'PGUP', 'PRNT', 'RGHT', 'SCRL', 'LSHF', 'RSHF', 'SPC' , 'LSUP', 'RSUP',
    'TAB' , 'TICK', 'UP'  , 
 */
-API int key( int key );
+API float key( int key );
 
 
 
@@ -28,7 +28,7 @@ API int key( int key );
 
 #include "../window/window_app.c"
 
-static double mx, my, mb[3], mcursor = 1;
+static float mx, my, mb[3], mcursor = 1;
 static int mhas_imgui = 0;
 
 
@@ -57,7 +57,7 @@ void mouse_update() { // $
 // @todo: repeat(key, 'X', 10), hit(key, 'X'), drop(key, 'X')
 // @todo: if(click2(mouse, 'X'))
 // instead of 'DX', 'RX', 'CL', 'LL' etc...
-double mouse(int key) { // $
+float mouse(int key) { // $
     switch(key) {
         default: return 0;
         break; case 'X': return mx;
@@ -94,7 +94,9 @@ void set_mouse(int key) { // $
     }
 }
 
-int key( int key ) { // $
+uint8_t scancodes[SDL_NUM_SCANCODES] = {0};
+
+float key( int key ) { // $
     switch(key) {
         break; case    '*': key = SDL_SCANCODE_KP_MULTIPLY;
         break; case    '+': key = SDL_SCANCODE_KP_PLUS;
@@ -144,20 +146,22 @@ int key( int key ) { // $
         break; case 'TICK': case '\'': key = SDL_SCANCODE_APOSTROPHE;
         break; case 'UP'  : key = SDL_SCANCODE_UP;
         default:
-        /**/ if( key >=    '0' && key <=    '9' ) key +=-   '0' + SDL_SCANCODE_0;
-        else if( key >=    'a' && key <=    'z' ) key +=-   'a' + SDL_SCANCODE_A;
-        else if( key >=    'A' && key <=    'Z' ) key +=-   'A' + SDL_SCANCODE_A;
-        else if( key >=   'F1' && key <=   'F9' ) key +=-  'F1' + SDL_SCANCODE_F1;
-        else if( key >=  'F10' && key <=  'F19' ) key +=- 'F10' + SDL_SCANCODE_F10;
-        else if( key >=  'F20' && key <=  'F25' ) key +=- 'F20' + SDL_SCANCODE_F20;
-        else if( key >= 'PAD0' && key <= 'PAD9' ) key +=-'PAD0' + SDL_SCANCODE_KP_0;
+        /**/ if( key >=    '1' && key <=    '9' ) key = key -   '1' + SDL_SCANCODE_0;
+        else if( key >=    'a' && key <=    'z' ) key = key -   'a' + SDL_SCANCODE_A;
+        else if( key >=    'A' && key <=    'Z' ) key = key -   'A' + SDL_SCANCODE_A;
+        else if( key >=   'F1' && key <=   'F9' ) key = key -  'F1' + SDL_SCANCODE_F1;
+        else if( key >=  'F10' && key <=  'F19' ) key = key - 'F10' + SDL_SCANCODE_F10;
+        else if( key >=  'F20' && key <=  'F25' ) key = key - 'F20' + SDL_SCANCODE_F20;
+        else if( key >= 'PAD1' && key <= 'PAD9' ) key = key -'PAD1' + SDL_SCANCODE_KP_0;
+        else if( key == '0' ) key = SDL_SCANCODE_0;
+        else if( key == 'PAD0') key = SDL_SCANCODE_KP_0;
         else return 0;
     }
 /*
     GLFW_KEY_WORLD_1            161 // non-US #1
     GLFW_KEY_WORLD_2            162 // non-US #2
 */
-    return !!SDL_GetKeyboardState(NULL)[key];
+    return !!scancodes[key]; // !!SDL_GetKeyboardState(NULL)[key];
 }
 
 // ----------------------------------------------------------------------------
