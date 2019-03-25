@@ -174,7 +174,7 @@ int main() {
     ALLOCA(image, textures_mem, mesh_texture_names_count);
 
     for (int i = 1; i < mesh_texture_names_count; i += 1) {
-        image_loadfile( &textures_mem[i], vfs_read(mesh_texture_names[i]), IMAGE_RGBA | IMAGE_U8);
+        image_loadfile( &textures_mem[i], vfs_find(mesh_texture_names[i]), IMAGE_RGBA | IMAGE_U8);
     }
 
     ALLOCA(void *, textures, SUBMESH_COUNT);
