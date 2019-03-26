@@ -8,17 +8,28 @@
 #include <string.h>
 #include <stdlib.h>
 
+/*
+#define array(T) \
+    struct { T* values; T *ptr, tmp; }
+*/
+
+#ifdef __cplusplus
+#define array_cast(x) (decltype(x))
+#else
+#define array_cast(x) (void *)
+#endif
+
 #define array(t) t*
 #define array_init(t) ( (t) = 0 )
-#define array_resize(t, n) ( memset( (t) = vrealloc((t), (n) * sizeof(0[t]) ), 0, (n) * sizeof(0[t]) ) )
-#define array_push(t, i) ( (t) = vrealloc((t), (array_count(t) + 1) * sizeof(0[t]) ), (t)[ array_count(t) - 1 ] = (i) )
+#define array_resize(t, n) ( memset( (t) = array_cast(t) vrealloc((t), (n) * sizeof(0[t]) ), 0, (n) * sizeof(0[t]) ) )
+#define array_push(t, i) ( (t) = array_cast(t) vrealloc((t), (array_count(t) + 1) * sizeof(0[t]) ), (t)[ array_count(t) - 1 ] = (i) )
 #define array_back(t) ( (t) ? &(t)[ vsize(t) - 1 ] : NULL )
 #define array_data(t) (t)
 #define array_at(t,i) (t[i])
 #define array_count(t) (int)( (t) ? vsize(t) / sizeof(0[t]) : 0u )
 #define array_bytes(t) (int)( (t) ? vsize(t) : 0u )
 #define array_sort(t, cmpfunc) qsort( t, array_count(t), sizeof(t[0]), cmpfunc )
-#define array_free(t) ( vrealloc((t), 0), (t) = 0 )
+#define array_free(t) ( array_cast(t) vrealloc((t), 0), (t) = 0 )
 
 #define array_search(t, key, cmpfn) /* requires sorted array beforehand */ \
     bsearch(&key, t, array_count(t), sizeof(t[0]), cmpfn )
