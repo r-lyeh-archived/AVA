@@ -23,7 +23,7 @@ size_t vsize( void *p ) {
 void *vresize( void *p, size_t sz ) {
     size_t *ret = (size_t*)p - 2;
     if( !p ) {
-        ret = REALLOC( 0, sizeof(size_t) * 2 + sz );
+        ret = (size_t*)REALLOC( 0, sizeof(size_t) * 2 + sz );
         ret[0] = sz;
         ret[1] = 0;
     } else {
@@ -33,7 +33,7 @@ void *vresize( void *p, size_t sz ) {
             ret[0] = sz;
             ret[1] = ocp - (sz - osz);
         } else {
-            ret = REALLOC( ret, sizeof(size_t) * 2 + sz * 1.75 );
+            ret = (size_t*)REALLOC( ret, sizeof(size_t) * 2 + sz * 1.75 );
             ret[0] = sz;
             ret[1] = (size_t)(sz * 1.75) - sz;
         }

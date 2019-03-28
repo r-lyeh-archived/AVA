@@ -113,7 +113,7 @@ void benchmark() {
         assert( v && *v == i + 1 );
     }
 
-    double t = (double)(clock() - t0) / CLOCKS_PER_SEC;
+    double t = (clock() - t0) / (double)CLOCKS_PER_SEC;
 
     printf("[0]=%d\n", *hashmap_find(&m, 0));
     printf("[N-1]=%d\n", *hashmap_find(&m, N-1));

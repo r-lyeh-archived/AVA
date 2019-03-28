@@ -8,6 +8,7 @@
 #define CMP_C
 #define HASH_C
 #define HASHMAP_C
+#define MAP_C
 #endif
 
 #ifndef API
@@ -18,3 +19,4 @@
 #include "struct_hash.c"
 #include "struct_hashmap.c"
 #include "struct_cmp.c"
+#include "struct_map.c"
