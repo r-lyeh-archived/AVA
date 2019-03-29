@@ -25,10 +25,10 @@
 #define M_CAST(type, ...)  ((type){ __VA_ARGS__ } )
 #endif
 
-#define vec2(x, y      ) M_CAST(vec2, (x), (y)          )
-#define vec3(x, y, z   ) M_CAST(vec3, (x), (y), (z),    )
-#define vec4(x, y, z, w) M_CAST(vec4, (x), (y), (z), (w))
-#define quat(x, y, z, w) M_CAST(quat, (x), (y), (z), (w))
+#define vec2(x, y      ) M_CAST(vec2, (float)(x), (float)(y)                        )
+#define vec3(x, y, z   ) M_CAST(vec3, (float)(x), (float)(y), (float)(z),           )
+#define vec4(x, y, z, w) M_CAST(vec4, (float)(x), (float)(y), (float)(z), (float)(w))
+#define quat(x, y, z, w) M_CAST(quat, (float)(x), (float)(y), (float)(z), (float)(w))
 #define mat44(...)       M_CAST(mat44, __VA_ARGS__ )
 
 typedef union vec2 { struct { float x, y; }; struct { float r, g; }; float v[1]; } vec2;
@@ -333,6 +333,15 @@ static m_inline vec3 transform44(const float *m, const vec3 p) {
         d * (m[2] * p.x + m[6] * p.y + m[10] * p.z + m[14])
     );
 }
+
+static m_inline vec4 transform444(const float *m, const vec4 p) {
+    float x = (m[0] * p.x) + (m[4] * p.y) + (m[ 8] * p.z) + m[12]; // p.w (vec4) assumed to be 1
+    float y = (m[1] * p.x) + (m[5] * p.y) + (m[ 9] * p.z) + m[13];
+    float z = (m[2] * p.x) + (m[6] * p.y) + (m[10] * p.z) + m[14];
+    float w = (m[3] * p.x) + (m[7] * p.y) + (m[11] * p.z) + m[15]; // rw
+    return vec4(x,y,z,w);
+}
+
 
 
 

@@ -54,9 +54,11 @@ void viewport_select(int slot, vec2 split) {
 
     // top-left
     glViewport(x, screen_height-y-h, w, h); 
+    // glOrtho(0,w,h,0,0,1);
 
     // bottom-left
     // glViewport(x, y, w, h)
+    // glOrtho(0,w,0,h,0,1);
 
     // ideas
     // if( flags & (TOPLEFT|UNIT))          ortho44(proj, -1, +1, -1, +1, -1, 1 );       // 0,0 top-left, 1-1 bottom-right
