@@ -339,8 +339,15 @@ static m_inline vec3 transform44(const float *m, const vec3 p) {
 
 // !!! for debugging
 #include <stdio.h>
-static m_inline void print44( float *m ) {
-    for(int i = 0; i < 4; ++i)
-        printf("%5.2f, %5.2f, %5.2f, %5.2f\n", m[i*4+0], m[i*4+1], m[i*4+2], m[i*4+3]);
+static m_inline void print_( float *m, int ii, int jj ) {
+    for( int j = 0; j < jj; ++j ) {
+        for( int i = 0; i < ii; ++i ) printf("%8.3f", *m++);
+        puts("");
+    }
     puts("---");
 }
+static m_inline void print2( vec2 v ) { print_(&v.x,2,1); }
+static m_inline void print3( vec3 v ) { print_(&v.x,3,1); }
+static m_inline void print4( vec4 v ) { print_(&v.x,4,1); }
+static m_inline void printq( quat q ) { print_(&q.x,4,1); }
+static m_inline void print44( float *m ) { print_(m,4,4); }
