@@ -9,8 +9,6 @@
 API void            vfs_import( const char *pathmask );
 API char *          vfs_read( const char *file );
 API const char *    vfs_find( const char *file );
-//API int             vfs_size( const char *file );
-//API int             vfs_exists( const char *file );
 
 #endif
 

@@ -28,8 +28,8 @@ API void panic( const char *description );
 #ifdef ASSERT_DEMO
 #pragma once
 int main() {
-	ASSERT(1 < 2);
-	ASSERT(1 > 2, "Assert demo: %d bigger than %d?", 1, 2);
+    ASSERT(1 < 2);
+    ASSERT(1 > 2, "Assert demo: %d bigger than %d?", 1, 2);
 }
 #endif
 
