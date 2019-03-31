@@ -22,6 +22,8 @@
 #define TYPES_C
 #endif
 
+#include "detect_assert.c"
+
 #include "detect_api.c"
 #include "detect_autorun.c"
 #include "detect_bits.c"
