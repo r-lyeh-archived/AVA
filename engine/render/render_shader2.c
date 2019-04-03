@@ -4,7 +4,7 @@
 // shader
 
 // API unsigned shader( const char *vert, const char *frag );
-API unsigned shader2(const char *vp, const char *fp, int num_attributes, const char **attributes);
+API unsigned shader2(const char *vp, const char *fp, const char *csv_attributes);
 
 API void shader_bind_int1(unsigned program, const char *uniform, int value);
 API void shader_bind_texture(unsigned program, unsigned texture, unsigned unit);
@@ -111,7 +111,7 @@ static GLuint shader_load(GLenum type, const char *source) {
     return 0;
 }
 
-unsigned shader2(const char *vp, const char *fp, int num_attributes, const char **attributes) {
+unsigned shader2(const char *vp, const char *fp, const char *attributes) {
     GLuint vertexShader = shader_load(GL_VERTEX_SHADER, vp);
     if( vertexShader ) {
         GLuint fragmentShader = shader_load(GL_FRAGMENT_SHADER, fp);
@@ -121,8 +121,16 @@ unsigned shader2(const char *vp, const char *fp, int num_attributes, const char 
                 glAttachShader(program, vertexShader);
                 glAttachShader(program, fragmentShader);
                 
-                for (int i = 0; i < num_attributes; i++) {
-                    glBindAttribLocation(program, i, attributes[i]);
+                if( attributes ) {
+                    char attribute[128] = {0};
+                    int i = 0;
+                    for( const char *substr = strstr(attributes, ","); substr ; ) {
+                        const char *nextstr = substr ? strstr(substr+1, ",") : 0;
+                        sprintf(attribute, "%.*s", nextstr ? (int)(nextstr - substr) : (int)strlen(substr), substr );
+                        substr = nextstr;
+
+                        glBindAttribLocation(program, i++, attribute);
+                    }
                 }
 
                 glLinkProgram(program);
