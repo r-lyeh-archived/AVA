@@ -11,13 +11,18 @@
 //
 // Usage:
 //
-//     fbo f = fbo_create(true, true);
-//     f.attach_color(texture);
+//     fbo f; fbo_create(&f, 0);
+//     fbo_attach_color(&f, texture, 0,0);
 //
-//     f.bind();
+//     fbo_bind(&f);
 //     // draw stuff
-//     f.unbind();
+//     fbo_unbind(&f);
 //
+
+enum fbo_flags {
+    FBO_DONT_AUTODEPTH,
+    FBO_DONT_AUTORESIZE,
+};
 
 typedef struct fbo {
     unsigned id;
@@ -31,7 +36,7 @@ typedef struct fbo {
 
 // 
 // 
-API fbo* fbo_create(fbo*, bool autoDepth /*= true*/, bool resizeViewport /*= true*/);
+API fbo* fbo_create(fbo*, int flags);
 API void fbo_destroy(fbo*);
 
 // Draw to texture 2D in the indicated attachment location (or a 2D layer of a 3D texture).
@@ -49,10 +54,10 @@ API void fbo_unbind(fbo*);
 #pragma once
 
 
-void fbo_create(fbo *f, bool autoDepth, bool resizeViewport) {
+void fbo_create(fbo *f, int flags) {
     fbo i = {0};
-    i.autoDepth = autoDepth;
-    i.resizeViewport = resizeViewport;
+    i.autoDepth = flags & FBO_DONT_AUTODEPTH ? 0 : 1;
+    i.resizeViewport = flags & FBO_DONT_AUTORESIZE ? 0 : 1;
     glGenFramebuffers(1, &i.id);
     glGenRenderbuffers(1, &i.renderbuffer);
     *f = i;
@@ -108,7 +113,7 @@ void fbo_attach_color(fbo *f, texture2 texture, unsigned attachment, unsigned la
             f->renderbufferWidth = f->newViewport[2];
             f->renderbufferHeight = f->newViewport[3];
             glBindRenderbuffer(GL_RENDERBUFFER, f->renderbuffer);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT32, f->renderbufferWidth, f->renderbufferHeight);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24/*32*/, f->renderbufferWidth, f->renderbufferHeight);
             glBindRenderbuffer(GL_RENDERBUFFER, 0);
         }
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, f->renderbuffer);
