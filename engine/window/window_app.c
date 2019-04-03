@@ -211,6 +211,14 @@ void trap_gl() {
 #else
 
 void glDebug(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, void * userdata) {
+
+    // whitelisted codes
+    if( id == 131154 ) return; // Pixel-path performance warning: Pixel transfer is synchronized with 3D rendering.
+    // if( id == 131169 ) return;
+    if( id == 131185 ) return; // Buffer object 2 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations
+    // if( id == 131204 ) return;
+    // if( id == 131218 ) return;
+
     const char * GL_ERROR_SOURCE[] = { "API", "WINDOW SYSTEM", "SHADER COMPILER", "THIRD PARTY", "APPLICATION", "OTHER" };
     const char * GL_ERROR_SEVERITY[] = { "HIGH", "MEDIUM", "LOW", "NOTIFICATION" };
     const char * GL_ERROR_TYPE[] = { "ERROR", "DEPRECATED BEHAVIOR", "UNDEFINED DEHAVIOUR", "PORTABILITY", "PERFORMANCE", "OTHER" };
@@ -225,9 +233,9 @@ void glDebug(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int
         GL_ERROR_TYPE[type], */
 
 #ifdef _WIN32
-    if (type <= 2 && debugging()) {
+    /* if (type <= 2 && debugging()) {
         breakpoint();
-    }
+    } */
 #endif
 }
 
@@ -288,6 +296,9 @@ void window_opengl(void) {
     typedef void (*GLDEBUGPROC)(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, const void * userParam);
     typedef void (*GLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC callback, const void * userParam);
     void (*glDebugMessageCallback)(GLDEBUGPROC callback, const void * userParam) = (GLDEBUGMESSAGECALLBACKPROC)SDL_GL_GetProcAddress("glDebugMessageCallback");
+    // glEnable(GL_DEBUG_OUTPUT);
+    // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    // glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, /*NULL*/0, GL_TRUE);
     glDebugMessageCallback((GLDEBUGPROC)glDebug, NULL);
     // #endif
 }
