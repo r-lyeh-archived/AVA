@@ -14,10 +14,6 @@
 #define OpenGL43 "#version 430 core\n"
 #define OpenGL44 "#version 440 core\n"
 
-// shader
-API GLuint shader( const char *vert, const char *frag );
-API void shader_bind( unsigned shader );
-
 typedef GLuint Shader;
 typedef GLuint Buffer;
 typedef GLuint VAO;
@@ -176,110 +172,6 @@ API Attribute get_attribute_location( Shader p, const char *name );
 
 #ifdef SHADER_C
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "render_opengl.c"
-#include "../engine.h" // realloc
-
-static
-void dump_shader_log( const char *source ) {
-    // dump source with line numbers
-    int line = 1;
-    const char *from = source, *end = strchr(from, '\n');
-    while( end ) {
-        fprintf(stderr, "%04d:%.*s\n", line++, (int)(end - from), from);
-        end = strchr( from = end + 1, '\n');
-    }
-    fprintf(stderr, "%04d:%s\n", line++, from);
-}
-
-static
-GLuint shader_generate( GLenum type, const char *source ) {
-    GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, (const char **)&source, NULL);
-    glCompileShader(shader);
-
-    GLint statuslen = GL_FALSE;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &statuslen);
-    if( statuslen == GL_FALSE ) {
-        //GLchar *logbuf = 0; // pros: clean + standard, cons: slow if compiling thousand of shaders?
-        //static GLchar *logbuf = 0; // cons: faster, cons: no MT + 1 memleak.
-        char logbuf[2048] = { 0 }; // enough?
-
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &statuslen);
-        //logbuf = (GLchar*)REALLOC(logbuf, statuslen);
-        glGetShaderInfoLog(shader, statuslen, NULL, logbuf);
-
-        // dump log with line numbers
-        dump_shader_log( source );
-        fprintf(stderr, "ERROR: %s shader:\n%s\n", type == GL_VERTEX_SHADER ? "Vertex" : "Fragment", logbuf);
-
-        //FREE(buf);
-        shader = 0;
-    }
-
-    return shader;
-}
-
-GLuint shader(const char *vs, const char *fs) {
-    GLuint vert = shader_generate(GL_VERTEX_SHADER, vs);
-    GLuint frag = shader_generate(GL_FRAGMENT_SHADER, fs);
-  //GLuint geom = shader_generate(GL_GEOMETRY_SHADER, gs);
-    GLuint program = 0;
-
-    if( vert && frag ) {
-        program = glCreateProgram();
-
-        glAttachShader(program, vert);
-        glAttachShader(program, frag);
-        // glAttachShader(program, geom);
-
-        glLinkProgram(program);
-
-        GLint status = GL_FALSE, length;
-        glGetProgramiv(program, GL_LINK_STATUS, &status);
-        if (status == GL_FALSE) {
-            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
-            GLchar *buf = (GLchar*)MALLOC(length);
-            glGetProgramInfoLog(program, length, NULL, buf);
-            fprintf(stderr, "Error: Shader/program link: %s\n", buf);
-            FREE(buf);
-            return 0;
-        }
-
-        // glDetachShader(program, vert);
-        // glDetachShader(program, frag);
-        // glDetachShader(program, geom);
-
-        glDeleteShader(vert);
-        glDeleteShader(frag);
-        // glDeleteShader(geom);
-    }
-
-    return program;
-}
-
-void shader_bind(unsigned shader) {
-    glUseProgram(shader);
-}
-
-/*
-GLuint shader_create( const char *vert, const char *frag ) {
-    GLuint vertex_shader, fragment_shader, program;
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
-    glCompileShader(vertex_shader);
-    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
-    glCompileShader(fragment_shader);
-    program = glCreateProgram();
-    glAttachShader(program, vertex_shader);
-    glAttachShader(program, fragment_shader);
-    glLinkProgram(program);
-    return program;
-}
-*/
 
 Attribute get_attribute_location( Shader p, const char *name ) {
     glUseProgram(p);
