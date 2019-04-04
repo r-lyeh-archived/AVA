@@ -92,6 +92,10 @@ API void  map_gc(map_t *m); // only if using MAP_DONT_ERASE
             for( key_t k = *(key_t *)cur->key; on; ) \
                 for( val_t v = *(val_t *)cur->value; on; on = 0 )
 
+#define map_clear(m) ( \
+    map_clear(&(m)->base) \
+    )
+
 #define map_count(m)        map_count(&(m)->base)
 #define map_gc(m)           map_gc(&(m)->base)
 
@@ -197,15 +201,21 @@ void (map_gc)(map_t* m) {
 #endif
 }
 
-void (map_destroy)(map_t* m) {
+void (map_clear)(map_t* m) {
     for( int i = 0; i <= MAP_HASHSIZE; ++i) {
         for( pair_t *next, *cur = m->array[i]; cur; cur = next ) {
             next = cur->next;
             REALLOC(cur,0);
         }
+        m->array[i] = 0;
     }
+}
+
+void (map_destroy)(map_t* m) {
+    (map_clear)(m);
 
     array_free(m->array);
+    m->array = 0;
 
     map_t c = {0};
     *m = c;
@@ -259,59 +269,6 @@ uint64_t shash(char *key) {
         hash = (hash ^ *buf++) * 131;
     }
     return hash;
-}
-
-void tests() {
-    {
-        map_t(int,char*) m = {0};
-        map_create(&m, icmp, ihash);
-            assert( 0 == map_count(&m) );
-        map_insert(&m, 123, "123");
-        map_insert(&m, 456, "456");
-            assert( 2 == map_count(&m) );
-            assert( map_find(&m, 123) );
-            assert( map_find(&m, 456) );
-            assert(!map_find(&m, 789) );
-            assert( 0 == strcmp("123", *map_find(&m, 123)) );
-            assert( 0 == strcmp("456", *map_find(&m, 456)) );
-
-        map_foreach(&m,const int,k,char*,v) {
-            printf("%d->%s\n", k, v);
-        }
-
-        map_erase(&m, 123);
-            assert(!map_find(&m, 123) );
-            assert( 1 == map_count(&m) );
-        map_erase(&m, 456);
-            assert(!map_find(&m, 456) );
-            assert( 0 == map_count(&m) );
-        map_destroy(&m);
-            assert( puts("ok") >= 0 );
-    }
-
-    {
-        map_t(char*,int) m = {0};
-        map_create(&m, scmp, shash);
-            assert( map_count(&m) == 0 );
-        map_insert(&m, "123", 123);
-        map_insert(&m, "456", 456);
-            assert( map_count(&m) == 2 );
-            assert( map_find(&m,"123") );
-            assert( map_find(&m,"456") );
-            assert(!map_find(&m,"789") );
-
-        map_foreach(&m,const char *,k,int,v) {
-            printf("%s->%d\n", k, v);
-        }
-
-        map_erase(&m, "123");
-            assert( 456 == *map_find(&m,"456") );
-            assert( map_count(&m) == 1 );
-        map_erase(&m, "456");
-            assert( map_count(&m) == 0 );
-        map_destroy(&m);
-            assert( puts("ok") >= 0 );
-    }
 }
 
 void benchmark() {
@@ -394,6 +351,59 @@ void benchmark() {
         {}
     );
 #endif
+}
+
+void tests() {
+    {
+        map_t(int,char*) m = {0};
+        map_create(&m, icmp, ihash);
+            assert( 0 == map_count(&m) );
+        map_insert(&m, 123, "123");
+        map_insert(&m, 456, "456");
+            assert( 2 == map_count(&m) );
+            assert( map_find(&m, 123) );
+            assert( map_find(&m, 456) );
+            assert(!map_find(&m, 789) );
+            assert( 0 == strcmp("123", *map_find(&m, 123)) );
+            assert( 0 == strcmp("456", *map_find(&m, 456)) );
+
+        map_foreach(&m,const int,k,char*,v) {
+            printf("%d->%s\n", k, v);
+        }
+
+        map_erase(&m, 123);
+            assert(!map_find(&m, 123) );
+            assert( 1 == map_count(&m) );
+        map_erase(&m, 456);
+            assert(!map_find(&m, 456) );
+            assert( 0 == map_count(&m) );
+        map_destroy(&m);
+            assert( puts("ok") >= 0 );
+    }
+
+    {
+        map_t(char*,int) m = {0};
+        map_create(&m, scmp, shash);
+            assert( map_count(&m) == 0 );
+        map_insert(&m, "123", 123);
+        map_insert(&m, "456", 456);
+            assert( map_count(&m) == 2 );
+            assert( map_find(&m,"123") );
+            assert( map_find(&m,"456") );
+            assert(!map_find(&m,"789") );
+
+        map_foreach(&m,const char *,k,int,v) {
+            printf("%s->%d\n", k, v);
+        }
+
+        map_erase(&m, "123");
+            assert( 456 == *map_find(&m,"456") );
+            assert( map_count(&m) == 1 );
+        map_erase(&m, "456");
+            assert( map_count(&m) == 0 );
+        map_destroy(&m);
+            assert( puts("ok") >= 0 );
+    }
 }
 
 int main() {
