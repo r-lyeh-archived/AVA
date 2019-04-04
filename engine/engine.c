@@ -69,10 +69,7 @@ int init() {
     // icon
 
     // vfs
-    vfs_import("data/**");
-    vfs_import("game/**");
-    vfs_import("games/**");
-    vfs_import("assets/**");
+    vfs_import("**");
 
 #if 1 // DEBUG
     // in case binary is present in any _debug/, _debugopt/, _release/ folder
