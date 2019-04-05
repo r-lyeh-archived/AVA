@@ -49,6 +49,8 @@ static m_inline float maxf     (float  a, float  b) { return a > b ? a : b; }
 static m_inline float absf     (float  a          ) { return a < 0.0f ? -a : a; }
 static m_inline float pmodf    (float  a, float  b) { return (a < 0.0f ? 1.0f : 0.0f) + (float)fmod(a, b); } // positive mod
 
+static m_inline vec2  float2   (float *a )          { return vec2(a[0],a[1]); }
+//
 static m_inline vec2  neg2     (vec2   a          ) { return vec2(-a.x, -a.y); }
 static m_inline vec2  add2     (vec2   a, vec2   b) { return vec2(a.x + b.x, a.y + b.y); }
 static m_inline vec2  sub2     (vec2   a, vec2   b) { return vec2(a.x - b.x, a.y - b.y); }
@@ -69,6 +71,7 @@ static m_inline vec2  norm2    (vec2   a          ) { return div2(a, len2(a)); }
 static m_inline int   finite2  (vec2   a          ) { return m_finite(a.x) && m_finite(a.y); }
 
 static m_inline vec3  vec23    (vec2   a, float z ) { return vec3(a.x,a.y,z); }
+static m_inline vec3  float3   (float *a )          { return vec3(a[0],a[1],a[2]); }
 //
 static m_inline vec3  neg3     (vec3   a          ) { return vec3(-a.x, -a.y, -a.z); }
 static m_inline vec3  add3     (vec3   a, vec3   b) { return vec3(a.x + b.x, a.y + b.y, a.z + b.z); }
@@ -91,6 +94,7 @@ static m_inline int   finite3  (vec3   a          ) { return finite2(vec2(a.x,a.
 //static m_inline vec3 tricross3 (vec3 a, vec3 b, vec3 c) { return cross3(a,cross3(b,c)); } // useful?
 
 static m_inline vec4  vec34    (vec3   a, float w ) { return vec4(a.x,a.y,a.z,w); }
+static m_inline vec4  float4   (float *a )          { return vec4(a[0],a[1],a[2],a[3]); }
 //
 static m_inline vec4  neg4     (vec4   a          ) { return vec4(-a.x, -a.y, -a.z, -a.w); }
 static m_inline vec4  add4     (vec4   a, vec4   b) { return vec4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w); }
@@ -114,6 +118,7 @@ static m_inline int   finite4  (vec4   a          ) { return finite3(vec3(a.x,a.
 static m_inline quat  idq      (                  ) { return quat(0,0,0,1); }
 static m_inline quat  vec3q    (vec3   a, float w ) { return quat(a.x,a.y,a.z,w); }
 static m_inline quat  vec4q    (vec4   a          ) { return quat(a.x,a.y,a.z,a.w); }
+static m_inline quat  floatq   (float *a )          { return quat(a[0],a[1],a[2],a[3]); }
 //
 static m_inline quat  negq     (quat   a          ) { return quat(-a.x,-a.y,-a.z,a.w); } // conjq
 static m_inline quat  addq     (quat   a, quat   b) { return quat(a.x+b.x,a.y+b.y,a.z+b.z,a.w+b.w); }
