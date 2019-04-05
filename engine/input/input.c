@@ -19,7 +19,8 @@ API void set_mouse(int key); // 'show', 'hide'
    'TAB' , 'TICK', 'UP'  , 
 */
 API float key( int key );
-
+API float key_up( int key );
+API float key_down( int key );
 
 
 
@@ -94,9 +95,11 @@ void set_mouse(int key) { // $
     }
 }
 
-uint8_t scancodes[SDL_NUM_SCANCODES] = {0};
+uint8_t scancodes0[SDL_NUM_SCANCODES] = {0};
+uint8_t scancodes1[SDL_NUM_SCANCODES] = {0};
+uint8_t *scancodes_now = scancodes0, *scancodes_old = scancodes1;
 
-float key( int key ) { // $
+float key_( uint8_t *scancodes, int key ) { // $
     switch(key) {
         break; case    '*': key = SDL_SCANCODE_KP_MULTIPLY;
         break; case    '+': key = SDL_SCANCODE_KP_PLUS;
@@ -162,6 +165,18 @@ float key( int key ) { // $
     GLFW_KEY_WORLD_2            162 // non-US #2
 */
     return !!scancodes[key]; // !!SDL_GetKeyboardState(NULL)[key];
+}
+
+float key( int key ) { // $
+    return key_(scancodes_now, key);
+}
+
+float key_up( int key ) { // $
+    return !key_(scancodes_now, key) && !!key_(scancodes_old, key);
+}
+
+float key_down( int key ) { // $
+    return key_(scancodes_now, key) && !key_(scancodes_old, key);
 }
 
 // ----------------------------------------------------------------------------

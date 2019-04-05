@@ -530,7 +530,8 @@ void window_swap( void **pixels ) {
     }
 
     // input
-    memcpy(scancodes, SDL_GetKeyboardState(NULL), SDL_NUM_SCANCODES * sizeof(uint8_t));
+    memcpy(scancodes_old, scancodes_now, SDL_NUM_SCANCODES * sizeof(uint8_t));
+    memcpy(scancodes_now, SDL_GetKeyboardState(NULL), SDL_NUM_SCANCODES * sizeof(uint8_t));
 
     if( pixels && !should_quit ) {
         *pixels = (unsigned char *)realloc(*pixels, 4 * w * h);
