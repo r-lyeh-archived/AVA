@@ -25,6 +25,7 @@ API void window_timings(void);
 API void window_destroy(void);
 
 API void window_opengl(void);
+API void window_fullscreen(bool enabled);
 
 API int window_width();
 API int window_height();
@@ -540,6 +541,14 @@ void window_swap( void **pixels ) {
 
     if( title[0] ) {
         SDL_SetWindowTitle(window, title);
+    }
+}
+
+void window_fullscreen(bool enabled) {
+    if( enabled ) {
+        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+    } else {
+        SDL_SetWindowFullscreen(window, 0);
     }
 }
 
