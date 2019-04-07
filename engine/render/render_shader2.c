@@ -31,6 +31,7 @@ API const char *shader_default_fullscreen_vs();
 #include <stdlib.h>
 
 int UNIFORM_LOC(unsigned program,const char *name) {
+    glUseProgram(program);
     int ret =
     (name[0] >= '0' && name[0] <= '9' ? atoi(name) : glGetUniformLocation(program,name));
     if( ret < 0 ) fprintf(stderr, "cannot find uniform '%s' in shader program %d\n", name, (int)program );
