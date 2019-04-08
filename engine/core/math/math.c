@@ -10,6 +10,7 @@
 #define UTILS_C
 #define CAST_C
 #define CAMERA_C
+#define GJK_C
 #endif
 
 #include "math_cast.c"
@@ -18,3 +19,4 @@
 #include "math_transform.c"
 #include "math_utils.c"
 #include "math_camera.c"
+#include "math_gjk.c"
