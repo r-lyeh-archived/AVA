@@ -1,5 +1,6 @@
 // simple C constructors
 // - rlyeh, public domain
+
 #pragma once
 #ifdef __cplusplus
 #define CAST(type, ...)  ( type { __VA_ARGS__ } )

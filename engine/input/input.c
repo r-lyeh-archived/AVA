@@ -10,6 +10,7 @@
 API void mouse_update();
 API float mouse(int key);   // 'X', 'Y', 'L', 'M', 'R', 'show', 'hide',
 API void set_mouse(int key); // 'show', 'hide'
+API vec2 mouse_xy();
 
 /*
    '*',    '+',    ',',    '-',    '.',    '/',    ';',    '=',    '[',    ']',    '`',
@@ -21,7 +22,7 @@ API void set_mouse(int key); // 'show', 'hide'
 API float key( int key );
 API float key_up( int key );
 API float key_down( int key );
-
+API vec3  key_wasdec();
 
 
 #ifdef INPUT_C
@@ -180,6 +181,9 @@ float key_down( int key ) { // $
 }
 
 // ----------------------------------------------------------------------------
+
+vec2 mouse_xy() { return vec2(mouse('X'), mouse('Y')); }
+vec3 key_wasdec() { return vec3(key('D')-key('A'), key('E')-key('C'), key('W')-key('S')); } // vec3(right,up,forward)
 
 #if 0
 

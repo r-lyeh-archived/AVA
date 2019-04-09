@@ -1,4 +1,4 @@
-// Original authors: @ands (Andreas Mantler; Public Domain) + @datenwolf (WTFPL2 licensed)
+// Original authors: @ands (PD), @vurtun (PD), @datenwolf (WTFPL2), @evanw (CC0).
 // - rlyeh, public domain.
 
 #pragma once
@@ -71,6 +71,7 @@ static m_inline float len2sq   (vec2   a          ) { return a.x * a.x + a.y * a
 static m_inline float len2     (vec2   a          ) { return sqrtf(len2sq(a)); }
 static m_inline vec2  norm2    (vec2   a          ) { return /*dot(2) == 0 ? a :*/ div2(a, len2(a)); }
 static m_inline int   finite2  (vec2   a          ) { return m_finite(a.x) && m_finite(a.y); }
+static m_inline vec2  lerp2 (vec2 a,vec2 b,float t) { return add2(scale2((a),1-(t)), scale2((b), t)); }
 
 static m_inline vec3  ptr3     (const float *a    ) { return vec3(a[0],a[1],a[2]); }
 static m_inline vec3  vec23    (vec2   a, float z ) { return vec3(a.x,a.y,z); }
@@ -93,7 +94,21 @@ static m_inline float len3sq   (vec3   a          ) { return dot3(a,a); }
 static m_inline float len3     (vec3   a          ) { return sqrtf(len3sq(a)); }
 static m_inline vec3  norm3    (vec3   a          ) { return /*dot3(a) == 0 ? a :*/ div3(a, len3(a)); }
 static m_inline int   finite3  (vec3   a          ) { return finite2(vec2(a.x,a.y)) && m_finite(a.z); }
+static m_inline vec3  lerp3 (vec3 a,vec3 b,float t) { return add3(scale3((a),1-(t)), scale3((b), t)); }
 //static m_inline vec3 tricross3 (vec3 a, vec3 b, vec3 c) { return cross3(a,cross3(b,c)); } // useful?
+static m_inline void  ortho3   (vec3 *left, vec3 *up, vec3 v) {
+    if ((v.z * v.z) > (0.7f * 0.7f)) {
+        float sqrlen  = v.y*v.y + v.z*v.z;
+        float invlen  = 1.f / sqrtf(sqrlen);
+        *up = vec3(0, v.z*invlen, -v.y*invlen);
+        *left = vec3(sqrlen*invlen, -v.x*up->z, v.x*up->y);
+    } else {
+        float sqrlen = v.x*v.x + v.y*v.y;
+        float invlen = 1.f / sqrtf(sqrlen);
+        *left = vec3(-v.y*invlen, v.x*invlen, 0);
+        *up = vec3(-v.z*left->y, v.z*left->x, sqrlen*invlen);
+    }
+}
 
 static m_inline vec4  ptr4     (const float *a    ) { return vec4(a[0],a[1],a[2],a[3]); }
 static m_inline vec4  vec34    (vec3   a, float w ) { return vec4(a.x,a.y,a.z,w); }
@@ -115,6 +130,7 @@ static m_inline float len4sq   (vec4   a          ) { return dot4(a,a); }
 static m_inline float len4     (vec4   a          ) { return sqrtf(len4sq(a)); }
 static m_inline vec4  norm4    (vec4   a          ) { return /*dot4(a) == 0 ? a :*/ div4(a, len4(a)); }
 static m_inline int   finite4  (vec4   a          ) { return finite3(vec3(a.x,a.y,a.z)) && m_finite(a.w); }
+static m_inline vec4  lerp4 (vec4 a,vec4 b,float t) { return add4(scale4((a),1-(t)), scale4((b), t)); }
 // static m_inline vec4 cross4(vec4 v0, vec4 v1) { return vec34(cross3(v0.xyz, v1.xyz), (v0.w + v1.w) * 0.5f); } // may fail
 
 static m_inline quat  idq      (                  ) { return quat(0,0,0,1); }

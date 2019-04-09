@@ -10,6 +10,7 @@
 #define AUTORUN_C
 #define BITS_C
 #define CALLSTACK_C
+#define CAST_C
 #define INCLUDES_C
 #define INLINE_C
 #define LINKAGE_C
@@ -28,6 +29,8 @@
 #include "detect_autorun.c"
 #include "detect_bits.c"
 #include "detect_callstack.c"
+#include "detect_cast.c"
+#include "detect_countof.c"
 #include "detect_includes.c"
 #include "detect_inline.c"
 #include "detect_linkage.c"

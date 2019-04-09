@@ -15,6 +15,7 @@
 #define TRIM_C
 #define TYPE_C
 #define UNICODE_C
+#define STRING2_C
 #endif
 
 #include "string_quark.c"
@@ -28,6 +29,8 @@
 #include "string_unicode.c"
 #include "string_fuzzy.c"
 #include "string_normalize.c"
+
+#include "string2.c"
 
 /*
 #include "string_sprintf.c"

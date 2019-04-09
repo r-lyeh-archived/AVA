@@ -11,13 +11,14 @@
 #pragma once
 #define APP_C
 #define MODULE_C
+#define GETOPT_C
 #endif
 
 #include "../render/render.c" // opengl, pass
 
 #include "window_app.c"
 #include "window_module.c"
-
+#include "window_getopt.c"
 //#include "network.c"
 //#include "palette.c"
 //#include "memory.c"

@@ -43,8 +43,6 @@ extern const float mesh_uvs[];
 extern const int   submesh_vertex_begin[];
 extern const int   submesh_vertex_end[];
 
-#define countof(x) ( sizeof(x) / sizeof((x)[0]) )
-
 int main() {
     window_create(0.75f, 0);
 
