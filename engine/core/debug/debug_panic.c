@@ -6,6 +6,8 @@ API void error( const char *description );
 API void fatal( const char *description );
 API void panic( const char *description );
 
+#define PANIC(...) panic(va(__VA_ARGS__))
+
 #ifdef PANIC_C
 #pragma once
 

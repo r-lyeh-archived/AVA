@@ -2,7 +2,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static const struct {
+const char* vertex_shader =
+    VS150 //VS130
+    "uniform mat4 MVP;\n"
+    "attribute vec2 att_pos;\n"
+    "attribute vec3 att_col;\n"
+    "varying vec3 color;\n"
+    "void main() {\n"
+    "    gl_Position = MVP * vec4(att_pos, 0.0, 1.0);\n"
+    "    color = att_col;\n"
+    "}\n";
+
+const char* fragment_shader =
+    FS150 //FS130
+    "varying vec3 color;\n"
+    "void main() {\n"
+    "    fragColor = vec4(color, 1.0);\n"
+    "}\n";
+
+unsigned indices[1]; // dummy
+struct {
     float x, y;
     float r, g, b;
 } vertices[3] = {
@@ -11,63 +30,38 @@ static const struct {
     {   0.f,  0.6f, 0.f, 0.f, 1.f }
 };
 
-static const char* vertex_shader_text =
-    VS150 //VS130
-    "uniform mat4 MVP;\n"
-    "attribute vec3 vCol;\n"
-    "attribute vec2 vPos;\n"
-    "varying vec3 color;\n"
-    "void main() {\n"
-    "    gl_Position = MVP * vec4(vPos, 0.0, 1.0);\n"
-    "    color = vCol;\n"
-    "}\n";
-static const char* fragment_shader_text =
-    FS150 //FS130
-    "varying vec3 color;\n"
-    "void main() {\n"
-    "    fragColor = vec4(color, 1.0);\n"
-    "}\n";
-
-
 EXPORT
 int main(int argc, char **argv) {
     puts(";; hello from game 04");
 
     window_create( 25.f /*25%*/, 0 );
 
-    // NOTE: OpenGL error checks have been omitted for brevity
-    GLuint vertex_buffer;
-    glGenBuffers(1, &vertex_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    unsigned program = shader2( vertex_shader, fragment_shader, "att_pos,att_col" );
 
-    GLuint program = shader( vertex_shader_text, fragment_shader_text );
-
-    GLint mvp_location, vpos_location, vcol_location;
-    mvp_location = glGetUniformLocation(program, "MVP");
-    vpos_location = glGetAttribLocation(program, "vPos");
-    vcol_location = glGetAttribLocation(program, "vCol");
-    glEnableVertexAttribArray(vpos_location);
-    glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*) 0);
-    glEnableVertexAttribArray(vcol_location);
-    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*) (sizeof(float) * 2));
+    int flags = 0;
+    mesh2 m;
+    mesh2_create(&m, "p2 c3", 3,vertices, 0,indices, flags );
 
     while (window_update()) {
         // model
-        mat44 m;
-        rotation44(m, deg((float)now_ms()/1000), 0,0,1 );
+        mat44 M;
+        rotation44(M, deg((float)now_ms()/1000), 0,0,1 );
+
+        // view
+        mat44 V;
+        identity44(V);
 
         // proj
-        mat44 p;
-        ortho44(p, -window_aspect(), window_aspect(), -1.f, 1.f, 1.f, -1.f);
+        mat44 P;
+        ortho44(P, -window_aspect(), window_aspect(), -1.f, 1.f, 1.f, -1.f);
 
         // modelviewproj
-        mat44 mvp;
-        multiply44(mvp, p, m);
+        mat44 MVP;
+        multiply344(MVP, P, V, M);
 
         // draw
-        shader_bind_mat44(program, "MVP"/*mvp_location*/, mvp);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        shader_bind_mat44(program, "MVP", MVP);
+        mesh2_render(&m, 0);
 
         static void *pixels = 0;
         window_swap( &pixels );

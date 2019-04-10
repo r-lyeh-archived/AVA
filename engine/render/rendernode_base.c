@@ -61,7 +61,7 @@ void rendernode_draw(rendernode *r, float model[16]) {
         material_sendmodel(r->material, model);
     }
 
-    if(r->mesh) mesh2_draw(r->mesh);
+    if(r->mesh) mesh2_render(r->mesh, 0);
     else {
         glBindVertexArray(r->mesh1.vao);
         /**/ if( r->mesh1.ibo16 ) glDrawElements(GL_TRIANGLES, r->mesh1.elementCount, GL_UNSIGNED_SHORT, (char*)0); // with index16

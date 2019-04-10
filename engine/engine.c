@@ -12,6 +12,10 @@
 #include "engine_framework.c"
 #include "engine_server.c"
 
+/// init() function
+/// loop() function
+/// quit() function
+
 API int init();
 API int loop();
 API int quit();
