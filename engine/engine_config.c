@@ -27,13 +27,4 @@
 #define $ /* printf("%s:%d\n", __FUNCTION__,__LINE__); */
 #endif
 
-// string helpers
-
-#include <stdarg.h>
-#ifndef VSNPRINTF
-#define VSNPRINTF vsnprintf
-#endif
-API char *vl( const char *fmt, va_list vl );
-API char *va( const char *fmt, ... );
-
 #endif

@@ -16,31 +16,32 @@ enum {
     WINDOW_MSAA4 = 0x20,
 };
 
-API int window_create( float zoom /* 10.0f */, int flags );
-API void window_title( const char *title );
-API int window_update(void);
-API int* window_size(void);
-API void window_swap( void **pixels );
-API void window_timings(void);
-API void window_destroy(void);
+API int   window_create(float zoom /* 10.0f */, int flags);
+API int   window_update();
+API void  window_swap(void **pixels); // split into window_capture() and window_swap();
+API void  window_destroy();
 
-API void window_opengl(void);
-API void window_fullscreen(bool enabled);
+API void  window_title( const char *title );
+API void  window_fullscreen(bool enabled);
 
-API int window_width();
-API int window_height();
+API int*  window_size();
+API int   window_width();
+API int   window_height();
 API float window_aspect();
+API char* window_timings();
 
-API int window_is_minimized();
-API int window_is_maximized();
-API int window_is_fullscreen();
-API int window_is_fullscreen_desktop();
-API int window_is_visible();
-API int window_is_resizable();
-API int window_is_borderless();
-API int window_has_input_focus();
-API int window_has_input_grabbed();
-API int window_has_mouse_focus();
+API int   window_is_minimized();
+API int   window_is_maximized();
+API int   window_is_fullscreen();
+API int   window_is_fullscreen_desktop();
+API int   window_is_visible();
+API int   window_is_resizable();
+API int   window_is_borderless();
+API int   window_has_input_focus();
+API int   window_has_input_grabbed();
+API int   window_has_mouse_focus();
+
+API void  window_load_opengl();
 
 #endif
 
@@ -76,6 +77,10 @@ void renderer_update(int width, int height) {
 }
 void renderer_post(int width, int height) {
 //  text_draw(width, height);
+    extern int ddraw_printf_line;
+    ddraw_printf_line = 0;
+    ddraw_render2d();
+    glDisable(GL_BLEND); // @fixme
 }
 void renderer_quit() {
 //  text_quit();
@@ -268,7 +273,7 @@ void window_destroy(void) {
     // glfwTerminate(); // exit(0)
 }
 
-void window_opengl(void) {
+void window_load_opengl(void) {
 #  if defined __gl3w_h_
     gl3w_init();
 #elif defined __glad_h_
@@ -460,7 +465,7 @@ int window_create( float zoom, int flags ) {
 
     SDL_GL_MakeCurrent(window, glcontext);
 
-    window_opengl();
+    window_load_opengl();
 
     //glfwSetKeyCallback(window, key_callback);
 
@@ -535,6 +540,8 @@ void window_swap( void **pixels ) {
     memcpy(scancodes_now, SDL_GetKeyboardState(NULL), SDL_NUM_SCANCODES * sizeof(uint8_t));
 
     if( pixels && !should_quit ) {
+    	w = window_width();
+    	h = window_height();
         *pixels = (unsigned char *)realloc(*pixels, 4 * w * h);
         renderer_capture(w,h,3,*pixels);
     }
@@ -552,7 +559,7 @@ void window_fullscreen(bool enabled) {
     }
 }
 
-void window_timings() {
+char* window_timings() {
     static double num_frames = 0, begin = FLT_MAX, fps = 0, prev_frame = 0;
     static int c = 0; char barcode = "/|\\-"[c=(c+1)&3];
 
@@ -569,20 +576,19 @@ void window_timings() {
         num_frames = 0;
     }
 
-#ifdef _MSC_VER
-    const char *appname = __argv[0];
-#else
     const char *appname = "";
+#ifdef _MSC_VER
+    appname = __argv[0];
 #endif
 
-    char buf[128] = {0};
-    sprintf(buf, "%s %.2ffps %.2fms %c", appname, fps, (now - prev_frame) * 1000.f, barcode);
-    window_title(buf + (buf[0] == ' '));
+    char *buf = va("%s %.2ffps %.2fms %c", appname, fps, (now - prev_frame) * 1000.f, barcode);
+    buf += (buf[0] == ' ');
 
     prev_frame = now;
     ++num_frames;
-}
 
+    return buf;
+}
 
 int window_width() { return window_size()[0]; }
 int window_height() { return window_size()[1]; }

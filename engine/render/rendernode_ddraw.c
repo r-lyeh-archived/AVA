@@ -29,6 +29,9 @@ API void ddraw_text3d( vec3 center, const char *fmt, ... );
 API void ddraw_console( const char *fmt, ... );
 API void ddraw_render2d();
 
+API void ddraw_printf( const char *buf );
+#define ddraw_printf(...) ddraw_printf(va(__VA_ARGS__))
+
 // void pushScale(x);
 // void popScale();
 // void pushExpire(ms);
@@ -732,6 +735,14 @@ void ddraw_text2d( vec2 center, const char *fmt, ... ) {
 #endif
 }
 
+//-----------------------------------------------------------------------------
+
+static int ddraw_printf_line = 0;
+
+void (ddraw_printf)(const char *buf) {
+    ddraw_text2d( vec2(-window_width()/4,window_height()/6-ddraw_printf_line++*10), buf );
+}
+
 // ----------------------------------------------------------------------------
 
 enum { MAX_MENUS = 256 };
@@ -774,6 +785,7 @@ void ddraw_render2d() {
     static material mat, *init = 0;
     if( !init ) {
         mat = *font_material();
+		if (!ddraw_font) ddraw_printf(""); // instance ddraw_font here :o)
         mat.texture = fonts[ddraw_font].texture_id;
         mat.alpha_enable = 1;
         mat.alpha_src = GL_ONE;

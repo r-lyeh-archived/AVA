@@ -1,8 +1,12 @@
 #include "engine.h"
-#include <stdio.h>
 
 EXPORT
 int main(int argc, char **argv) {
-    puts(";; hello from game 01");
-}
+    window_create(0.25f, 0);
 
+    while( window_update() ) {
+        ddraw_printf("%s", window_timings());
+        ddraw_printf("basic window creation");
+        window_swap(NULL);
+    }
+}

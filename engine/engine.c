@@ -108,23 +108,3 @@ int quit() {
     puts("; engine end");
     return 1;
 }
-
-#include <stdarg.h>
-#include <assert.h>
-static THREAD_LOCAL char vl_buf[2048];
-static THREAD_LOCAL int  vl_idx = 0;
-char *vl( const char *fmt, va_list v ) {
-    int l = VSNPRINTF(0, 0, fmt, v );
-    assert(l >= 0);
-    assert(l+1 <= 2048);
-    char *dst = vl_buf + (vl_idx + l < 2048 ? vl_idx : 0);
-    vl_idx += VSNPRINTF( dst, 2048, fmt, v ) + 1;
-    return dst;
-}
-char *va( const char *fmt, ... ) {
-    va_list v;
-    va_start(v, fmt);
-    char *dst = vl( fmt, v );
-    va_end(v);
-    return dst;
-}
