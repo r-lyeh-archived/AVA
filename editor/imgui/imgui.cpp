@@ -15,13 +15,6 @@
 */
 
 #include <stdint.h>
-#define API
-#include "engine_minimal.c"
-#define OSCRECV_C
-#include "network/network_oscrecv.c"
-#define SHAPE_C
-#include "render/rendernode_shape.c"
-#define GL(...) __VA_ARGS__
 
 #pragma comment(lib, "opengl32.lib")
 #ifndef IMGUI_DEFINE_MATH_OPERATORS

@@ -3,12 +3,15 @@
 #define AUDIO_C
 #define DATA_C
 #define INPUT_C
+#define MATH_C
 #define NETWORK_C
 #define PACKAGE_C
 #define RENDER_C
 #define STORAGE_C
 #define WINDOW_C
 #endif
+
+#include "math/math.c"
 
 #include "audio/audio.c"
 #include "data/data.c"

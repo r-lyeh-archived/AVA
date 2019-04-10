@@ -1,10 +1,26 @@
+#define API
+#include <engine_minimal.c>
+#define OSCRECV_C
+#include "network/network_oscrecv.c"
+#if 0
+#define SHAPE_C
+#include <engine/render/rendernode_shape.c>
+/*
+extern "C" {
+#include "math/math_camera.c"
+#include "math/math_linear.c"
+#include "math/math_transform.c"
+#include "math/math_utils.c"
+#include "input/input.c"
+}
+*/
+#endif
+
+
 // include opengl, imgui and all widgets.
+#define GL(...) __VA_ARGS__
 #include "imgui/imgui.cpp"
 
-#include "core/math/math_linear.c"
-#include "core/math/math_transform.c"
-#include "core/math/math_utils.c"
-#include "input/input.c"
 
 #include <timeapi.h> // timeBeginPeriod, timeEndPeriod
 #include <thread>

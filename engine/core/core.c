@@ -4,7 +4,6 @@
 #define DEBUG_C
 #define DETECT_C
 #define FILESYS_C
-#define MATH_C
 #define MEMORY_C
 #define NATIVE_C
 #define OBJECT_C
@@ -21,7 +20,6 @@
 #include "async/async.c"
 #include "debug/debug.c"
 #include "filesys/filesys.c"
-#include "math/math.c"
 #include "native/native.c"
 #include "serial/serial.c"
 #include "time/time.c"

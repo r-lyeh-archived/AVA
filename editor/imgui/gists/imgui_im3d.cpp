@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../engine/core/math/math.c"
+#include "../engine/math/math.c"
 #include "../engine/render/rendernode_shape.c"
 
 #if 0

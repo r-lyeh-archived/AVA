@@ -1,7 +1,7 @@
 // includes code by @glampert (public domain).
 
 #pragma once
-#include "../detect/detect_inline.c"
+#include "../core/detect/detect_inline.c"
 #include "math_linear.c"
 #include <float.h> // FLT_MIN, FLT_MAX
 #include <stdint.h>
