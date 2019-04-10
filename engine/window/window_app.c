@@ -80,7 +80,10 @@ void renderer_post(int width, int height) {
     extern int ddraw_printf_line;
     ddraw_printf_line = 0;
     ddraw_render2d();
-    glDisable(GL_BLEND); // @fixme
+    static material m, *init = 0;
+    if( !init ) material_create(init = &m);
+    material_enable(&m, 0);
+    // glDisable(GL_BLEND); // @fixme
 }
 void renderer_quit() {
 //  text_quit();
