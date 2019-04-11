@@ -266,6 +266,7 @@ void window_title( const char *title_ ) {
 }
 
 void window_destroy(void) {
+	ui_destroy();
     renderer_quit();
     if(window) {
         SDL_DestroyWindow(window);
@@ -489,6 +490,8 @@ int window_create( float zoom, int flags ) {
     extern void set_mouse(int);
     set_mouse( flags & WINDOW_NO_MOUSE ? 'hide' : 'show' );
 
+    ui_create();
+
     return 1;
 }
 int* window_size() {
@@ -517,11 +520,14 @@ void window_swap( void **pixels ) {
 
     renderer_post(w, h);
 
+    ui_render();
+
     SDL_GL_SwapWindow(window);
     glFinish();
 
     // SDL_PumpEvents();
     SDL_Event event;
+    nk_input_begin(ui_ctx);
     while (SDL_PollEvent(&event)) {
         if (event.type == SDL_QUIT)
             should_quit = 1;
@@ -536,7 +542,8 @@ void window_swap( void **pixels ) {
             SDL_WarpMouseInWindow(window, rects[0]/2, rects[1]/2);
             */
         }
-    }
+        nk_sdl_handle_event(&event);
+    } nk_input_end(ui_ctx);
 
     // input
     memcpy(scancodes_old, scancodes_now, SDL_NUM_SCANCODES * sizeof(uint8_t));
