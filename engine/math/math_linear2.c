@@ -58,7 +58,7 @@ static m_inline vec2  add2     (vec2   a, vec2   b) { return vec2(a.x + b.x, a.y
 static m_inline vec2  sub2     (vec2   a, vec2   b) { return vec2(a.x - b.x, a.y - b.y); }
 static m_inline vec2  mul2     (vec2   a, vec2   b) { return vec2(a.x * b.x, a.y * b.y); }
 static m_inline vec2  scale2   (vec2   a, float  b) { return vec2(a.x * b, a.y * b); }
-static m_inline vec2  div2     (vec2   a, float  b) { return scale2(a, 1.0f / b); }
+static m_inline vec2  div2     (vec2   a, float  b) { return b ? scale2(a, 1.0f / b) : vec2(0,0); }
 static m_inline vec2  pmod2    (vec2   a, float  b) { return vec2(pmodf(a.x, b), pmodf(a.y, b)); }
 static m_inline vec2  min2     (vec2   a, vec2   b) { return vec2(minf(a.x, b.x), minf(a.y, b.y)); }
 static m_inline vec2  max2     (vec2   a, vec2   b) { return vec2(maxf(a.x, b.x), maxf(a.y, b.y)); }
@@ -138,7 +138,8 @@ static m_inline quat  ptrq     (const float *a    ) { return quat(a[0],a[1],a[2]
 static m_inline quat  vec3q    (vec3   a, float w ) { return quat(a.x,a.y,a.z,w); }
 static m_inline quat  vec4q    (vec4   a          ) { return quat(a.x,a.y,a.z,a.w); }
 //
-static m_inline quat  negq     (quat   a          ) { return quat(-a.x,-a.y,-a.z,a.w); } // conjq
+static m_inline quat  negq_    (quat   a          ) { return quat(-a.x,-a.y,-a.z,-a.w); }
+static m_inline quat  conjq    (quat   a          ) { return quat(-a.x,-a.y,-a.z,a.w); }
 static m_inline quat  addq     (quat   a, quat   b) { return quat(a.x+b.x,a.y+b.y,a.z+b.z,a.w+b.w); }
 static m_inline quat  subq     (quat   a, quat   b) { return quat(a.x-b.x,a.y-b.y,a.z-b.z,a.w-b.w); }
 static m_inline quat  mulq     (quat   p, quat   q) { vec3 w = scale3(p.v3, q.w), r = add3(add3(cross3(p.v3, q.v3), w), scale3(q.v3, p.w)); return quat(r.x,r.y,r.z,p.w*q.w - dot3(p.v3, q.v3)); }

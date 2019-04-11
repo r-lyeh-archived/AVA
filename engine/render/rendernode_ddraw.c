@@ -785,7 +785,7 @@ void ddraw_render2d() {
     static material mat, *init = 0;
     if( !init ) {
         mat = *font_material();
-		if (!ddraw_font) ddraw_printf(""); // instance ddraw_font here :o)
+        if (!ddraw_font) ddraw_printf(""); // instance ddraw_font here :o)
         mat.texture = fonts[ddraw_font].texture_id;
         mat.alpha_enable = 1;
         mat.alpha_src = GL_ONE;

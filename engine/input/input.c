@@ -150,7 +150,7 @@ float key_( uint8_t *scancodes, int key ) { // $
         break; case 'TICK': case '\'': key = SDL_SCANCODE_APOSTROPHE;
         break; case 'UP'  : key = SDL_SCANCODE_UP;
         default:
-        /**/ if( key >=    '1' && key <=    '9' ) key = key -   '1' + SDL_SCANCODE_0;
+        /**/ if( key >=    '1' && key <=    '9' ) key = key -   '1' + SDL_SCANCODE_1;
         else if( key >=    'a' && key <=    'z' ) key = key -   'a' + SDL_SCANCODE_A;
         else if( key >=    'A' && key <=    'Z' ) key = key -   'A' + SDL_SCANCODE_A;
         else if( key >=   'F1' && key <=   'F9' ) key = key -  'F1' + SDL_SCANCODE_F1;

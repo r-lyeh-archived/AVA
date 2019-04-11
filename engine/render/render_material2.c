@@ -42,13 +42,17 @@ void material_create(material *m) {
 
     m->wireframe = 0;
     //m->face_ccw = 1; // cw, ccw
-    m->two_sided = GL_FALSE;
+    m->two_sided = GL_TRUE; // GL_FALSE;
     m->depth_mask = GL_TRUE;
     m->depth_test = GL_DEPTH_TEST;
     m->depth_func = GL_LEQUAL;
     m->alpha_enable = GL_FALSE;
     m->alpha_src = GL_SRC_ALPHA;
     m->alpha_dst = GL_ONE_MINUS_SRC_ALPHA;
+
+    //additive(GL_ONE, GL_ONE);
+    //decal(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //modulate(GL_DST_COLOR, GL_ZERO)
 
     m->u_VP = -1;
     m->u_M = -1;
@@ -60,7 +64,6 @@ void material_enable(material *m, float projview[16]) {
     // array_push(materials, m);
 
     // set draw state
-
     glPolygonMode(GL_FRONT_AND_BACK, m->wireframe ? GL_LINE : GL_FILL);
 
     m->two_sided ? glDisable(GL_CULL_FACE) : glEnable(GL_CULL_FACE), glCullFace(GL_BACK);
@@ -70,10 +73,6 @@ void material_enable(material *m, float projview[16]) {
     glDepthFunc(m->depth_func);
 
     !m->alpha_enable ? glDisable(GL_BLEND) : glEnable(GL_BLEND),glBlendFunc(m->alpha_src, m->alpha_dst);
-    //glEnable(GL_BLEND);
-    //glBlendFunc(GL_ONE, GL_ONE); // additive: 1 * src_color + 1 * fb_color
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // decal: src_color.a * src_color + (1 - src_color.a) * fb_color
-    //glBlendFunc(GL_DST_COLOR, GL_ZERO); // modulate: fb_color * src_color + 0 * fb_color
 
     //glFrontFace(GL_CCW);
 
