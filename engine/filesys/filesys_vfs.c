@@ -17,7 +17,10 @@ API const char *    vfs_find_fuzzy( const char *file ); // const char ** instead
 
 #ifdef VFS_C
 #pragma once
-#include "engine.h" // detect, realloc
+//#include "engine.h" // detect, realloc
+//#include "../struct/struct_map.c"
+//#include "../struct/struct_hash.c"
+//#include "../struct/struct_cmp.c"
 #include "filesys_dir.c"
 typedef struct asset_counter {
     int hits;
@@ -63,10 +66,6 @@ void vfs_debug() {
         puts( "---" );
     }
 }
-
-#include "../struct/struct_map.c"
-#include "../struct/struct_hash.c"
-#include "../struct/struct_cmp.c"
 
 static int vfs_scmp(char *a, char *b) {
     return strcmp((const char *)a, (const char*)b);

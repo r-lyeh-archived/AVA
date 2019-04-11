@@ -49,7 +49,7 @@ API char *dir_list(char **s, const char *pathmask);
 #ifdef DIR_C
 #pragma once
 #include "engine.h" // detect, realloc
-#include "detect/detect_memory.c"
+//#include "detect/detect_memory.c"
 #include "filesys_file.c"
 //char *va( const char *, ... );
 //#include <inttypes.h>

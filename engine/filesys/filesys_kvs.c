@@ -27,7 +27,7 @@ API bool kvs_write( const char *dbfile, const char *keystr, const char *val );
 #ifdef KVS_C
 #pragma once
 #include <stdint.h>
-#include "detect/detect_memory.c" // realloc
+//#include "detect/detect_memory.c" // realloc
 
 #if 1 //ndef $
 #define _FILE_OFFSET_BITS 64

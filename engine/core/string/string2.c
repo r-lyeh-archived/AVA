@@ -21,7 +21,7 @@ API int string_ends( const char *s, const char *e );
 
 #ifdef STRING2_C
 #pragma once
-#include <engine.h>
+//#include <engine.h>
 
 array(char*) string_split(char *text, const char *delimiters) {
     array(char *) out = 0;

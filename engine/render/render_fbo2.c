@@ -3,8 +3,6 @@
 
 #ifndef FBO_H
 #define FBO_H
-#include <engine.h>
-
 
 // A framebuffer object that can take color attachments. Draw calls between
 // bind() and unbind() are drawn to the attached textures.

@@ -3,10 +3,8 @@
 #define ASYNC_C
 #define DEBUG_C
 #define DETECT_C
-#define FILESYS_C
 #define MEMORY_C
 #define NATIVE_C
-#define OBJECT_C
 #define SERIAL_C
 #define STRING_C
 #define STRUCT_C
@@ -15,11 +13,9 @@
 
 #include "detect/detect.c"
 #include "memory/memory.c"
-#include "object/object.c"
 #include "struct/struct.c"
 #include "async/async.c"
 #include "debug/debug.c"
-#include "filesys/filesys.c"
 #include "native/native.c"
 #include "serial/serial.c"
 #include "time/time.c"
