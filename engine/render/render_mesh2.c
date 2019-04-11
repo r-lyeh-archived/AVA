@@ -191,8 +191,7 @@ void mesh2_destroy(mesh2* m) {
     glDeleteVertexArrays(1, &m->vao);
 }
 
-/*
-mesh2 *mesh2_parse_bob(mesh2 *self, const char *data, size_t length) {
+void mesh2_loadmem(mesh2 *self, const char *data, size_t length) {
     // .bob format (little-endian):
     // [bytes_vp:4][bytes_vt:4][bytes_vn:4][bytes_idx:4][P3f...][T2f...][N3f...][IDX32...]
     uint32_t bytes_vp = ((uint32_t*)data)[0];
@@ -205,39 +204,36 @@ mesh2 *mesh2_parse_bob(mesh2 *self, const char *data, size_t length) {
     void *vn = (void*)&data[4*4 + bytes_vp + bytes_vt];
     void *id = (void*)&data[4*4 + bytes_vp + bytes_vt + bytes_vn];
     // convert indices ptn[...] to p[...]
-    uint32_t *id2 = (uint32_t*)malloc(bytes_id);
-    uint32_t count_id = bytes_id / sizeof(0[id2]);
+    uint32_t *idx = (uint32_t*)MALLOC(bytes_id);
+    uint32_t count_id = bytes_id / sizeof(0[idx]);
     for( int i = 0; i < count_id; i += 3 ) {
-        id2[ i / 3 ] = ((uint32_t*)id)[ i ];
+        idx[ i / 3 ] = ((uint32_t*)id)[ i ];
     }
-    id = id2;
+    id = idx;
     bytes_id /= 3;
-
-    // convert vertex buffers to interleaved buffer
-    float *vtx2 = (float*)malloc( bytes_vp + bytes_vt + bytes_vn );
-    int32 vcount = bytes_vp/(3*4)/3;
+    // convert buffers to single interleaved buffer
+    float *vtx = (float*)MALLOC( bytes_vp + bytes_vt + bytes_vn ), *ptr = vtx;
+    int32 vcount = bytes_vp/(3*sizeof(float));
     for( int i = 0; i < vcount; ++i ) {
-        *vtx2++ = ((float*)vp)[ i*3 + 0 ];
-        *vtx2++ = ((float*)vp)[ i*3 + 1 ];
-        *vtx2++ = ((float*)vp)[ i*3 + 2 ];
+        *ptr++ = ((float*)vp)[ i*3 + 0 ];
+        *ptr++ = ((float*)vp)[ i*3 + 1 ];
+        *ptr++ = ((float*)vp)[ i*3 + 2 ];
 
-        *vtx2++ = ((float*)vt)[ i*2 + 0 ];
-        *vtx2++ = ((float*)vt)[ i*2 + 1 ];
+        *ptr++ = ((float*)vt)[ i*2 + 0 ];
+        *ptr++ = ((float*)vt)[ i*2 + 1 ];
 
-        *vtx2++ = ((float*)vn)[ i*3 + 0 ];
-        *vtx2++ = ((float*)vn)[ i*3 + 1 ];
-        *vtx2++ = ((float*)vn)[ i*3 + 2 ];
+        *ptr++ = ((float*)vn)[ i*3 + 0 ];
+        *ptr++ = ((float*)vn)[ i*3 + 1 ];
+        *ptr++ = ((float*)vn)[ i*3 + 2 ];
     }
-    mesh2_create(self, "p3 t2 n3", vcount, vtx2, bytes_id / sizeof(uint32_t), id2, 0);
-    
-    free(vtx2);
-    free(id2);
-    return self;
+    mesh2_create(self, "p3 t2 n3", vcount, vtx, bytes_id / sizeof(uint32_t), idx, 0);
+
+    FREE(vtx);
+    FREE(idx);
 }
 
-mesh2 *mesh2_load_bob(mesh2 *self, const char *pathfile) {
-    return mesh2_parse_bob(self, file_read_(pathfile), file_size_(pathfile)); // LEAK
+void mesh2_loadfile(mesh2 *self, const char *pathfile) {
+    mesh2_loadmem(self, file_read(pathfile), file_size(pathfile));
 }
-*/
 
 #endif

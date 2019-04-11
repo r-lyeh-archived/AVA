@@ -18,16 +18,13 @@ API bool        file_isfile( const char *pathfile );
 API bool        file_islink( const char *pathfile );
 
 API char*       file_read( const char *pathfile );
+API char*       file_readz( const char *pathfile );
 API bool        file_write( const char *pathfile, const void *data, int len );
 API bool        file_append( const char *pathfile, const void *data, int len );
 
 API bool        file_copy( const char *srcpath, const char *dstpath );
 API bool        file_touch( const char *pathfile );
 API bool        file_delete( const char *path );
-
-API int   file_size_(const char* name);
-API char* file_read_(const char* name);
-API char* file_find(const char* name);
 
 #endif
 
@@ -125,6 +122,7 @@ int file_size( const char *pathfile ) {
     uint64_t s = stat8(pathfile, &st) < 0 ? 0ULL : (uint64_t)st.st_size;
     return (int)s;
 }
+
 int file_stamp( const char *pathfile ) {
     struct stat_ st;
     uint64_t t = stat8(pathfile, &st) < 0 ? 0ULL : (uint64_t)st.st_mtime;
@@ -155,13 +153,47 @@ bool file_islink( const char *pathfile ) {
 }
 
 char* file_read(const char *pathfile) {
+    static THREAD_LOCAL int map = 0;
+    static THREAD_LOCAL struct maplen { char *map; int len; } maps[16] = {0};
+    uint64_t len = file_size(pathfile);
+    char *mem = file_map( pathfile, 0, len );
+    if( mem ) {
+        struct maplen *bl = &maps[ map = ++map & (16-1) ];
+        if( bl->map ) file_unmap( bl->map, bl->len );
+        bl->map = mem;
+        bl->len = len;
+    }
+    return mem;
+}
+
+HEAP
+char* file_readz(const char *pathfile) {
+#if 0
     uint64_t len = file_size(pathfile);
     char *buf = REALLOC( 0, len + 1 ); buf[len] = 0;
     char *map = file_map( pathfile, 0, len );
     memcpy( buf, map, len );
     file_unmap( map, len );
     return buf;
+#else
+    char *buf;
+    size_t len = file_size(pathfile);
+
+    FILE *fp = fopen8(pathfile, "rb");
+    if( fp && len ) {
+        buf = malloc(len + 1);
+        len = fread(buf, 1, len, fp);
+        fclose(fp);
+    } else {
+        buf = calloc(1,4);
+        len = 0;
+    }
+
+    return (buf[len] = 0, buf);
+#endif
 }
+
+
 bool file_write(const char *pathfile, const void *data, int len) {
     bool ok = 0;
     FILE *fp = fopen8(pathfile, "wb");
@@ -230,31 +262,6 @@ bool file_delete( const char *path ) {
 }
 
 
-// to merge:
-
-int file_size_(const char *name) {
-    struct stat st;
-    return stat(name, &st) >= 0 ? (int)st.st_size : 0;
-}
-
-char* file_read_(const char* name) {
-    char *buf;
-    size_t len;
-
-    FILE *fp = fopen(name, "rb");
-    if( fp ) {
-        len = file_size_(name);
-        buf = malloc(len + 1);
-        len = fread(buf, 1, len, fp);
-        fclose(fp);
-    } else {
-        buf = calloc(1,4);
-        len = 0;
-    }
-
-    buf[len] = 0;
-    return buf;
-}
 
 
 #endif

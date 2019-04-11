@@ -25,3 +25,8 @@
 #include "render/render.c"
 #include "storage/storage.c"
 #include "window/window.c"
+
+//#include "palette.c"
+//#include "memory.c"
+//#include "string32.c"
+//#include "stringv.c"

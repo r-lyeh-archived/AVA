@@ -114,8 +114,8 @@ bool pug_decoder( image *img, const void *ptr, size_t size, int flags ) {
 }
 
 bool image_loadfile( image *img, const char *pathfile, int flags ) {
-    void *ptr = file_read_(pathfile);
-    int size = file_size_(pathfile);
+    void *ptr = file_read(pathfile);
+    int size = file_size(pathfile);
     bool ok = 0;
     if( !ok ) {
         ok = pug_decoder( img, ptr, size, flags );
