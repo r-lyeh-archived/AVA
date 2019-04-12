@@ -130,7 +130,7 @@ void (map_create)(map_t* m) {
     map_t c = {0};
     *m = c;
 
-    array_resize(m->array, (MAP_HASHSIZE+1));
+    array_reserve(m->array, (MAP_HASHSIZE+1));
     memset(m->array, 0, (MAP_HASHSIZE+1) * sizeof(m->array[0]) );
 }
 
