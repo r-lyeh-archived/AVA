@@ -8,8 +8,8 @@
 typedef struct material {
     GLenum wireframe;
     GLenum two_sided;
-    GLenum depth_mask;
-    GLenum depth_test;
+    GLenum depth_enable_write;
+    GLenum depth_enable_test;
     GLenum depth_func;
     GLenum alpha_enable;
     GLenum alpha_src;
@@ -40,19 +40,24 @@ void material_create(material *m) {
     material n = {0};
     *m = n;
 
-    m->wireframe = 0;
+    m->wireframe = false;
     //m->face_ccw = 1; // cw, ccw
-    m->two_sided = GL_TRUE; // GL_FALSE;
-    m->depth_mask = GL_TRUE;
-    m->depth_test = GL_DEPTH_TEST;
-    m->depth_func = GL_LEQUAL;
+    m->two_sided = true; // GL_FALSE;
+    m->depth_enable_write = true;
+    m->depth_enable_test = true;
+    m->depth_func = GL_LESS;
     m->alpha_enable = GL_FALSE;
-    m->alpha_src = GL_SRC_ALPHA;
-    m->alpha_dst = GL_ONE_MINUS_SRC_ALPHA;
+    m->alpha_src = GL_ONE; //GL_SRC_ALPHA;
+    m->alpha_dst = GL_ZERO; //GL_ONE_MINUS_SRC_ALPHA;
 
     //additive(GL_ONE, GL_ONE);
     //decal(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //modulate(GL_DST_COLOR, GL_ZERO)
+
+    // depth state enabled
+    // col src one
+    // col dst zero
+    // alpha src one
 
     m->u_VP = -1;
     m->u_M = -1;
@@ -68,8 +73,8 @@ void material_enable(material *m, float projview[16]) {
 
     m->two_sided ? glDisable(GL_CULL_FACE) : glEnable(GL_CULL_FACE), glCullFace(GL_BACK);
 
-    glDepthMask(m->depth_mask ? GL_TRUE : GL_FALSE);
-    m->depth_test ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+    glDepthMask(m->depth_enable_write ? GL_TRUE : GL_FALSE);
+    m->depth_enable_test ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
     glDepthFunc(m->depth_func);
 
     !m->alpha_enable ? glDisable(GL_BLEND) : glEnable(GL_BLEND),glBlendFunc(m->alpha_src, m->alpha_dst);

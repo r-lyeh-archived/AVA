@@ -522,6 +522,11 @@ void window_swap( void **pixels ) {
 
     ui_render();
 
+    static material m = {0}, *mi = 0; if( !mi ) {
+        material_create(mi = &m);
+    }
+    material_enable(mi, 0);
+
     SDL_GL_SwapWindow(window);
     glFinish();
 

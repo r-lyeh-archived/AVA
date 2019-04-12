@@ -327,7 +327,7 @@ void font_destroy( int font_id ) {
 
 void font_mesh(rendernode *r, int font_id, const char *text ) {
     font_t *f = &fonts[ font_id ];
-if(!f) { /* init on demand */ font_mem(0, 0, 0, 0); f = &fonts[0]; }
+    if(!f) { /* init on demand */ font_mem(0, 0, 0, 0); f = &fonts[0]; }
 
     // utf8 to utf32
 
