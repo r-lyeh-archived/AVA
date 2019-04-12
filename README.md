@@ -46,26 +46,26 @@
 - Inspiration from: bitsquid, nothings, rlk, krig, ccxvii, rmitton, jo.
 
 ## Todo ᕕ(ᐛ)ᕗ
-- [x] 01 [Project structure, build system and makefiles.](#01)
-- [x] 02 [Window creation and basic framework.](#02)
-- [x] 03 [Audio.](#03)
+- [x] 00 [Project structure, build system and makefiles.](#00)
+- [x] 01 [Window creation and basic framework.](#01)
+- [x] 02 [Audio.](#02)
 -
 
 ## Screenshots
 
-### 01
+### 00
 Project structure, build system and makefiles.
-<img src="games/01/demo.gif" height="96px" align="right">
+<img src="games/00/demo.gif" height="96px" align="right">
+<br><br>
+
+### 01
+Window creation and basic framework.
+<img src="games/01/demo.png" height="96px" align="right">
 <br><br>
 
 ### 02
-Window creation and basic framework.
-<img src="games/02/demo.png" height="96px" align="right">
-<br><br>
-
-### 03
 Audio.
-<img src="games/03/demo.png" height="96px" align="right">
+<img src="games/02/demo.png" height="96px" align="right">
 <br><br>
 
 ## Releases
