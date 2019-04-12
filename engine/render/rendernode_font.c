@@ -263,7 +263,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
         int end = unicode_ranges[i+1];
         int lang = unicode_ranges[i+2];
         if( flags & lang ) {
-            LOGDEBUG(TEXT, "%x [%4x..%4x]", lang, begin, end);
+            // LOGDEBUG(TEXT, "%x [%4x..%4x]", lang, begin, end);
             stbtt_PackSetOversampling(&context, f->oversampleX, f->oversampleY); /*useful on small fonts*/
             if( !stbtt_PackFontRange(&context, (unsigned char *)fontData, 0, f->size, begin, end - begin, (stbtt_packedchar*)f->charInfo + total_index) ) {
                 /*panic("Failed to pack atlas font");*/
@@ -302,8 +302,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
     //f->spaceX *= scaler;
     //f->spaceY *= scaler;
 
-    LOGDEBUG(FONT, "font spacing {%f,%f}", f->spaceX, f->spaceY);
-
+    //LOGDEBUG(FONT, "font spacing {%f,%f}", f->spaceX, f->spaceY);
     return id;
 }
 
