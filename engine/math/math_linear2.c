@@ -333,7 +333,7 @@ static m_inline float det44(const float *M) { // !!! ok, i guess
     
     return ( s[0]*c[5]-s[1]*c[4]+s[2]*c[3]+s[3]*c[2]-s[4]*c[1]+s[5]*c[0] );
 }
-static m_inline void invert44(float *T, const float *M) { // !!! ok, i guess
+static m_inline bool invert44(float *T, const float *M) { // !!! ok, i guess
     float s[6], c[6];
     s[0] = M[0*4+0]*M[1*4+1] - M[1*4+0]*M[0*4+1];
     s[1] = M[0*4+0]*M[1*4+2] - M[1*4+0]*M[0*4+2];
@@ -350,29 +350,29 @@ static m_inline void invert44(float *T, const float *M) { // !!! ok, i guess
     c[5] = M[2*4+2]*M[3*4+3] - M[3*4+2]*M[2*4+3];
     
     float det = ( s[0]*c[5]-s[1]*c[4]+s[2]*c[3]+s[3]*c[2]-s[4]*c[1]+s[5]*c[0] );
-    if( det ) {
-        float idet = 1.0f / det;
+    if( !det ) return false;
+    float idet = 1.0f / det;
 
-        T[0*4+0] = ( M[1*4+1] * c[5] - M[1*4+2] * c[4] + M[1*4+3] * c[3]) * idet;
-        T[0*4+1] = (-M[0*4+1] * c[5] + M[0*4+2] * c[4] - M[0*4+3] * c[3]) * idet;
-        T[0*4+2] = ( M[3*4+1] * s[5] - M[3*4+2] * s[4] + M[3*4+3] * s[3]) * idet;
-        T[0*4+3] = (-M[2*4+1] * s[5] + M[2*4+2] * s[4] - M[2*4+3] * s[3]) * idet;
+    T[0*4+0] = ( M[1*4+1] * c[5] - M[1*4+2] * c[4] + M[1*4+3] * c[3]) * idet;
+    T[0*4+1] = (-M[0*4+1] * c[5] + M[0*4+2] * c[4] - M[0*4+3] * c[3]) * idet;
+    T[0*4+2] = ( M[3*4+1] * s[5] - M[3*4+2] * s[4] + M[3*4+3] * s[3]) * idet;
+    T[0*4+3] = (-M[2*4+1] * s[5] + M[2*4+2] * s[4] - M[2*4+3] * s[3]) * idet;
 
-        T[1*4+0] = (-M[1*4+0] * c[5] + M[1*4+2] * c[2] - M[1*4+3] * c[1]) * idet;
-        T[1*4+1] = ( M[0*4+0] * c[5] - M[0*4+2] * c[2] + M[0*4+3] * c[1]) * idet;
-        T[1*4+2] = (-M[3*4+0] * s[5] + M[3*4+2] * s[2] - M[3*4+3] * s[1]) * idet;
-        T[1*4+3] = ( M[2*4+0] * s[5] - M[2*4+2] * s[2] + M[2*4+3] * s[1]) * idet;
+    T[1*4+0] = (-M[1*4+0] * c[5] + M[1*4+2] * c[2] - M[1*4+3] * c[1]) * idet;
+    T[1*4+1] = ( M[0*4+0] * c[5] - M[0*4+2] * c[2] + M[0*4+3] * c[1]) * idet;
+    T[1*4+2] = (-M[3*4+0] * s[5] + M[3*4+2] * s[2] - M[3*4+3] * s[1]) * idet;
+    T[1*4+3] = ( M[2*4+0] * s[5] - M[2*4+2] * s[2] + M[2*4+3] * s[1]) * idet;
 
-        T[2*4+0] = ( M[1*4+0] * c[4] - M[1*4+1] * c[2] + M[1*4+3] * c[0]) * idet;
-        T[2*4+1] = (-M[0*4+0] * c[4] + M[0*4+1] * c[2] - M[0*4+3] * c[0]) * idet;
-        T[2*4+2] = ( M[3*4+0] * s[4] - M[3*4+1] * s[2] + M[3*4+3] * s[0]) * idet;
-        T[2*4+3] = (-M[2*4+0] * s[4] + M[2*4+1] * s[2] - M[2*4+3] * s[0]) * idet;
+    T[2*4+0] = ( M[1*4+0] * c[4] - M[1*4+1] * c[2] + M[1*4+3] * c[0]) * idet;
+    T[2*4+1] = (-M[0*4+0] * c[4] + M[0*4+1] * c[2] - M[0*4+3] * c[0]) * idet;
+    T[2*4+2] = ( M[3*4+0] * s[4] - M[3*4+1] * s[2] + M[3*4+3] * s[0]) * idet;
+    T[2*4+3] = (-M[2*4+0] * s[4] + M[2*4+1] * s[2] - M[2*4+3] * s[0]) * idet;
 
-        T[3*4+0] = (-M[1*4+0] * c[3] + M[1*4+1] * c[1] - M[1*4+2] * c[0]) * idet;
-        T[3*4+1] = ( M[0*4+0] * c[3] - M[0*4+1] * c[1] + M[0*4+2] * c[0]) * idet;
-        T[3*4+2] = (-M[3*4+0] * s[3] + M[3*4+1] * s[1] - M[3*4+2] * s[0]) * idet;
-        T[3*4+3] = ( M[2*4+0] * s[3] - M[2*4+1] * s[1] + M[2*4+2] * s[0]) * idet;
-    }
+    T[3*4+0] = (-M[1*4+0] * c[3] + M[1*4+1] * c[1] - M[1*4+2] * c[0]) * idet;
+    T[3*4+1] = ( M[0*4+0] * c[3] - M[0*4+1] * c[1] + M[0*4+2] * c[0]) * idet;
+    T[3*4+2] = (-M[3*4+0] * s[3] + M[3*4+1] * s[1] - M[3*4+2] * s[0]) * idet;
+    T[3*4+3] = ( M[2*4+0] * s[3] - M[2*4+1] * s[1] + M[2*4+2] * s[0]) * idet;
+    return true;
 }
 static m_inline vec3 transform44(const float *m, const vec3 p) {
     float d = 1.0f / (m[3] * p.x + m[7] * p.y + m[11] * p.z + m[15]);
@@ -382,13 +382,27 @@ static m_inline vec3 transform44(const float *m, const vec3 p) {
         d * (m[2] * p.x + m[6] * p.y + m[10] * p.z + m[14])
     );
 }
-
 static m_inline vec4 transform444(const float *m, const vec4 p) {
     float x = (m[0] * p.x) + (m[4] * p.y) + (m[ 8] * p.z) + m[12]; // p.w (vec4) assumed to be 1
     float y = (m[1] * p.x) + (m[5] * p.y) + (m[ 9] * p.z) + m[13];
     float z = (m[2] * p.x) + (m[6] * p.y) + (m[10] * p.z) + m[14];
     float w = (m[3] * p.x) + (m[7] * p.y) + (m[11] * p.z) + m[15]; // rw
     return vec4(x,y,z,w);
+}
+static m_inline bool unproject44(vec3 *out, int sx, int sy, float dz, vec4 viewport, mat44 mvp) { 
+    // sy: usually window_height()-y instead, dz:0=near,1=far
+    // src: https://www.khronos.org/opengl/wiki/GluProject_and_gluUnProject_code
+    mat44 inv_mvp;
+    if( invert44(inv_mvp, mvp) ) {
+        vec4 in = vec4( (sx-viewport.x)/viewport.z*2-1, (sy-viewport.y)/viewport.w*2-1, 2*dz-1, 1 );
+        vec4 p = transform444(inv_mvp, in);
+        if( p.w != 0 ) {
+            p.w = 1.f/p.w;
+            *out = vec3(p.x*p.w,p.y*p.w,p.z*p.w);
+            return true;
+        }
+    }
+    return false;
 }
 
 
