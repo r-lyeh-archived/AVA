@@ -176,20 +176,23 @@ char* file_readz(const char *pathfile) {
     file_unmap( map, len );
     return buf;
 #else
-    char *buf;
-    size_t len = file_size(pathfile);
+    static THREAD_LOCAL int buf = 0;
+    static THREAD_LOCAL char *bufs[16] = {0};
+    char **data = &bufs[ buf = ++buf & (16-1) ];
 
+    size_t len = file_size(pathfile);
     FILE *fp = fopen8(pathfile, "rb");
+
     if( fp && len ) {
-        buf = malloc(len + 1);
-        len = fread(buf, 1, len, fp);
+        *data = REALLOC(*data, len + 1);
+        len = fread(*data, 1, len, fp);
         fclose(fp);
     } else {
-        buf = calloc(1,4);
+        *data = REALLOC(*data, 4);
         len = 0;
     }
 
-    return (buf[len] = 0, buf);
+    return ((*data)[len] = 0, *data);
 #endif
 }
 

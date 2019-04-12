@@ -310,7 +310,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
 int font( const char *fontfile, int fontSize, int flags ) {
     char *data = file_read(fontfile);
     int id = font_mem( data, file_size(fontfile), fontSize, flags );
-    free(data);
+    // free(data);
     return id;
 }
 

@@ -128,6 +128,7 @@ bool image_loadfile( image *img, const char *pathfile, int flags ) {
     } else {
         printf("%s %dx%dx%d\n", pathfile, img->w, img->h, img->channels);
     }
+    // free(ptr);
     return ok;
 }
 
