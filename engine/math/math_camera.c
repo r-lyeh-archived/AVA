@@ -126,7 +126,7 @@ void flycamera(
     multiply44(rotationYX, rotationY, rotationX);
 
     // apply move delta to head position
-    vec3 worldMovement = transform44(rotationYX, move_delta);
+    vec3 worldMovement = transform344(rotationYX, move_delta);
     *position = add3(*position, worldMovement);
 
     // construct view matrix
