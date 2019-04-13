@@ -15,7 +15,12 @@ int main() {
     while (window_update()) {
         ui_demo();
 
-        window_swap(0);
+        // swap & capture
+        static void *pixels = 0;
+        window_swap( &pixels );
+
+        // send capture to remote view
+        network_sendbuf( pixels, window_width(), window_height(), 3, 7755 );
     }
 }
 
