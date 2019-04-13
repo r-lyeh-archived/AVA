@@ -188,8 +188,8 @@ material* font_material() {
             "in vec4 v_color0;\n"
             "in vec2 v_uv0;\n"
             "void main() {\n"
-            "    vec4 c = texture(u_mainTex, v_uv0);\n"
-            "    fragColor = v_color0 * vec4(c.r, c.r, c.r, c.r);\n"
+            "    float r = texture(u_mainTex, v_uv0).r;\n"
+            "    fragColor = v_color0 * r;\n"
             "}\n";
         material_create(&m);
         m.shader = shader(vs, fs);
@@ -209,18 +209,19 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
         seen = 1;
         // init placeholder
         font_mem(bm_mini_ttf, bm_mini_ttf_length, 8, FONT_RANGE_EU /*512, no oversample*/ );
+
         // assign it to slot #0
         fonts[0] = fonts[1];
         fonts_count = 0;
     }
 
-    // return placeholder font #0 (silkscreen) if null or empty data
+    // return placeholder font #0 if null or empty data
     if(!fontData || fileSize <= 0 || fontSize <= 0) {
         return 0;
     }
 
     int id = (++fonts_count);
-    fonts = (font_t*)realloc( fonts, sizeof(font_t) * (id+1) );
+    fonts = (font_t*)REALLOC( fonts, sizeof(font_t) * (id+1) );
     font_t *f = &fonts[ id ];
     memset(f, 0, sizeof(font_t));
     f->id = id;
@@ -248,9 +249,9 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
     }
     charCount = 0xFFFF;
     
-    f->lookup = (int*)calloc( 1, sizeof(int) * charCount );
-    f->charInfo = malloc(sizeof(stbtt_packedchar) * charCount);
-    uint8_t *atlasData = (uint8_t*)malloc(f->atlasWidth * f->atlasHeight);
+    f->lookup = (int*)CALLOC( 1, sizeof(int) * charCount );
+    f->charInfo = MALLOC(sizeof(stbtt_packedchar) * charCount);
+    uint8_t *atlasData = (uint8_t*)MALLOC(f->atlasWidth * f->atlasHeight);
 
     int total_index = 0;
 
@@ -282,9 +283,9 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
     img.h = f->atlasHeight;
     img.channels = 1;
     img.pixels = atlasData;
-    f->texture_id = texture_mem(img, 0 /* |TEXTURE_NEAREST */ /* gl3: |TEXTURE_MIPMAPS */ /* gl2: |TEXTURE_ANISOTROPY*/);
+    f->texture_id = texture_mem(img, 0 |TEXTURE_NEAREST /* gl3: |TEXTURE_MIPMAPS */ /* gl2: |TEXTURE_ANISOTROPY*/);
 
-    free(atlasData);
+    FREE(atlasData);
 
     // config character spacing
     uint32_t default_char = 'W'; // 'A'
@@ -307,9 +308,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
 }
 
 int font( const char *fontfile, int fontSize, int flags ) {
-    char *data = file_read(fontfile);
-    int id = font_mem( data, file_size(fontfile), fontSize, flags );
-    // free(data);
+    int id = font_mem( file_read(fontfile), file_size(fontfile), fontSize, flags );
     return id;
 }
 
@@ -317,8 +316,8 @@ void font_destroy( int font_id ) {
     font_t *f = &fonts[ font_id ];
 
     texture_destroy( &f->texture_id );
-    free( f->charInfo );
-    free( f->lookup );
+    FREE( f->charInfo );
+    FREE( f->lookup );
 
     font_t zero = {0};
     *f = zero;
@@ -337,10 +336,10 @@ void font_mesh(rendernode *r, int font_id, const char *text ) {
 
 #if 1
     // 4 verts, 6 edges/2 polys
-    int vlen = 4 * count; void *vertices = (void*)malloc( vlen * sizeof(vec3) );
-    int ulen = 4 * count; void *uvs      = (void*)malloc( ulen * sizeof(vec2) );
-    int clen = 4 * count; void *colors   = (void*)malloc( clen * sizeof(uint32_t) );
-    int ilen = 6 * count; void *indexes  = (void*)malloc( ilen * sizeof(uint16_t) );
+    int vlen = 4 * count; void *vertices = (void*)MALLOC( vlen * sizeof(vec3) );
+    int ulen = 4 * count; void *uvs      = (void*)MALLOC( ulen * sizeof(vec2) );
+    int clen = 4 * count; void *colors   = (void*)MALLOC( clen * sizeof(uint32_t) );
+    int ilen = 6 * count; void *indexes  = (void*)MALLOC( ilen * sizeof(uint16_t) );
 #else
     static const int k_maxstrlen = 1024;
     static GLfloat vertdata[...];
@@ -407,15 +406,15 @@ void font_mesh(rendernode *r, int font_id, const char *text ) {
     };
     mesh(&r->mesh1, VERTEX_P|VERTEX_C|VERTEX_U | 16, ilen, buffers );
 #else
-    r->mesh = malloc( sizeof(mesh2) );
+    r->mesh = MALLOC( sizeof(mesh2) );
     mesh2_create(r->mesh, vertices );
 #endif
 
-    free(vertices);
-    free(colors);
-    free(uvs);
-    free(indexes);
-    free(text32);
+    FREE(vertices);
+    FREE(colors);
+    FREE(uvs);
+    FREE(indexes);
+    FREE(text32);
 }
 
 void font_create(font_t*f, const char *fontfile, int fontsize, int fontflags ) {

@@ -50,9 +50,13 @@ void material_create(material *m) {
     m->alpha_src = GL_ONE; //GL_SRC_ALPHA;
     m->alpha_dst = GL_ZERO; //GL_ONE_MINUS_SRC_ALPHA;
 
-    //additive(GL_ONE, GL_ONE);
-    //decal(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //modulate(GL_DST_COLOR, GL_ZERO)
+    // for regular alpha,
+    //   additive(GL_ONE, GL_ONE)
+    //   decal(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    //   modulate(GL_DST_COLOR, GL_ZERO)
+    //or for premultiplied alpha,
+    //   premultiply(GL_ONE, GL_ONE_MINUS_SRC_ALPHA); 
+    //   then, in shader: vec4(rgb * alpha, alpha) for normal blending, and vec4(rgb, 0) for additive.
 
     // depth state enabled
     // col src one

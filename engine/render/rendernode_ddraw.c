@@ -7,30 +7,38 @@
 #define DDRAW_H
 
 // add functions
+
+API void ddraw_begin(float projview[16]);
+API void ddraw_end(void);
+
+API void ddraw_color(vec4 color);
+
 API void ddraw_aabb(vec3 minbb, vec3 maxbb);
 API void ddraw_arrow(vec3 from, vec3 to);
 API void ddraw_axis(vec3 center, float radius);
-API void ddraw_box(vec3 center, float width, float height, float depth); //void ddraw_box_(vec3 points[8]); // instead?
+API void ddraw_box(vec3 center, vec3 extents);
 API void ddraw_circle(vec3 center, vec3 dir, float radius);
 API void ddraw_cone(vec3 pos1, vec3 pos2, float radius);
 API void ddraw_cross(vec3 center, float radius);
 API void ddraw_frustum(float projview_matrix[16]);
 API void ddraw_grid(int hcols, int hrows, float step);
-API void ddraw_line(vec3 from, vec3 to); //void ddraw_lineEx( vec3 src, vec3 dst, float srccolor[4], float dstcolor[4] );
+API void ddraw_line(vec3 from, vec3 to);
 API void ddraw_normal(vec3 center, vec3 dir, float radius);
 API void ddraw_ring(vec3 center, vec3 dir, float radius);
 API void ddraw_sphere(vec3 center, float radius);
 API void ddraw_sphere2(vec3 center, float radius);
 API void ddraw_xzgrid(float mins, float maxs, float y, float step);
 
-API  int ddraw_menu( int submenu_id, const char **lines );
-API void ddraw_text2d( vec2 center, const char *fmt, ... );
-API void ddraw_text3d( vec3 center, const char *fmt, ... );
-API void ddraw_console( const char *fmt, ... );
-API void ddraw_render2d();
+//
 
 API void ddraw_printf( const char *buf );
-#define ddraw_printf(...) ddraw_printf(va(__VA_ARGS__))
+API void ddraw_console( const char *buf );
+API void ddraw_text2d( vec2 center, const char *buf );
+//API void ddraw_text3d( vec3 center, const char *fmt, ... );
+
+#define ddraw_printf(...)   ddraw_printf(va(__VA_ARGS__))
+#define ddraw_console(...)   ddraw_console(va(__VA_ARGS__))
+#define ddraw_text2d(p,...) ddraw_text2d(p,va(__VA_ARGS__))
 
 // void pushScale(x);
 // void popScale();
@@ -38,24 +46,14 @@ API void ddraw_printf( const char *buf );
 // void popExpire();
 // void pushDepth(on/off);
 // void popDepth();
-
+//
 // void ddraw_point(vec3 location);
-// void ddraw_text2d(vec3 location, const char *text);
-// void ddraw_text3d(vec3 location, const char *text);
-// 
 // void ddraw_enable(int debugMode);
 
-void ddraw_color(float r, float g, float b, float a);
-
-void ddraw_begin(float projview[16]);
-void ddraw_end(void);
-
+void ddraw_lineEx( vec3 src, vec3 dst, vec4 col ); // src_col, dst_col
 void ddraw_triangle(vec3 p, vec3 q, vec3 r);
 void ddraw_quad(vec3 a, vec3 b, vec3 c, vec3 d);
 //void ddraw_rect(float a[2], float b[2]);
-//void ddraw_box_(float pvec3[8]);
-
-void ddraw_lineEx( vec3 src, vec3 dst, vec4 col );
 
 #endif
 
@@ -68,19 +66,6 @@ void ddraw_lineEx( vec3 src, vec3 dst, vec4 col );
 #include "rendernode_font.c"
 #include "engine.h" // app/window
 //#include "render_ddraw.c"
-
-// find/compute basis/triad/axes from single normal
-
-static void basis3(vec3 *tangent, vec3 *bitangent, const vec3 normal) {
-    // perp_vector(tangent, normal)
-    if( normal.z * normal.z < normal.x * normal.x ) {
-        *tangent = vec3(normal.y,-normal.x,0);
-    } else {
-        *tangent = vec3(0,-normal.z,normal.y);
-    }
-
-    *bitangent = cross3(*tangent, normal);
-}
 
 // 
 
@@ -138,7 +123,7 @@ void ortho(mat44 proj, int flags) {
             translate44(proj, -1, +1, 0 ); 
         } else {
             // (0,0) top-left, (w,h) bottom-right
-            ortho44(proj, 0,w,h,0, -1,1 );
+            ortho44(proj, 0,w,-h,0, -1,1 );
         }
     }
     if( flags & ORTHO_BOTTOMLEFT ) {
@@ -202,11 +187,8 @@ static struct vertex_p3c4_ { vec3 position; vec4 color; } draw_buf[MAXBUFFER];
 static vec4 draw_color = { 1, 1, 1, 1 };
 static int draw_kind = GL_LINES;
 
-void ddraw_color(float r, float g, float b, float a) {
-    draw_color.r = r;
-    draw_color.g = g;
-    draw_color.b = b;
-    draw_color.a = a;
+void ddraw_color(vec4 c) {
+    draw_color = c;
 }
 
 void ddraw_begin(float projview[16]) {
@@ -518,13 +500,13 @@ void ddraw_box_(vec3 points[8]) {
     }
 }
 
-void ddraw_box(vec3 center, float width, float height, float depth ) {
+void ddraw_box(vec3 center, vec3 extents) {
     const float cx = center.x;
     const float cy = center.y;
     const float cz = center.z;
-    const float w  = width  * 0.5f;
-    const float h  = height * 0.5f;
-    const float d  = depth  * 0.5f;
+    const float w  = extents.x * 0.5f;
+    const float h  = extents.y * 0.5f;
+    const float d  = extents.z * 0.5f;
 
     // Create all the 8 points:
     vec3 points[8];
@@ -564,7 +546,7 @@ void ddraw_circle(vec3 center, vec3 normal, float radius) {
     const float segments = 32;
 
     vec3 left = {0}, up = {0};
-    basis3(&left, &up, normal);
+    ortho3(&left, &up, normal);
 
     vec3 point, lastPoint;
     up = scale3(up, radius);
@@ -595,7 +577,7 @@ void ddraw_cone(vec3 begin, vec3 end, float radius) {
     const float bars = 12;
 
     vec3 x = {0}, y = {0}, n = norm3(sub3(end, begin));
-    basis3(&x, &y, n);
+    ortho3(&x, &y, n);
 
     ddraw_circle(end, n, radius);
     for (int i=0; i<bars; ++i) {
@@ -667,15 +649,13 @@ void ddraw_frustum(float projview[16]) {
 #include <stdlib.h>
 #include <string.h>
 
-static char *ddraw__console[16] = {0};
-static int ddraw__line = 0;
-void ddraw_console(const char *fmt, ...) {
-    //fmt = FORMAT(fmt);
-    char buf[256]; va_list vl; va_start(vl, fmt); vsnprintf(buf, 256, fmt, vl); va_end(vl); fmt = buf;
+static int console_line_ = 0;
+static char *console_lines_[16] = {0};
 
-    ddraw__line++; ddraw__line %= 16;
-    //strcpyf( &ddraw__console[ddraw__line], "%s", fmt );
-    ddraw__console[ddraw__line] = realloc( ddraw__console[ddraw__line], strlen(fmt)+1); strcpy( ddraw__console[ddraw__line], fmt );
+void (ddraw_console)(const char *buf) {
+    console_line_++; console_line_ %= 16;
+    console_lines_[console_line_] = realloc( console_lines_[console_line_], strlen(buf)+1); 
+    strcpy( console_lines_[console_line_], buf );
 }
 
 // ----------------------------------------------------------------------------
@@ -705,34 +685,19 @@ void ddraw_clear() {
 }
 
 // default embedded font
-//const
-int ddraw_font = 0;
 
-void ddraw_text2d( vec2 center, const char *fmt, ... ) {
+int ddraw_font = 0;
+int ddraw_spacey = 10; // fonts[0].spaceY
+
+void (ddraw_text2d)( vec2 pos, const char *buf ) {
     rendernode *r = ddraw_find_slot();
     if( !r ) return;
 
-    //fmt = FORMAT(fmt);
-    char buf[256]; va_list vl; va_start(vl, fmt); vsnprintf(buf, 256, fmt, vl); va_end(vl); fmt = buf;
-
-
-#if 0
-    if(!ddraw_font && __argc > 1) {
-        ddraw_font = font(__argv[1], __argc > 2 ? atoi(__argv[2]) : 8, FONT_RANGE_EU /*512, no oversample*/ );
-    }
-#endif
-
     // create mesh
-    font_mesh( r, ddraw_font, fmt );
+    font_mesh( r, ddraw_font, buf );
 
-    // @todo: fix this
-    // create transform
-    float scale = 3;
-    identity44(r->tf.matrix);
-#if 1
-    scale44(r->tf.matrix, (float)scale / window_width(), (float)scale / window_height(), 1);
-    translate44( r->tf.matrix, center.x, center.y, 0 );
-#endif
+    scaling44(r->tf.matrix, 1,1,1);
+    translate44( r->tf.matrix, pos.x, - pos.y, 0 );
 }
 
 //-----------------------------------------------------------------------------
@@ -740,42 +705,7 @@ void ddraw_text2d( vec2 center, const char *fmt, ... ) {
 static int ddraw_printf_line = 0;
 
 void (ddraw_printf)(const char *buf) {
-    ddraw_text2d( vec2(-window_width()/4,window_height()/6-ddraw_printf_line++*10), buf );
-}
-
-// ----------------------------------------------------------------------------
-
-enum { MAX_MENUS = 256 };
-
-int ddraw_menu( int submenu_id, const char **options ) {
-    if( submenu_id < 0 || submenu_id >= MAX_MENUS ) {
-        return -1;
-    }
-    if( !options ) {
-        return -1;
-    }
-
-    int options_size = 0;
-    for( int i = 0; options[i]; ++i ) {
-        ++options_size;
-    }
-
-    if( !options_size ) {
-        return -1;
-    }
-
-    static int selection[MAX_MENUS] = {0};
-
-    int *s = &selection[ 0 ];
-    if( key('UP') ) { *s = *s - 1; if( *s < 0 ) *s = options_size - 1; }
-    if( key('DOWN') ) { *s = *s + 1; if( *s >= options_size ) *s = 0; }
-
-    for( int i = 0; options[i]; ++i ) {
-        vec2 pos = {0, -i * 12 };
-        ddraw_text2d( pos, "%s%s", *s == i ? ">> " : " - ", options[i] );
-    }
-
-    return key('\n') ? *s : -1;
+    (ddraw_text2d)( vec2(3,ddraw_printf_line++ * ddraw_spacey), buf );
 }
 
 // ----------------------------------------------------------------------------
@@ -788,8 +718,10 @@ void ddraw_render2d() {
         if (!ddraw_font) ddraw_printf(""); // instance ddraw_font here :o)
         mat.texture = fonts[ddraw_font].texture_id;
         mat.alpha_enable = 1;
-        mat.alpha_src = GL_ONE;
-        mat.alpha_dst = GL_ONE;
+        mat.alpha_src = GL_ONE, mat.alpha_dst = GL_ONE_MINUS_SRC_ALPHA; // premultiplied
+        mat.alpha_src = GL_DST_COLOR, mat.alpha_dst = GL_ZERO; // modulate
+        mat.alpha_src = GL_ONE, mat.alpha_dst = GL_ONE; // additive
+        mat.alpha_src = GL_SRC_ALPHA, mat.alpha_dst = GL_ONE_MINUS_SRC_ALPHA; // decal
     }
 
     // setup matrices
@@ -803,36 +735,50 @@ void ddraw_render2d() {
     multiply44(projview2d_center, view, proj2d);
 
     mat44 projview2d_topleft;
-    ortho(proj2d, ORTHO_TOPLEFT | ORTHO_NORMALIZED);
+    ortho(proj2d, ORTHO_TOPLEFT /*| ORTHO_NORMALIZED */ );
     multiply44(projview2d_topleft, view, proj2d);
 
+    mat44 projview2d_bottomleft;
+    ortho(proj2d, ORTHO_BOTTOMLEFT /*| ORTHO_NORMALIZED */ );
+    multiply44(projview2d_bottomleft, view, proj2d);
+
     // texts
-    material_enable(&mat, projview2d_center);
+    material_enable(&mat, projview2d_topleft);
     for( int i = 0; i < instanced_shapes; ++i ) {
         shapes[i].material = &mat;
         rendernode_draw(&shapes[i], shapes[i].tf.matrix);
     }
 
     // draw console
-    material_enable(&mat, projview2d_topleft);
+    material_enable(&mat, projview2d_bottomleft);
     float spacing = fonts[ddraw_font].spaceY;
-    for(int l = ddraw__line; l < ddraw__line + 16; ++l) {
-        int p = l - ddraw__line;
-        int i = l % 16;
-        if( ddraw__console[i] ) {
-            float scale = 3;
-
+    for(int l = 0; l < 16; ++l) {
+        int p = console_line_ + l;
+        int i = (p+1) % 16;
+        if( console_lines_[i] ) {
             mat44 m;
             identity44(m);
-            scale44(m, scale / window_width(), scale / window_height(), 1);
-            translate44( m, 0, -p * spacing,0 );
+            translate44( m, 0, (l+1) * spacing,0 );
 
             rendernode r = { 0 };
-            font_mesh(&r, ddraw_font, ddraw__console[i]);
+            font_mesh(&r, ddraw_font, console_lines_[i]);
             r.material = &mat;
             rendernode_draw(&r, m);
             rendernode_destroy(&r);
         }
+    }
+    // draw console input
+    static unsigned char cursor = 0;
+    {
+        mat44 m;
+        identity44(m);
+        translate44( m, 0, 0, 0 );
+
+        rendernode r = { 0 };
+        font_mesh(&r, ddraw_font, (++cursor > 127) ? ">_" : "> " );
+        r.material = &mat;
+        rendernode_draw(&r, m);
+        rendernode_destroy(&r);
     }
 
     ddraw_clear();
