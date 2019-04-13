@@ -99,6 +99,7 @@ static m_inline int   finite3  (vec3   a          ) { return finite2(vec2(a.x,a.
 static m_inline vec3  lerp3 (vec3 a,vec3 b,float t) { return add3(scale3((a),1-(t)), scale3((b), t)); }
 //static m_inline vec3 tricross3 (vec3 a, vec3 b, vec3 c) { return cross3(a,cross3(b,c)); } // useful?
 static m_inline void  ortho3   (vec3 *left, vec3 *up, vec3 v) {
+#if 0
     if ((v.z * v.z) > (0.7f * 0.7f)) {
         float sqrlen  = v.y*v.y + v.z*v.z;
         float invlen  = 1.f / sqrtf(sqrlen);
@@ -110,6 +111,10 @@ static m_inline void  ortho3   (vec3 *left, vec3 *up, vec3 v) {
         *left = vec3(-v.y*invlen, v.x*invlen, 0);
         *up = vec3(-v.z*left->y, v.z*left->x, sqrlen*invlen);
     }
+#else
+    *left = (v.z*v.z) < (v.x*v.x) ? vec3(v.y,-v.x,0) : vec3(0,-v.z,v.y);
+    *up = cross3(*left, v);
+#endif
 }
 
 static m_inline vec4  ptr4     (const float *a    ) { return vec4(a[0],a[1],a[2],a[3]); }
