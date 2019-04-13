@@ -339,6 +339,9 @@ int window_create( float zoom, int flags ) {
             *dot = '\0';
         }
     }
+    const char *wtitle = __argv[0];
+#else
+    const char *wtitle = "";
 #endif
 
     flags |= WINDOW_LEGACY_OPENGL; // O:)
@@ -431,7 +434,7 @@ int window_create( float zoom, int flags ) {
         #endif
 
             window = SDL_CreateWindow(
-                "",
+                wtitle,
                 bounds.x + (bounds.w - appw) / 2, bounds.y + (bounds.h - apph) / 2,
                 appw, apph, sdl_window_flags
             );
@@ -450,7 +453,7 @@ int window_create( float zoom, int flags ) {
         /* SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG); */ have_debug = GL_FALSE;
 
         window = SDL_CreateWindow(
-            "",
+            wtitle,
             bounds.x + (bounds.w - appw) / 2, bounds.y + (bounds.h - apph) / 2,
             appw, apph, sdl_window_flags
         );
@@ -471,7 +474,7 @@ int window_create( float zoom, int flags ) {
 
     window_load_opengl();
 
-    //glfwSetKeyCallback(window, key_callback);
+    //glEnable(GL_FRAMEBUFFER_SRGB);
 
 #if 0
     // center
@@ -479,8 +482,6 @@ int window_create( float zoom, int flags ) {
         glfwSetWindowPos(window , (desktop->width-appw)/2 , (desktop->height-apph)/2);
     }
 #endif
-
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     renderer_init();
 
@@ -491,6 +492,8 @@ int window_create( float zoom, int flags ) {
     set_mouse( flags & WINDOW_NO_MOUSE ? 'hide' : 'show' );
 
     ui_create();
+
+    SDL_RaiseWindow(window);
 
     return 1;
 }
@@ -576,7 +579,6 @@ void window_fullscreen(bool enabled) {
 
 char* window_timings() {
     static double num_frames = 0, begin = FLT_MAX, fps = 0, prev_frame = 0;
-    static int c = 0; char barcode = "/|\\-"[c=(c+1)&3];
 
     double now = SDL_GetTicks() / 1000.0; // glfwGetTime();
     if( begin > now ) {
@@ -596,7 +598,7 @@ char* window_timings() {
     appname = __argv[0];
 #endif
 
-    char *buf = va("%s %.2ffps %.2fms %c", appname, fps, (now - prev_frame) * 1000.f, barcode);
+    char *buf = va("%s %.2ffps %.2fms", appname, fps, (now - prev_frame) * 1000.f);
     buf += (buf[0] == ' ');
 
     prev_frame = now;
