@@ -717,6 +717,7 @@ void ddraw_render2d() {
         mat = *font_material();
         if (!ddraw_font) ddraw_printf(""); // instance ddraw_font here :o)
         mat.texture = fonts[ddraw_font].texture_id;
+        mat.depth_func = GL_LEQUAL;
         mat.alpha_enable = 1;
         mat.alpha_src = GL_ONE, mat.alpha_dst = GL_ONE_MINUS_SRC_ALPHA; // premultiplied
         mat.alpha_src = GL_DST_COLOR, mat.alpha_dst = GL_ZERO; // modulate

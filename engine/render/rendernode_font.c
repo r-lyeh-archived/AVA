@@ -197,6 +197,7 @@ material* font_material() {
         m.u_M = glGetUniformLocation(m.shader, "u_M");
         m.u_texture = glGetUniformLocation(m.shader, "u_mainTex");
         m.two_sided = 1;
+        m.depth_func = GL_LEQUAL;
         m.alpha_enable = 1;
         m.alpha_src = GL_SRC_ALPHA, m.alpha_dst = GL_ONE_MINUS_SRC_ALPHA;
     }

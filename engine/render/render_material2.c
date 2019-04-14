@@ -7,6 +7,7 @@
 
 typedef struct material {
     GLenum wireframe;
+    GLenum face_ccw;
     GLenum two_sided;
     GLenum depth_enable_write;
     GLenum depth_enable_test;
@@ -41,7 +42,7 @@ void material_create(material *m) {
     *m = n;
 
     m->wireframe = false;
-    //m->face_ccw = 1; // cw, ccw
+    m->face_ccw = 1; // cw, ccw
     m->two_sided = true; // GL_FALSE;
     m->depth_enable_write = true;
     m->depth_enable_test = true;
@@ -83,7 +84,7 @@ void material_enable(material *m, float projview[16]) {
 
     !m->alpha_enable ? glDisable(GL_BLEND) : glEnable(GL_BLEND),glBlendFunc(m->alpha_src, m->alpha_dst);
 
-    //glFrontFace(GL_CCW);
+    m->face_ccw ? glFrontFace(GL_CCW) : glFrontFace(GL_CW);
 
     // set shader
     glUseProgram(m->shader);
