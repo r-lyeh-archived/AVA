@@ -57,9 +57,20 @@ API void   mesh2_destroy(mesh2* m);
 
 #ifdef MESH2_C
 #pragma once
-
 #include <stdlib.h>
 #include <stdarg.h>
+
+#define STS_VERTEX_CACHE_OPTIMIZER_IMPLEMENTATION
+#include "3rd/sts_vertex_cache_optimizer.h"
+
+static
+unsigned int *index_optimize(unsigned int *index_data, int index_count, int vertex_count) {
+    float before = stsvco_compute_ACMR( index_data, index_count, 8 );
+    stsvco_optimize( index_data, index_count, vertex_count, 32 );
+    float after = stsvco_compute_ACMR( index_data, index_count, 8 );
+    printf("vertex optimization %f -> %f\n", before, after);
+    return index_data;
+}
 
 typedef int mesh2_static_assert[ sizeof(mesh2) == 64 ];
 
@@ -105,6 +116,10 @@ void mesh2_create(mesh2* m, const char *format, int vertex_count, void *vertex_d
     // index data
     if( index_data && index_count ) {
         m->index_count = index_count;
+
+        if( 0 )
+        if( vertex_count )
+        index_optimize(index_data, index_count, vertex_count);
 
         glGenBuffers(1, &m->ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ibo);
