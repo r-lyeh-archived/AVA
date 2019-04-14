@@ -14,6 +14,7 @@
 #define MESH2_C
 #define VIEWPORT2_C
 #define MATERIAL2_C
+#define DDRAW2_C
 
 #define RENDERNODE_C
 #endif
@@ -31,5 +32,6 @@
 #include "render_viewport2.c"
 #include "render_material2.c"
 #include "render_mesh2.c"
+#include "render_ddraw2.c"
 
 #include "rendernode.c"
