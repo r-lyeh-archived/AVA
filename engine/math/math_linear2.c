@@ -5,7 +5,10 @@
 #include <math.h>
 #include <float.h>
 
-#define M__PI 3.14159265358979323846f
+#define M__EPSILON (1e-6)
+#define M__PI      (3.141592654f) // (3.14159265358979323846f)
+#define TO_RAD     (M__PI/180.f)
+#define TO_DEG     (180.f/M__PI)
 
 #if defined(_MSC_VER) && !defined(__cplusplus)
 #define m_inline __inline
@@ -52,6 +55,9 @@ static m_inline float minf     (float  a, float  b) { return a < b ? a : b; }
 static m_inline float maxf     (float  a, float  b) { return a > b ? a : b; }
 static m_inline float absf     (float  a          ) { return a < 0.0f ? -a : a; }
 static m_inline float pmodf    (float  a, float  b) { return (a < 0.0f ? 1.0f : 0.0f) + (float)fmod(a, b); } // positive mod
+static m_inline float signf    (float  a)           { return (a < 0) ? -1.f : 1.f; }
+static m_inline float clampf(float v,float a,float b){return maxf(minf(b,v),a); }
+
 
 static m_inline vec2  ptr2     (const float *a    ) { return vec2(a[0],a[1]); }
 //
@@ -60,7 +66,7 @@ static m_inline vec2  add2     (vec2   a, vec2   b) { return vec2(a.x + b.x, a.y
 static m_inline vec2  sub2     (vec2   a, vec2   b) { return vec2(a.x - b.x, a.y - b.y); }
 static m_inline vec2  mul2     (vec2   a, vec2   b) { return vec2(a.x * b.x, a.y * b.y); }
 static m_inline vec2  scale2   (vec2   a, float  b) { return vec2(a.x * b, a.y * b); }
-static m_inline vec2  div2     (vec2   a, float  b) { return b ? scale2(a, 1.0f / b) : vec2(0,0); }
+static m_inline vec2  div2     (vec2   a, float  b) { return scale2(a, b ? 1/b : 0.f); }
 static m_inline vec2  pmod2    (vec2   a, float  b) { return vec2(pmodf(a.x, b), pmodf(a.y, b)); }
 static m_inline vec2  min2     (vec2   a, vec2   b) { return vec2(minf(a.x, b.x), minf(a.y, b.y)); }
 static m_inline vec2  max2     (vec2   a, vec2   b) { return vec2(maxf(a.x, b.x), maxf(a.y, b.y)); }
@@ -83,7 +89,7 @@ static m_inline vec3  add3     (vec3   a, vec3   b) { return vec3(a.x + b.x, a.y
 static m_inline vec3  sub3     (vec3   a, vec3   b) { return vec3(a.x - b.x, a.y - b.y, a.z - b.z); }
 static m_inline vec3  mul3     (vec3   a, vec3   b) { return vec3(a.x * b.x, a.y * b.y, a.z * b.z); }
 static m_inline vec3  scale3   (vec3   a, float  b) { return vec3(a.x * b, a.y * b, a.z * b); }
-static m_inline vec3  div3     (vec3   a, float  b) { return b ? scale3(a, 1.0f / b) : vec3(0,0,0); }
+static m_inline vec3  div3     (vec3   a, float  b) { return scale3(a, b ? 1/b : 0.f); }
 static m_inline vec3  pmod3    (vec3   a, float  b) { return vec3(pmodf(a.x, b), pmodf(a.y, b), pmodf(a.z, b)); }
 static m_inline vec3  min3     (vec3   a, vec3   b) { return vec3(minf(a.x, b.x), minf(a.y, b.y), minf(a.z, b.z)); }
 static m_inline vec3  max3     (vec3   a, vec3   b) { return vec3(maxf(a.x, b.x), maxf(a.y, b.y), maxf(a.z, b.z)); }
@@ -125,7 +131,7 @@ static m_inline vec4  add4     (vec4   a, vec4   b) { return vec4(a.x + b.x, a.y
 static m_inline vec4  sub4     (vec4   a, vec4   b) { return vec4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w); }
 static m_inline vec4  mul4     (vec4   a, vec4   b) { return vec4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w); }
 static m_inline vec4  scale4   (vec4   a, float  b) { return vec4(a.x * b, a.y * b, a.z * b, a.w * b); }
-static m_inline vec4  div4     (vec4   a, float  b) { return b ? scale4(a, 1.0f / b) : vec4(0,0,0,0); }
+static m_inline vec4  div4     (vec4   a, float  b) { return scale4(a, b ? 1/b : 0.f); }
 static m_inline vec4  pmod4    (vec4   a, float  b) { return vec4(pmodf(a.x, b), pmodf(a.y, b), pmodf(a.z, b), pmodf(a.w, b)); }
 static m_inline vec4  min4     (vec4   a, vec4   b) { return vec4(minf(a.x, b.x), minf(a.y, b.y), minf(a.z, b.z), minf(a.w, b.w)); }
 static m_inline vec4  max4     (vec4   a, vec4   b) { return vec4(maxf(a.x, b.x), maxf(a.y, b.y), maxf(a.z, b.z), maxf(a.w, b.w)); }
@@ -466,12 +472,12 @@ static m_inline vec4 transform444(const float *m, const vec4 p) {
     float w = (m[3] * p.x) + (m[7] * p.y) + (m[11] * p.z) + m[15]; // rw
     return vec4(x,y,z,w);
 }
-static m_inline bool unproject44(vec3 *out, int sx, int sy, float dz, vec4 viewport, mat44 mvp) { 
-    // sy: usually window_height()-y instead, dz:0=near,1=far
+static m_inline bool unproject44(vec3 *out, vec3 xyd, vec4 viewport, mat44 mvp) { 
+    // xyd: usually x:mouse_x,y:window_height()-mouse_y,d:0=znear/1=zfar
     // src: https://www.khronos.org/opengl/wiki/GluProject_and_gluUnProject_code
     mat44 inv_mvp;
     if( invert44(inv_mvp, mvp) ) {
-        vec4 in = vec4( (sx-viewport.x)/viewport.z*2-1, (sy-viewport.y)/viewport.w*2-1, 2*dz-1, 1 );
+        vec4 in = vec4( (xyd.x-viewport.x)/viewport.z*2-1, (xyd.y-viewport.y)/viewport.w*2-1, 2*xyd.z-1, 1 );
         vec4 p = transform444(inv_mvp, in);
         if( p.w != 0 ) {
             p.w = 1.f/p.w;

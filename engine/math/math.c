@@ -11,6 +11,7 @@
 #define CAMERA_C
 #define GJK_C
 #define MTYPES_C
+#define GEOMETRY_C
 #endif
 
 #include "math_linear.c"
@@ -20,3 +21,4 @@
 #include "math_camera.c"
 #include "math_gjk.c"
 #include "math_types.c"
+#include "math_geometry.c"
