@@ -32,7 +32,7 @@ typedef struct hit {
         // rays only: penetration (t0) and extraction (t1) points along ray line
         struct { float t0, t1; };
         // gjk only
-        struct { int hit; vec3 p0, p1; float distance2; int iterations; };
+        struct { int hits; vec3 p0, p1; float distance2; int iterations; };
     };
     union { vec3 p; vec3 contact_point; };
     union { vec3 n; vec3 normal; };
