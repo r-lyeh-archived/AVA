@@ -580,7 +580,7 @@ void window_fullscreen(bool enabled) {
 char* window_timings() {
     static double num_frames = 0, begin = FLT_MAX, fps = 0, prev_frame = 0;
 
-    double now = SDL_GetTicks() / 1000.0; // glfwGetTime();
+    double now = SDL_GetTicks() / 1000.0;
     if( begin > now ) {
         begin = now;
         num_frames = 0;
@@ -598,7 +598,7 @@ char* window_timings() {
     appname = __argv[0];
 #endif
 
-    char *buf = va("%s %.2ffps %.2fms", appname, fps, (now - prev_frame) * 1000.f);
+    char *buf = va("%s %5.2ffps %5.2fms", appname, fps, (now - prev_frame) * 1000.f);
     buf += (buf[0] == ' ');
 
     prev_frame = now;
