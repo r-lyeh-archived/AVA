@@ -776,7 +776,7 @@ void ddraw_render2d() {
         translate44( m, 0, 0, 0 );
 
         rendernode r = { 0 };
-        font_mesh(&r, ddraw_font, (++cursor > 127) ? ">_" : "> " );
+        font_mesh(&r, ddraw_font, (++cursor & 0x20) ? ">_" : "> " ); // &0x20 =~ every 0.5s at 60fps
         r.material = &mat;
         rendernode_draw(&r, m);
         rendernode_destroy(&r);
