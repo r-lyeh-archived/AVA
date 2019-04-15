@@ -28,16 +28,16 @@ API void camera_orbit(camera *cam, float distance, vec2 mouse);
 #pragma once
 
 void camera_create(camera *cam, float sensitivity, bool invert_x, bool invert_y) {
+    camera z = {0};
+    *cam = z;
+
     cam->position = vec3(0, 0, -3);
 
     cam->right = vec3(1, 0, 0);
     cam->up = vec3(0, 1, 0);
     cam->forward = vec3(0, 0, 1);
 
-    cam->last_x = 0;
-    cam->last_y = 0;
-    cam->yaw = 0;
-    cam->pitch = 0;
+    cam->yaw = 90;
 
     cam->sensitivity = sensitivity;
     cam->invert_x = invert_x ? -1 : 1;
