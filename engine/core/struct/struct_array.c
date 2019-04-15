@@ -21,7 +21,7 @@
 
 #define array(t) t*
 #define array_init(t) ( (t) = 0 )
-#define array_reserve(t, n) ( memset( (t) = array_cast(t) vrealloc((t), (n) * sizeof(0[t]) ), 0, (n) * sizeof(0[t]) ) )
+#define array_resize(t, n) ( memset( array_count(t) + ((t) = array_cast(t) vrealloc((t), (n) * sizeof(0[t]) )), 0, ((n)-array_count(t)) * sizeof(0[t]) ), (t) )
 #define array_push(t, i) ( (t) = array_cast(t) vrealloc((t), (array_count(t) + 1) * sizeof(0[t]) ), (t)[ array_count(t) - 1 ] = (i) )
 #define array_back(t) ( (t) ? &(t)[ vsize(t) - 1 ] : NULL )
 #define array_data(t) (t)

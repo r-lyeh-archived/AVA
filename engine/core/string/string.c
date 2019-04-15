@@ -13,13 +13,12 @@
 #define SPLIT_C
 #define SSO_C
 #define TRIM_C
-#define TYPE_C
 #define UNICODE_C
 #define STRING2_C
+#define STRING3_C
 #endif
 
 #include "string_quark.c"
-#include "string_type.c"
 #include "string_sso.c"
 #include "string_ini.c"
 #include "string_trim.c"
@@ -31,6 +30,7 @@
 #include "string_normalize.c"
 
 #include "string2.c"
+#include "string3.c"
 
 /*
 #include "string_sprintf.c"
