@@ -633,15 +633,11 @@ void editor_draw() {
         static vec3 cam_scale = vec3(1,1,1);
         static mat44 cam_mat4 = {0};
 
-        float p,r,y;
-        toEulerAngle(cam_quat, &p, &r, &y);
+        vec3 pry = euler(cam_quat);
         bool vkf1 = (GetAsyncKeyState(VK_F1) & 0x8000), vkf2 = (GetAsyncKeyState(VK_F2) & 0x8000);
         if( vkf1 || vkf2 ) {
-            p *= rad2deg;
-            r *= rad2deg;
-            y *= rad2deg;
-            r = (int)r + (vkf1 ? +1 : -1); 
-            toQuaternion(cam_quat, p * deg2rad, r * deg2rad, y * deg2rad);
+            pry.y = (int)pry.y + (vkf1 ? +1 : -1);  // roll
+            cam_quat = eulerq(pry);
         }
 
         float delta = 1/60.f;
@@ -655,7 +651,7 @@ void editor_draw() {
         camera_fps( cam, move_delta, look_delta );
         copy44(c->transform, cam->view);
 
-        PRINTF("Cam: %f %f %f (%ff,%ff,%ff,%ff) (%05.2fº pitch, %05.2fº roll, %05.2fº yaw)\n", cam_pos.x, cam_pos.y, cam_pos.z, cam_quat.x, cam_quat.y, cam_quat.z, cam_quat.w, p*rad2deg,r*rad2deg,y*rad2deg);
+        PRINTF("Cam: %f %f %f (%ff,%ff,%ff,%ff)\n", cam_pos.x, cam_pos.y, cam_pos.z, cam_quat.x, cam_quat.y, cam_quat.z, cam_quat.w);
      }
 
 

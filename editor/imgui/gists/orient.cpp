@@ -943,11 +943,11 @@ void ImOrient::QuatFromDir(ImQuat& out, const ImVec3& dir)
 
 void orient_demo() {
     static ImQuat quaternion(1,0,0,1);
-    static ImVec3 axis(1,0,0); static float angle = 0;
+    static ImVec3 axis_(1,0,0); static float angle = 0;
     static ImVec3 direction(1,0,0);
     ImGui::QuaternionGizmo("Quaternion", quaternion);
     ImGui::SameLine();
-    ImGui::AxisAngleGizmo("AxisAngle", axis, angle);
+    ImGui::AxisAngleGizmo("AxisAngle", axis_, angle);
     ImGui::SameLine();
     ImGui::DirectionGizmo("Direction", direction);
 }

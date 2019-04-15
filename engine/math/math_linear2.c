@@ -32,6 +32,7 @@
 #define vec3(x, y, z   ) M_CAST(vec3, (float)(x), (float)(y), (float)(z),           )
 #define vec4(x, y, z, w) M_CAST(vec4, (float)(x), (float)(y), (float)(z), (float)(w))
 #define quat(x, y, z, w) M_CAST(quat, (float)(x), (float)(y), (float)(z), (float)(w))
+#define axis(x, y, z)    M_CAST(axis, (float)(x), (float)(y), (float)(z))
 #define mat33(...)       M_CAST(mat33, __VA_ARGS__ )
 #define mat44(...)       M_CAST(mat44, __VA_ARGS__ )
 
@@ -39,7 +40,7 @@ typedef union vec2 { struct { float x, y; }; struct { float r, g; }; float v[1];
 typedef union vec3 { struct { float x, y, z; }; struct { float r, g, b; }; float v[1]; vec2 v2; } vec3;
 typedef union vec4 { struct { float x, y, z, w; }; struct { float r, g, b, a; }; float v[1]; vec2 v2; vec3 v3; } vec4;
 typedef union quat { struct { float x, y, z, w; }; float v[1]; vec3 v3; vec4 v4; } quat;
-
+typedef union axis { struct { float x, y, z; }; } axis;
 typedef float mat33[9];
 typedef float mat44[16];
 
@@ -159,11 +160,7 @@ static m_inline quat  mulq     (quat   p, quat   q) { vec3 w = scale3(p.v3, q.w)
 static m_inline quat  scaleq   (quat   a, float  s) { return quat(a.x*s,a.y*s,a.z*s,a.w*s); }
 static m_inline quat  normq    (quat   a          ) { vec4 v = norm4(a.v4); return quat(v.x,v.y,v.z,v.w); }
 static m_inline float dotq     (quat   a, quat   b) { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
-static m_inline quat  eulerq   (float pitch_deg, float roll_deg, float yaw_deg) {
-    float hp = rad(pitch_deg) * 0.5f, hr = rad(roll_deg) * 0.5f, hy = rad(yaw_deg) * 0.5f;
-    float cy = cosf(hy), sy = sinf(hy), cr = cosf(hr), sr = sinf(hr), cp = cosf(hp), sp = sinf(hp);
-    return quat(cy*cr*cp + sy*sr*sp, cy*sr*cp - sy*cr*sp, cy*cr*sp + sy*sr*cp, sy*cr*cp - cy*sr*sp);
-}
+
 static m_inline quat  rotationq(float deg,float x,float y,float z){ deg=rad(deg)*0.5f; return vec3q(scale3(vec3(x,y,z),sinf(deg)),cosf(deg)); }
 static m_inline quat  mat44q   (mat44 M) {
     float r=0.f;
@@ -180,6 +177,17 @@ static m_inline quat  mat44q   (mat44 M) {
 }
 
 
+// euler <-> quat
+static m_inline vec3  euler    (quat q) { // returns PitchRollYaw (PRY) in degrees. from wikipedia:
+    float sr_cp = 2*(q.x*q.y + q.z*q.w), cr_cp = 1-2*(q.y*q.y + q.z*q.z);
+    float sy_cp = 2*(q.x*q.w + q.y*q.z), cy_cp = 1-2*(q.z*q.z + q.w*q.w), sp = 2*(q.x*q.z-q.w*q.y);
+    return scale3(vec3(fabs(sp) >= 1 ? copysignf(M_PI / 2, sp) : asinf(sp), atan2f(sr_cp, cr_cp), atan2f(sy_cp, cy_cp)), TO_DEG);
+}
+static m_inline quat  eulerq   (vec3 pry_degrees) {
+    float hp = rad(pry_degrees.x) * 0.5f, hr = rad(pry_degrees.y) * 0.5f, hy = rad(pry_degrees.z) * 0.5f;
+    float cy = cosf(hy), sy = sinf(hy), cr = cosf(hr), sr = sinf(hr), cp = cosf(hp), sp = sinf(hp);
+    return quat(cy*cr*cp + sy*sr*sp, cy*sr*cp - sy*cr*sp, cy*cr*sp + sy*sr*cp, sy*cr*cp - cy*sr*sp);
+}
 
 
 static m_inline void copy33(float *m, const float *a) {
