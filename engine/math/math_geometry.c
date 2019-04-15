@@ -122,7 +122,7 @@ API poly    diamond(vec3 from, vec3 to, float size);
 poly poly_make(int cnt) {
     poly p = {0};
     p.cnt = cnt;
-    array_reserve(p.verts, cnt);
+    array_resize(p.verts, cnt);
     return p;
 }
 
@@ -151,7 +151,7 @@ poly pyramid(vec3 from, vec3 to, float size) {
 
     /* calculate base vertices */
     poly p = {0};
-    array_reserve(p.verts, 5+1); p.cnt = 5; /*+1 for diamond case*/
+    array_resize(p.verts, 5+1); p.cnt = 5; /*+1 for diamond case*/
     p.verts[0] = add3(add3(from, xext), yext); /*a*/
     p.verts[1] = add3(add3(from, xext), nyext); /*b*/
     p.verts[2] = add3(add3(from, nxext), nyext); /*c*/

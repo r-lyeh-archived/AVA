@@ -108,34 +108,6 @@ void camera_orbit( camera *cam, float distance, vec2 mouse ) {
     lookat44(cam->view, vec3( cx*cy*distance, sy*distance, sx*cy*distance ), vec3(0,0,0), vec3(0,1,0) );
 }
 
-// old api
-
-void flycamera(
-    mat44 cam_view,
-    vec3 *position, vec2 *rotation,
-    vec3 move_delta, vec2 look_delta )
-{
-    // apply look delta to mouse rotation
-    rotation->x -= look_delta.y;
-    rotation->y -= look_delta.x;
-
-    // build rotation
-    float rotationY[16], rotationX[16], rotationYX[16];
-    rotation44(rotationX, rotation->x, 1.0f, 0.0f, 0.0f);
-    rotation44(rotationY, rotation->y, 0.0f, 1.0f, 0.0f);
-    multiply44(rotationYX, rotationY, rotationX);
-
-    // apply move delta to head position
-    vec3 worldMovement = transform344(rotationYX, move_delta);
-    *position = add3(*position, worldMovement);
-
-    // construct view matrix
-    float inverseRotation[16], inverseTranslation[16];
-    transpose44(inverseRotation, rotationYX);
-    translation44(inverseTranslation, -position->x, -position->y, -position->z);
-    multiply44(cam_view, inverseRotation, inverseTranslation); // = inverse(translation(position) * rotationYX);
-}
-
 // ideas
 
 void camera_lerp();
