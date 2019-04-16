@@ -1,4 +1,4 @@
-// Original authors: @ands (PD), @vurtun (PD), @datenwolf (WTFPL2), @evanw (CC0).
+// Original authors: @ands (PD), @vurtun (PD), @datenwolf (WTFPL2), @evanw (CC0), @sgorsten (Unlicense).
 // - rlyeh, public domain.
 
 #pragma once
@@ -28,6 +28,8 @@
 #define M_CAST(type, ...)  ((type){ __VA_ARGS__ } )
 #endif
 
+// ----------------------------------------------------------------------------
+
 #define vec2(x, y      ) M_CAST(vec2, (float)(x), (float)(y)                        )
 #define vec3(x, y, z   ) M_CAST(vec3, (float)(x), (float)(y), (float)(z),           )
 #define vec4(x, y, z, w) M_CAST(vec4, (float)(x), (float)(y), (float)(z), (float)(w))
@@ -44,6 +46,14 @@ typedef union axis { struct { float x, y, z; }; } axis;
 typedef float mat33[9];
 typedef float mat44[16];
 
+// A value type representing an abstract direction vector in 3D space, independent of any coordinate system.
+// A concrete 3D coordinate system with defined x, y, and z axes.
+
+typedef enum { axis_forward, axis_back, axis_left, axis_right, axis_up, axis_down } coord_axis;
+typedef coord_axis coord_system[3];
+
+// ----------------------------------------------------------------------------
+
 #define ptr(type) 0[&type.x]
 
 static m_inline float deg      (float radians)      { return radians / M__PI * 180.0f; }
@@ -59,6 +69,8 @@ static m_inline float pmodf    (float  a, float  b) { return (a < 0.0f ? 1.0f : 
 static m_inline float signf    (float  a)           { return (a < 0) ? -1.f : 1.f; }
 static m_inline float clampf(float v,float a,float b){return maxf(minf(b,v),a); }
 static m_inline float mixf(float a,float b,float t) { return a*(1-t)+b*t; }
+
+// ----------------------------------------------------------------------------
 
 static m_inline vec2  ptr2     (const float *a    ) { return vec2(a[0],a[1]); }
 //
@@ -81,6 +93,8 @@ static m_inline float len2     (vec2   a          ) { return sqrtf(len2sq(a)); }
 static m_inline vec2  norm2    (vec2   a          ) { return /*dot(2) == 0 ? a :*/ div2(a, len2(a)); }
 static m_inline int   finite2  (vec2   a          ) { return m_finite(a.x) && m_finite(a.y); }
 static m_inline vec2  mix2  (vec2 a,vec2 b,float t) { return add2(scale2((a),1-(t)), scale2((b), t)); }
+
+// ----------------------------------------------------------------------------
 
 static m_inline vec3  ptr3     (const float *a    ) { return vec3(a[0],a[1],a[2]); }
 static m_inline vec3  vec23    (vec2   a, float z ) { return vec3(a.x,a.y,z); }
@@ -124,6 +138,8 @@ static m_inline void  ortho3   (vec3 *left, vec3 *up, vec3 v) {
 #endif
 }
 
+// ----------------------------------------------------------------------------
+
 static m_inline vec4  ptr4     (const float *a    ) { return vec4(a[0],a[1],a[2],a[3]); }
 static m_inline vec4  vec34    (vec3   a, float w ) { return vec4(a.x,a.y,a.z,w); }
 //
@@ -146,6 +162,8 @@ static m_inline vec4  norm4    (vec4   a          ) { return /*dot4(a) == 0 ? a 
 static m_inline int   finite4  (vec4   a          ) { return finite3(vec3(a.x,a.y,a.z)) && m_finite(a.w); }
 static m_inline vec4  mix4  (vec4 a,vec4 b,float t) { return add4(scale4((a),1-(t)), scale4((b), t)); }
 // static m_inline vec4 cross4(vec4 v0, vec4 v1) { return vec34(cross3(v0.xyz, v1.xyz), (v0.w + v1.w) * 0.5f); } // may fail
+
+// ----------------------------------------------------------------------------
 
 static m_inline quat  idq      (                  ) { return quat(0,0,0,1); }
 static m_inline quat  ptrq     (const float *a    ) { return quat(a[0],a[1],a[2],a[3]); }
@@ -189,6 +207,7 @@ static m_inline quat  eulerq   (vec3 pry_degrees) {
     return quat(cy*cr*cp + sy*sr*sp, cy*sr*cp - sy*cr*sp, cy*cr*sp + sy*sr*cp, sy*cr*cp - cy*sr*sp);
 }
 
+// ----------------------------------------------------------------------------
 
 static m_inline void scaling33(mat33 m, float x, float y, float z) { // !!! ok, i guess
     m[0] = x; m[1] = 0; m[2] = 0;
@@ -271,9 +290,33 @@ static m_inline void mul33(mat33 m, const mat33 a, const mat33 b) {
     m[8] = a[6]*b[2]+a[7]*b[5]+a[8]*b[8];
 }
 
+// ----------------------------------------------------------------------------
 
-
-
+static m_inline void scaling44(mat44 m, float x, float y, float z);
+static m_inline void id44(mat44 m) {
+    scaling44(m, 1,1,1);
+}
+static m_inline void identity44(mat44 m) {
+    scaling44(m, 1,1,1);
+}
+static m_inline void copy44(mat44 m, const mat44 a) {
+    for( int i = 0; i < 16; ++i ) m[i] = a[i];
+}
+static m_inline void multiply44(mat44 m, const mat44 a, const mat44 b) {
+    for (int y = 0; y < 4; y++)
+    for (int x = 0; x < 4; x++)
+    m[y*4+x] = a[x] * b[y*4]+a[4+x] * b[y*4+1]+a[8+x] * b[y*4+2]+a[12+x] * b[y*4+3];
+}
+static m_inline void multiply344(mat44 m, const mat44 a, const mat44 b, const mat44 d) {
+    mat44 c;
+    multiply44(c, a, b);
+    multiply44(m, c, d);
+}
+static m_inline void mul44(mat44 m, const mat44 a) {
+    mat44 b; copy44(b, m);
+    multiply44(m, b, a);
+}
+// ---
 static m_inline void ortho44(mat44 m, float l, float r, float b, float t, float n, float f) {
     m[ 0] = 2/(r-l);      m[ 1] = 0;            m[ 2] = 0;            m[ 3] = 0;
     m[ 4] = 0;            m[ 5] = 2/(t-b);      m[ 6] = 0;            m[ 7] = 0;
@@ -299,7 +342,7 @@ static m_inline void lookat44(mat44 m, vec3 eye, vec3 center, vec3 up) {
     m[ 8] = s.z;           m[ 9] = u.z;           m[10] = -f.z;         m[11] = 0;
     m[12] = -dot3(s, eye); m[13] = -dot3(u, eye); m[14] = dot3(f, eye); m[15] = 1;
 }
-
+// ---
 static m_inline void translation44(mat44 m, float x, float y, float z) { // identity4 + translate4
     m[ 0] = 1.0f; m[ 1] = 0.0f; m[ 2] = 0.0f; m[ 3] = 0.0f;
     m[ 4] = 0.0f; m[ 5] = 1.0f; m[ 6] = 0.0f; m[ 7] = 0.0f;
@@ -395,30 +438,7 @@ static m_inline void scale44(mat44 m, float x, float y, float z) {
     m[2] *= z; m[6] *= z; m[10] *= z;
 #endif
 }
-//
-static m_inline void id44(mat44 m) {
-    scaling44(m, 1,1,1);
-}
-static m_inline void identity44(mat44 m) {
-    scaling44(m, 1,1,1);
-}
-static m_inline void copy44(mat44 m, const mat44 a) {
-    for( int i = 0; i < 16; ++i ) m[i] = a[i];
-}
-static m_inline void multiply44(mat44 m, const mat44 a, const mat44 b) {
-    for (int y = 0; y < 4; y++)
-    for (int x = 0; x < 4; x++)
-    m[y*4+x] = a[x] * b[y*4]+a[4+x] * b[y*4+1]+a[8+x] * b[y*4+2]+a[12+x] * b[y*4+3];
-}
-static m_inline void multiply344(mat44 m, const mat44 a, const mat44 b, const mat44 d) {
-    mat44 c;
-    multiply44(c, a, b);
-    multiply44(m, c, d);
-}
-static m_inline void mul44(mat44 m, const mat44 a) {
-    mat44 b; copy44(b, m);
-    multiply44(m, b, a);
-}
+// ---
 static m_inline void transpose44(mat44 m, const mat44 a) { // M[i][j] = A[j][i];
     m[ 0] = a[0]; m[ 1] = a[4]; m[ 2] = a[ 8]; m[ 3] = a[12];
     m[ 4] = a[1]; m[ 5] = a[5]; m[ 6] = a[ 9]; m[ 7] = a[13];
@@ -512,10 +532,70 @@ static m_inline bool unproject44(vec3 *out, vec3 xyd, vec4 viewport, mat44 mvp) 
     return false;
 }
 
+static m_inline vec3 transform_axis(const coord_system basis, const coord_axis to);
+static m_inline void rebase44(mat44 m, const coord_system src_basis, const coord_system dst_basis) {
+    vec3 v1 = transform_axis(src_basis, dst_basis[0]);
+    vec3 v2 = transform_axis(src_basis, dst_basis[1]);
+    vec3 v3 = transform_axis(src_basis, dst_basis[2]);
+    m[ 0] = v1.x; m[ 1] = v1.y; m[ 2] = v1.z; m[ 3] = 0;
+    m[ 4] = v2.x; m[ 5] = v2.y; m[ 6] = v2.z; m[ 7] = 0;
+    m[ 8] = v3.x; m[ 9] = v3.y; m[10] = v3.z; m[11] = 0;
+    m[12] =    0; m[13] =    0; m[14] =    0; m[15] = 1;
+}
 
+// ----------------------------------------------------------------------------
 
+static m_inline vec3 transform_axis(const coord_system basis, const coord_axis to) { 
+    const float dot_table[6][6] = {
+        {+1,-1,0,0,0,0},{-1,+1,0,0,0,0},{0,0,+1,-1,0,0},
+        {0,0,-1,+1,0,0},{0,0,0,0,+1,-1},{0,0,0,0,-1,+1},
+    };
+    return vec3( dot_table[basis[0]][to], dot_table[basis[1]][to], dot_table[basis[2]][to] );
+}
 
+// A vector is the difference between two points in 3D space, possessing both direction and magnitude
+vec3 transform_vector  (const mat44 m, const vec3 vector)   { return transform344(m, vector); }
 
+// A point is a specific location within a 3D space
+vec3 transform_point   (const mat44 m, const vec3 p)    { // return (m * vec4{point,1).xyz()/r.w;
+    float inv = 1.0f / (m[3+4*0]*p.x + m[3+4*1]*p.y + m[3+4*2]*p.z + m[3+4*3]);
+    return vec3(
+        (m[0+4*0]*p.x + m[0+4*1]*p.y + m[0+4*2]*p.z + m[0+4*3]) * inv,
+        (m[1+4*0]*p.x + m[1+4*1]*p.y + m[1+4*2]*p.z + m[1+4*3]) * inv,
+        (m[2+4*0]*p.x + m[2+4*1]*p.y + m[2+4*2]*p.z + m[2+4*3]) * inv
+    );
+}
+
+// A tangent is a unit-length vector which is parallel to a piece of geometry, such as a surface or a curve
+vec3 transform_tangent (const mat44 m, const vec3 tangent)  { return norm3(transform_vector(m, tangent)); }
+
+// A normal is a unit-length bivector which is perpendicular to a piece of geometry, such as a surface or a curve
+vec3 transform_normal  (const mat44 m, const vec3 normal)   {
+    mat44 t; transpose44(t,m); mat44 i; invert44(i,t);
+    return scale3(norm3(transform_vector(i, normal)), det44(m) < 0 ? -1 : 1);
+}
+
+// A quaternion can describe both a rotation and a uniform scaling in 3D space
+quat transform_quat     (const mat44 m, const quat q)      {
+    vec3 s = scale3(transform_vector(m, q.v3), det44(m) < 0 ? -1 : 1);
+    return quat(s.x,s.y,s.z,q.w);
+}
+
+// A matrix can describe a general transformation of homogeneous coordinates in projective space
+float* transform_matrix(mat44 out, const mat44 m, const mat44 matrix) {
+    mat44 I; invert44(I, m);
+    mat44 N; multiply344(out, I, matrix, m); // m,matrix,I instead ?
+    return out;
+}
+
+// Scaling factors are not a vector, they are a compact representation of a scaling matrix
+vec3 transform_scaling (const mat44 m, const vec3 scaling) {
+    mat44 s; scaling44(s, scaling.x, scaling.y, scaling.z);
+    mat44 out; transform_matrix(out, m, s);
+    return vec3( out[0], out[5], out[10] );
+}
+
+// ----------------------------------------------------------------------------
 // !!! for debugging
 #include <stdio.h>
 static m_inline void print_( float *m, int ii, int jj ) {
@@ -529,4 +609,5 @@ static m_inline void print2( vec2 v ) { print_(&v.x,2,1); }
 static m_inline void print3( vec3 v ) { print_(&v.x,3,1); }
 static m_inline void print4( vec4 v ) { print_(&v.x,4,1); }
 static m_inline void printq( quat q ) { print_(&q.x,4,1); }
+static m_inline void print33( float *m ) { print_(m,3,3); }
 static m_inline void print44( float *m ) { print_(m,4,4); }
