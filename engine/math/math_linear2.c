@@ -169,7 +169,7 @@ static m_inline quat  ptrq     (const float *a    ) { return quat(a[0],a[1],a[2]
 static m_inline quat  vec3q    (vec3   a, float w ) { return quat(a.x,a.y,a.z,w); }
 static m_inline quat  vec4q    (vec4   a          ) { return quat(a.x,a.y,a.z,a.w); }
 //
-static m_inline quat  negq_    (quat   a          ) { return quat(-a.x,-a.y,-a.z,-a.w); }
+static m_inline quat  negq     (quat   a          ) { return quat(-a.x,-a.y,-a.z,-a.w); }
 static m_inline quat  conjq    (quat   a          ) { return quat(-a.x,-a.y,-a.z,a.w); }
 static m_inline quat  addq     (quat   a, quat   b) { return quat(a.x+b.x,a.y+b.y,a.z+b.z,a.w+b.w); }
 static m_inline quat  subq     (quat   a, quat   b) { return quat(a.x-b.x,a.y-b.y,a.z-b.z,a.w-b.w); }
@@ -177,6 +177,7 @@ static m_inline quat  mulq     (quat   p, quat   q) { vec3 w = scale3(p.vec3, q.
 static m_inline quat  scaleq   (quat   a, float  s) { return quat(a.x*s,a.y*s,a.z*s,a.w*s); }
 static m_inline quat  normq    (quat   a          ) { vec4 v = norm4(a.vec4); return quat(v.x,v.y,v.z,v.w); }
 static m_inline float dotq     (quat   a, quat   b) { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
+static m_inline quat  mixq(quat a, quat b, float t) { return normq(dotq(a,b) < 0 ? addq(negq(a),scaleq(addq(b,a),t)) : addq(a,scaleq(subq(b,a),t))); }
 
 static m_inline quat  rotationq(float deg,float x,float y,float z){ deg=rad(deg)*0.5f; return vec3q(scale3(vec3(x,y,z),sinf(deg)),cosf(deg)); }
 static m_inline quat  mat44q   (mat44 M) {
