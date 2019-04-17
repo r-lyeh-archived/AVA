@@ -105,6 +105,18 @@ API void  map_gc(map_t *m); // only if using MAP_DONT_ERASE
 #define map_cast(t) (void *)
 #endif
 
+// ----------
+// quick helpers
+
+API int      map_strcmp(char *a, char *b);
+API uint64_t map_strhash(char *key);
+
+API int      map_intcmp(int a, int b);
+API uint64_t map_inthash(int key);
+
+#define map_create_keystr(map) map_create(map, map_strcmp, map_strhash)
+#define map_create_keyint(map) map_create(map, map_intcmp, map_inthash)
+
 #endif
 
 // -------------------------------
@@ -219,6 +231,39 @@ void (map_destroy)(map_t* m) {
 
     map_t c = {0};
     *m = c;
+}
+
+int map_strcmp(char *a, char *b) {
+#if 1 
+    int sa = strlen((const char*)a);
+    int sb = strlen((const char*)b);
+    return sa<sb ? -1 : sa>sb ? +1 : strncmp((const char*)a, (const char*)b, sa);
+#else
+    return strcmp((const char*)a, (const char*)b);
+#endif
+}
+uint64_t map_strhash(char *key) { // compute fast hash. faster than fnv64, a few more collisions though.
+    const unsigned char *buf = (const unsigned char *)key;
+    uint64_t hash = 0;
+    while( *buf ) {
+        hash = (hash ^ *buf++) * 131;
+    }
+    return hash;
+}
+
+int map_intcmp(int key1, int key2) {
+    return key1 - key2;
+}
+uint64_t map_inthash(int key) { // triple32 hashing https://github.com/skeeto/hash-prospector (unlicensed)
+    uint32_t x = (uint32_t)key;
+    x ^= x >> 17;
+    x *= UINT32_C(0xed5ad4bb);
+    x ^= x >> 11;
+    x *= UINT32_C(0xac4c1b51);
+    x ^= x >> 15;
+    x *= UINT32_C(0x31848bab);
+    x ^= x >> 14;
+    return x;
 }
 
 #endif
