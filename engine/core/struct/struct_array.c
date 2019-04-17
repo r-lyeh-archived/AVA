@@ -30,6 +30,10 @@
 #define array_bytes(t) (int)( (t) ? vsize(t) : 0u )
 #define array_sort(t, cmpfunc) qsort( t, array_count(t), sizeof(t[0]), cmpfunc )
 #define array_free(t) ( array_cast(t) vrealloc((t), 0), (t) = 0 )
+#define array_empty(t) ( !array_count(t) )
+
+#define array_foreach(t,val_t,v) \
+    for( val_t *v = &0[t], *vend = v + array_count(t); v < vend; ++v )
 
 #define array_search(t, key, cmpfn) /* requires sorted array beforehand */ \
     bsearch(&key, t, array_count(t), sizeof(t[0]), cmpfn )
@@ -144,6 +148,11 @@ int main() {
             array_push(as, values[i]);
         }
         array_sort(as, cmps);
+
+        int i;
+        array_foreach(k, char*, v) {
+            printf("#%d) %s\n", i++, *v);
+        }
 
         char *key = "example";
         char **found = array_search(as, key, cmps);
