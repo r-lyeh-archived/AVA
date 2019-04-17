@@ -5,10 +5,10 @@
 #include <math.h>
 #include <float.h>
 
-#define M__EPSILON (1e-6)
-#define M__PI      (3.141592654f) // (3.14159265358979323846f)
-#define TO_RAD     (M__PI/180.f)
-#define TO_DEG     (180.f/M__PI)
+#define C_EPSILON  (1e-6)
+#define C_PI       (3.141592654f) // (3.14159265358979323846f)
+#define TO_RAD     (C_PI/180.f)
+#define TO_DEG     (180.f/C_PI)
 
 #if defined(_MSC_VER) && !defined(__cplusplus)
 #define m_inline __inline
@@ -30,6 +30,7 @@
 
 // ----------------------------------------------------------------------------
 
+#define ptr(type)        0[&(type).x]
 #define vec2(x, y      ) M_CAST(vec2, (float)(x), (float)(y)                        )
 #define vec3(x, y, z   ) M_CAST(vec3, (float)(x), (float)(y), (float)(z),           )
 #define vec4(x, y, z, w) M_CAST(vec4, (float)(x), (float)(y), (float)(z), (float)(w))
@@ -38,10 +39,10 @@
 #define mat33(...)       M_CAST(mat33, __VA_ARGS__ )
 #define mat44(...)       M_CAST(mat44, __VA_ARGS__ )
 
-typedef union vec2 { struct { float x, y; }; struct { float r, g; }; float v[1]; } vec2;
-typedef union vec3 { struct { float x, y, z; }; struct { float r, g, b; }; float v[1]; vec2 v2; } vec3;
-typedef union vec4 { struct { float x, y, z, w; }; struct { float r, g, b, a; }; float v[1]; vec2 v2; vec3 v3; } vec4;
-typedef union quat { struct { float x, y, z, w; }; float v[1]; vec3 v3; vec4 v4; } quat;
+typedef union vec2 { struct { float x, y; }; struct { float r, g; }; } vec2;
+typedef union vec3 { struct { float x, y, z; }; struct { float r, g, b; }; vec2 vec2; } vec3;
+typedef union vec4 { struct { float x, y, z, w; }; struct { float r, g, b, a; }; vec2 vec2; vec3 vec3; } vec4;
+typedef union quat { struct { float x, y, z, w; }; float v[1]; vec3 vec3; vec4 vec4; } quat;
 typedef union axis { struct { float x, y, z; }; } axis;
 typedef float mat33[9];
 typedef float mat44[16];
@@ -54,10 +55,8 @@ typedef coord_axis coord_system[3];
 
 // ----------------------------------------------------------------------------
 
-#define ptr(type) 0[&type.x]
-
-static m_inline float deg      (float radians)      { return radians / M__PI * 180.0f; }
-static m_inline float rad      (float degrees)      { return degrees * M__PI / 180.0f; }
+static m_inline float deg      (float radians)      { return radians / C_PI * 180.0f; }
+static m_inline float rad      (float degrees)      { return degrees * C_PI / 180.0f; }
 
 static m_inline int   mini     (int    a, int    b) { return a < b ? a : b; }
 static m_inline int   maxi     (int    a, int    b) { return a > b ? a : b; }
@@ -174,9 +173,9 @@ static m_inline quat  negq_    (quat   a          ) { return quat(-a.x,-a.y,-a.z
 static m_inline quat  conjq    (quat   a          ) { return quat(-a.x,-a.y,-a.z,a.w); }
 static m_inline quat  addq     (quat   a, quat   b) { return quat(a.x+b.x,a.y+b.y,a.z+b.z,a.w+b.w); }
 static m_inline quat  subq     (quat   a, quat   b) { return quat(a.x-b.x,a.y-b.y,a.z-b.z,a.w-b.w); }
-static m_inline quat  mulq     (quat   p, quat   q) { vec3 w = scale3(p.v3, q.w), r = add3(add3(cross3(p.v3, q.v3), w), scale3(q.v3, p.w)); return quat(r.x,r.y,r.z,p.w*q.w - dot3(p.v3, q.v3)); }
+static m_inline quat  mulq     (quat   p, quat   q) { vec3 w = scale3(p.vec3, q.w), r = add3(add3(cross3(p.vec3, q.vec3), w), scale3(q.vec3, p.w)); return quat(r.x,r.y,r.z,p.w*q.w - dot3(p.vec3, q.vec3)); }
 static m_inline quat  scaleq   (quat   a, float  s) { return quat(a.x*s,a.y*s,a.z*s,a.w*s); }
-static m_inline quat  normq    (quat   a          ) { vec4 v = norm4(a.v4); return quat(v.x,v.y,v.z,v.w); }
+static m_inline quat  normq    (quat   a          ) { vec4 v = norm4(a.vec4); return quat(v.x,v.y,v.z,v.w); }
 static m_inline float dotq     (quat   a, quat   b) { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
 
 static m_inline quat  rotationq(float deg,float x,float y,float z){ deg=rad(deg)*0.5f; return vec3q(scale3(vec3(x,y,z),sinf(deg)),cosf(deg)); }
@@ -226,7 +225,7 @@ static m_inline void scale33(mat33 m, float x, float y, float z) {
 #endif
 }
 static m_inline void rotation33(mat33 m, float degrees, float x,float y,float z) {
-    float radians = degrees * M__PI / 180.0f;
+    float radians = degrees * C_PI / 180.0f;
     float s = sinf(radians), c = cosf(radians), c1 = 1.0f - c;
     float xy = x*y, yz = y*z, zx = z*x, xs = x*s, ys = y*s, zs = z*s;
     m[0] = c1*x*x+c; m[1] = c1*xy-zs; m[2] = c1*zx+ys;
@@ -330,7 +329,7 @@ static m_inline void frustum44(mat44 m, float l, float r, float b, float t, floa
     m[12] = 0;           m[13] = 0;           m[14] = -2*(f*n)/(f-n);  m[15] = 0;
 }
 static m_inline void perspective44(mat44 m, float fovy_degrees, float aspect, float nearp, float farp) {
-    float y = tanf(fovy_degrees * M__PI / 360) * nearp, x = y * aspect;
+    float y = tanf(fovy_degrees * C_PI / 360) * nearp, x = y * aspect;
     frustum44(m, -x, x, -y, y, nearp, farp);
 }
 static m_inline void lookat44(mat44 m, vec3 eye, vec3 center, vec3 up) {
@@ -386,7 +385,7 @@ static m_inline void rotationq44(mat44 m, quat q) {
 static m_inline void rotation44(mat44 m, float degrees, float x, float y, float z) {
     //if(len3sq(vec3(x,y,z)) < (1e-4 * 1e-4)) return;
 
-    float radians = degrees * M__PI / 180.0f;
+    float radians = degrees * C_PI / 180.0f;
     float c = cosf(radians), s = sinf(radians), c1 = 1.0f - c;
     m[ 0] = x*x*c1 + c;   m[ 1] = y*x*c1 + z*s; m[ 2] = x*z*c1 - y*s; m[ 3] = 0.0f;
     m[ 4] = x*y*c1 - z*s; m[ 5] = y*y*c1 + c;   m[ 6] = y*z*c1 + x*s; m[ 7] = 0.0f;
@@ -396,7 +395,7 @@ static m_inline void rotation44(mat44 m, float degrees, float x, float y, float 
 static m_inline void rotate44(mat44 m, float degrees, float x, float y, float z) { // !!! ok, i guess
     if(len3sq(vec3(x,y,z)) < (1e-4 * 1e-4)) return;
 
-    float radians = degrees * M__PI / 180.0f;
+    float radians = degrees * C_PI / 180.0f;
     float c = cosf(radians), s = -sinf(radians), c1 = 1 - c;
     float m00 = m[ 0],  m01 = m[ 1],  m02 = m[ 2], m03 = m[ 3],
           m04 = m[ 4],  m05 = m[ 5],  m06 = m[ 6], m07 = m[ 7],
@@ -514,7 +513,7 @@ static m_inline vec4 transform444(const mat44 m, const vec4 p) {
 }
 static m_inline vec3 transform344(const mat44 m, const vec3 p) {
     vec4 v = transform444(m, vec34(p, 1));
-    return scale3(v.v3, 1.f / v.w);
+    return scale3(v.vec3, 1.f / v.w);
 }
 static m_inline bool unproject44(vec3 *out, vec3 xyd, vec4 viewport, mat44 mvp) { 
     // xyd: usually x:mouse_x,y:window_height()-mouse_y,d:0=znear/1=zfar
@@ -577,7 +576,7 @@ vec3 transform_normal  (const mat44 m, const vec3 normal)   {
 
 // A quaternion can describe both a rotation and a uniform scaling in 3D space
 quat transform_quat     (const mat44 m, const quat q)      {
-    vec3 s = scale3(transform_vector(m, q.v3), det44(m) < 0 ? -1 : 1);
+    vec3 s = scale3(transform_vector(m, q.vec3), det44(m) < 0 ? -1 : 1);
     return quat(s.x,s.y,s.z,q.w);
 }
 

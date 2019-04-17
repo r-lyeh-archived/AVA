@@ -23,9 +23,9 @@ static m_inline float ease_quintic_in(float t) { return t*t*t*t*t; }
 static m_inline float ease_quintic_out(float t) { float f=(t-1); return f*f*f*f*f+1; }
 static m_inline float ease_quintic_inout(float t) { float f; return (t < 0.5f) ? 16*t*t*t*t*t : (f=((2*t)-2),0.5f*f*f*f*f*f+1); }
 
-static m_inline float ease_sine_in(float t) { return 1+sinf((t-1)*(M__PI*0.5f)); }
-static m_inline float ease_sine_out(float t) { return sinf(t*(M__PI*0.5f)); }
-static m_inline float ease_sine_inout(float t) { return 0.5f*(1-cosf(t*M_PI)); }
+static m_inline float ease_sine_in(float t) { return 1+sinf((t-1)*(C_PI*0.5f)); }
+static m_inline float ease_sine_out(float t) { return sinf(t*(C_PI*0.5f)); }
+static m_inline float ease_sine_inout(float t) { return 0.5f*(1-cosf(t*C_PI)); }
 
 static m_inline float ease_circular_in(float t) { return 1-sqrtf(1-(t*t)); }
 static m_inline float ease_circular_out(float t) { return sqrtf((2-t)*t); }
@@ -35,13 +35,13 @@ static m_inline float ease_exponential_in(float t) { return (t <= 0) ? t : powf(
 static m_inline float ease_exponential_out(float t) { return (t >= 1) ? t : 1-powf(2,-10*t); }
 static m_inline float ease_exponential_inout(float t) { return (t <= 0 || t >= 1) ? t : t < 0.5f ? 0.5f*powf(2,(20*t)-10) : -0.5f*powf(2,(-20*t)+10)+1; }
 
-static m_inline float ease_elastic_in(float t) { return sinf(13*(M__PI*0.5f)*t)*powf(2,10*(t-1)); }
-static m_inline float ease_elastic_out(float t) { return sinf(-13*(M__PI*0.5f)*(t+1))*powf(2,-10*t)+1; }
-static m_inline float ease_elastic_inout(float t) { return t < 0.5f ? 0.5f*sinf(13*(M__PI*0.5f)*(2*t))*powf(2,10*((2*t)-1)) : 0.5f*(sinf(-13*(M__PI*0.5f)*((2*t-1)+1))*powf(2,-10*(2*t-1))+2); }
+static m_inline float ease_elastic_in(float t) { return sinf(13*(C_PI*0.5f)*t)*powf(2,10*(t-1)); }
+static m_inline float ease_elastic_out(float t) { return sinf(-13*(C_PI*0.5f)*(t+1))*powf(2,-10*t)+1; }
+static m_inline float ease_elastic_inout(float t) { return t < 0.5f ? 0.5f*sinf(13*(C_PI*0.5f)*(2*t))*powf(2,10*((2*t)-1)) : 0.5f*(sinf(-13*(C_PI*0.5f)*((2*t-1)+1))*powf(2,-10*(2*t-1))+2); }
 
-static m_inline float ease_back_in(float t) { return t*t*t-t*sinf(t*M_PI); }
-static m_inline float ease_back_out(float t) { float f=1-t; return 1-(f*f*f-f*sinf(f*M_PI)); }
-static m_inline float ease_back_inout(float t) { float f; return t < 0.5f ? (f=2*t,0.5f*(f*f*f-f*sinf(f*M_PI))) : (f=(1-(2*t-1)),0.5f*(1-(f*f*f-f*sinf(f*M_PI)))+0.5f); }
+static m_inline float ease_back_in(float t) { return t*t*t-t*sinf(t*C_PI); }
+static m_inline float ease_back_out(float t) { float f=1-t; return 1-(f*f*f-f*sinf(f*C_PI)); }
+static m_inline float ease_back_inout(float t) { float f; return t < 0.5f ? (f=2*t,0.5f*(f*f*f-f*sinf(f*C_PI))) : (f=(1-(2*t-1)),0.5f*(1-(f*f*f-f*sinf(f*C_PI)))+0.5f); }
 
 static m_inline float ease_bounce_out(float t) { return (t < 4.f/11) ? (121.f*t*t)/16 : (t < 8.f/11) ? (363.f/40*t*t)-(99.f/10*t)+17.f/5 : (t < 9.f/10) ? (4356.f/361*t*t)-(35442.f/1805*t)+16061.f/1805 : (54.f/5*t*t)-(513.f/25*t)+268.f/25; }
 static m_inline float ease_bounce_in(float t) { return 1-ease_bounce_out(1-t); }

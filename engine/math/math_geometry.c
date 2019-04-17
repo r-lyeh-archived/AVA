@@ -218,7 +218,7 @@ static float line_closest_line_(float *t1, float *t2, vec3 *c1, vec3 *c2, line l
     float e = dot3(d2, d2);
     float f = dot3(d2, r);
 
-    if (i <= M__EPSILON && e <= M__EPSILON) {
+    if (i <= C_EPSILON && e <= C_EPSILON) {
         /* both segments degenerate into points */
         vec3 d12;
         *t1 = *t2 = 0.0f;
@@ -227,9 +227,9 @@ static float line_closest_line_(float *t1, float *t2, vec3 *c1, vec3 *c2, line l
         d12 = sub3(*c1, *c2);
         return dot3(d12,d12);
     }
-    if (i > M__EPSILON) {
+    if (i > C_EPSILON) {
         float c = dot3(d1,r);
-        if (e > M__EPSILON) {
+        if (e > C_EPSILON) {
             /* non-degenerate case */
             float b = dot3(d1,d2);
             float denom = i*e - b*b;

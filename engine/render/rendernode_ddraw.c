@@ -554,7 +554,7 @@ void ddraw_circle(vec3 center, vec3 normal, float radius) {
     lastPoint = add3(center, up);
 
     for (int i = 1; i <= segments; ++i) {
-        const float radians = (M__PI * 2) * i / segments;
+        const float radians = (C_PI * 2) * i / segments;
 
         vec3 vs = scale3(left, sinf(radians));
         vec3 vc = scale3(up,   cosf(radians));
@@ -581,7 +581,7 @@ void ddraw_cone(vec3 begin, vec3 end, float radius) {
 
     ddraw_circle(end, n, radius);
     for (int i=0; i<bars; ++i) {
-        float angle = (i / bars) * 2 * M__PI;
+        float angle = (i / bars) * 2 * C_PI;
         float c = cosf(angle), s = sinf(angle);
         vec3 end2 = add3( end, add3(scale3(x,radius*c), scale3(y,radius*s)) );
         ddraw_line(begin, end2);
