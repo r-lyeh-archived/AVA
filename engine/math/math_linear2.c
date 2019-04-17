@@ -266,12 +266,6 @@ static m_inline void copy33(mat33 m, const mat33 a) {
     for(int i = 0; i < 9; ++i) m[i] = a[i];
 }
 //
-static m_inline vec3 transform33(mat33 m, vec3 p) {
-    float x = (m[0] * p.x) + (m[4] * p.y) + (m[ 8] * p.z);
-    float y = (m[1] * p.x) + (m[5] * p.y) + (m[ 9] * p.z);
-    float z = (m[2] * p.x) + (m[6] * p.y) + (m[10] * p.z);
-    return vec3(x,y,z);
-}
 static m_inline vec3 mulv33(mat33 m, vec3 v) {
     return vec3(m[0]*v.x+m[1]*v.y+m[2]*v.z,m[3]*v.x+m[4]*v.y+m[5]*v.z,m[6]*v.x+m[7]*v.y+m[8]*v.z);
 }
@@ -503,18 +497,7 @@ static m_inline bool invert44(mat44 T, const mat44 M) { // !!! ok, i guess
     T[3*4+3] = ( M[2*4+0] * s[3] - M[2*4+1] * s[1] + M[2*4+2] * s[0]) * idet;
     return true;
 }
-static m_inline vec4 transform444(const mat44 m, const vec4 p) {
-    // remember w = 1 for move in space; w = 0 rotate in space;
-    float x = m[0]*p.x + m[4]*p.y + m[ 8]*p.z + m[12]*p.w;
-    float y = m[1]*p.x + m[5]*p.y + m[ 9]*p.z + m[13]*p.w;
-    float z = m[2]*p.x + m[6]*p.y + m[10]*p.z + m[14]*p.w;
-    float w = m[3]*p.x + m[7]*p.y + m[11]*p.z + m[15]*p.w;
-    return vec4(x,y,z,w);
-}
-static m_inline vec3 transform344(const mat44 m, const vec3 p) {
-    vec4 v = transform444(m, vec34(p, 1));
-    return scale3(v.vec3, 1.f / v.w);
-}
+static m_inline vec4 transform444(const mat44, const vec4);
 static m_inline bool unproject44(vec3 *out, vec3 xyd, vec4 viewport, mat44 mvp) { 
     // xyd: usually x:mouse_x,y:window_height()-mouse_y,d:0=znear/1=zfar
     // src: https://www.khronos.org/opengl/wiki/GluProject_and_gluUnProject_code
@@ -531,7 +514,7 @@ static m_inline bool unproject44(vec3 *out, vec3 xyd, vec4 viewport, mat44 mvp) 
     return false;
 }
 
-static m_inline vec3 transform_axis(const coord_system basis, const coord_axis to);
+static m_inline vec3 transform_axis(const coord_system, const coord_axis);
 static m_inline void rebase44(mat44 m, const coord_system src_basis, const coord_system dst_basis) {
     vec3 v1 = transform_axis(src_basis, dst_basis[0]);
     vec3 v2 = transform_axis(src_basis, dst_basis[1]);
@@ -542,57 +525,40 @@ static m_inline void rebase44(mat44 m, const coord_system src_basis, const coord
     m[12] =    0; m[13] =    0; m[14] =    0; m[15] = 1;
 }
 
-// ----------------------------------------------------------------------------
 
-static m_inline vec3 transform_axis(const coord_system basis, const coord_axis to) { 
-    const float dot_table[6][6] = {
-        {+1,-1,0,0,0,0},{-1,+1,0,0,0,0},{0,0,+1,-1,0,0},
-        {0,0,-1,+1,0,0},{0,0,0,0,+1,-1},{0,0,0,0,-1,+1},
-    };
-    return vec3( dot_table[basis[0]][to], dot_table[basis[1]][to], dot_table[basis[2]][to] );
+static m_inline void compose44(mat44 m, vec3 t, quat q, vec3 s) {
+#if 0
+    // quat to rotation matrix
+    m[0] = 1 - 2 * (q.y * q.y + q.z * q.z);
+    m[1] = 2 * (q.x * q.y + q.z * q.w);
+    m[2] = 2 * (q.x * q.z - q.y * q.w);
+
+    m[4] = 2 * (q.x * q.y - q.z * q.w);
+    m[5] = 1 - 2 * (q.x * q.x + q.z * q.z);
+    m[6] = 2 * (q.y * q.z + q.x * q.w);
+
+    m[8] = 2 * (q.x * q.z + q.y * q.w);
+    m[9] = 2 * (q.y * q.z - q.x * q.w);
+    m[10] = 1 - 2 * (q.x * q.x + q.y * q.y);
+
+    // scale matrix
+    m[0] *= s.x; m[4] *= s.x; m[8] *= s.x;
+    m[1] *= s.y; m[5] *= s.y; m[9] *= s.y;
+    m[2] *= s.z; m[6] *= s.z; m[10] *= s.z;
+
+    // set translation
+    m[12] = t.x; m[13] = t.y; m[14] = t.z;
+
+    m[3] = 0; m[7] = 0; m[11] = 0; m[15] = 1;
+#else
+    rotationq44(m,q);
+    scale44(m,s.x,s.y,s.z);
+    relocate44(m,t.x,t.y,t.z);
+
+    m[3] = 0; m[7] = 0; m[11] = 0; m[15] = 1;
+#endif
 }
 
-// A vector is the difference between two points in 3D space, possessing both direction and magnitude
-vec3 transform_vector  (const mat44 m, const vec3 vector)   { return transform344(m, vector); }
-
-// A point is a specific location within a 3D space
-vec3 transform_point   (const mat44 m, const vec3 p)    { // return (m * vec4{point,1).xyz()/r.w;
-    float inv = 1.0f / (m[3+4*0]*p.x + m[3+4*1]*p.y + m[3+4*2]*p.z + m[3+4*3]);
-    return vec3(
-        (m[0+4*0]*p.x + m[0+4*1]*p.y + m[0+4*2]*p.z + m[0+4*3]) * inv,
-        (m[1+4*0]*p.x + m[1+4*1]*p.y + m[1+4*2]*p.z + m[1+4*3]) * inv,
-        (m[2+4*0]*p.x + m[2+4*1]*p.y + m[2+4*2]*p.z + m[2+4*3]) * inv
-    );
-}
-
-// A tangent is a unit-length vector which is parallel to a piece of geometry, such as a surface or a curve
-vec3 transform_tangent (const mat44 m, const vec3 tangent)  { return norm3(transform_vector(m, tangent)); }
-
-// A normal is a unit-length bivector which is perpendicular to a piece of geometry, such as a surface or a curve
-vec3 transform_normal  (const mat44 m, const vec3 normal)   {
-    mat44 t; transpose44(t,m); mat44 i; invert44(i,t);
-    return scale3(norm3(transform_vector(i, normal)), det44(m) < 0 ? -1 : 1);
-}
-
-// A quaternion can describe both a rotation and a uniform scaling in 3D space
-quat transform_quat     (const mat44 m, const quat q)      {
-    vec3 s = scale3(transform_vector(m, q.vec3), det44(m) < 0 ? -1 : 1);
-    return quat(s.x,s.y,s.z,q.w);
-}
-
-// A matrix can describe a general transformation of homogeneous coordinates in projective space
-float* transform_matrix(mat44 out, const mat44 m, const mat44 matrix) {
-    mat44 I; invert44(I, m);
-    mat44 N; multiply344(out, I, matrix, m); // m,matrix,I instead ?
-    return out;
-}
-
-// Scaling factors are not a vector, they are a compact representation of a scaling matrix
-vec3 transform_scaling (const mat44 m, const vec3 scaling) {
-    mat44 s; scaling44(s, scaling.x, scaling.y, scaling.z);
-    mat44 out; transform_matrix(out, m, s);
-    return vec3( out[0], out[5], out[10] );
-}
 
 // ----------------------------------------------------------------------------
 // !!! for debugging

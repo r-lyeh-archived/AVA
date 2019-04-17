@@ -8,19 +8,6 @@
 #include "math_linear2.c"
 
 
-static m_inline vec3 transformq(const quat q, const vec3 v) {  // !!! ok, i guess
-    // [src] https://gamedev.stackexchange.com/questions/28395/rotating-vector3-by-a-quaternion (laurent couvidou)
-    // Extract the vector part of the quaternion
-    vec3 u = vec3(q.x, q.y, q.z);
-    // Extract the scalar part of the quaternion
-    float s = q.w;
-    // Do the math
-    vec3 a = scale3(u, 2 * dot3(u,v));
-    vec3 b = scale3(v, s*s - dot3(u,u));
-    vec3 c = scale3(cross3(u,v), 2*s);
-    return add3(a, add3(b,c));
-}
-
 #if 0
 static m_inline void mat4_add(mat44 M, mat44 a, mat44 b) {
     int i;
