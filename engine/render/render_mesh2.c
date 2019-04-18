@@ -41,9 +41,10 @@ typedef struct mesh2 {
     union {
     GLuint texture_id[1];
     GLuint material_id;
+    struct material *material;
     };
     vec3 minbb, maxbb; // center+extents instead ?
-    char name[64 - sizeof(GLuint) * 6 - sizeof(vec3) * 2]; // char *name; instead?
+    char name[64 - sizeof(GLuint) * 5 - sizeof(struct material*) - sizeof(vec3) * 2]; // char *name; instead?
 } mesh2;
 #pragma pack()
 
@@ -51,6 +52,8 @@ typedef struct mesh2 {
 API void   mesh2_create(mesh2* m, const char *format, int vertex_count, void *vertex_data, int index_count, void *index_data, int flags);
 API void   mesh2_render(mesh2* m, unsigned program); // , int instanceCount = 1, GLenum mode /*GL_TRIANGLES*/);
 API void   mesh2_destroy(mesh2* m);
+
+API void   mesh2_make_quad( struct mesh2 *m );
 
 #endif
 
@@ -100,11 +103,11 @@ void mesh2_create(mesh2* m, const char *format, int vertex_count, void *vertex_d
         break; case '4': dc->num_components = 4;
         break; case 'f': dc->vertex_type = GL_FLOAT;
         break; case 'u': dc->vertex_type = GL_UNSIGNED_INT;
-        break; case 'b': if(format[-1] >= '0' && format[-1] <= '9') dc->vertex_type = GL_BYTE; //else bitangent.
+        break; case 'b': if(format[-1] >= '0' && format[-1] <= '9') dc->vertex_type = GL_UNSIGNED_BYTE; //else bitangent.
         break; case ' ': case '\0': 
             if (!dc->vertex_type) dc->vertex_type = GL_FLOAT;
             dc->offset = sizeof_vertex;
-            sizeof_vertex += (dc->stride = dc->num_components * (dc->vertex_type == GL_BYTE ? 1 : 4));
+            sizeof_vertex += (dc->stride = dc->num_components * (dc->vertex_type == GL_UNSIGNED_BYTE ? 1 : 4));
             ++dc;
         break; default: if( !strchr("pntcwai", *format) ) PANIC("unsupported vertex type '%c'", *format);
     } while (*format++);
@@ -138,7 +141,9 @@ void mesh2_create(mesh2* m, const char *format, int vertex_count, void *vertex_d
     // vertex setup: iterate descriptors
     for( int i = 0; i < countof(descriptor); ++i ) {
         if( descriptor[i].num_components ) {
-            glVertexAttribPointer(i, descriptor[i].num_components, descriptor[i].vertex_type, GL_FALSE, sizeof_vertex, (GLchar*)NULL + descriptor[i].offset );
+            glVertexAttribPointer(i, 
+                descriptor[i].num_components,  descriptor[i].vertex_type, descriptor[i].vertex_type == GL_UNSIGNED_BYTE ? GL_TRUE : GL_FALSE,
+                sizeof_vertex, (GLchar*)NULL + descriptor[i].offset );
             glEnableVertexAttribArray(i);
         } else {
             glDisableVertexAttribArray(i);
@@ -181,29 +186,36 @@ void mesh2_render(mesh2* m, unsigned program) {
         material *material = &materials[m->material_id];
         material3_bind(material, program);
     }
+
+    if( r->material && model ) {
+        material_sendmodel(r->material, model);
+    }
 #endif
 
-    // bind vao
+    //
     glBindVertexArray(m->vao);
-
-    // draw mesh
-    if( m->ibo ) {
-        // with indices
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ibo); // <-- why? intel only?
+    if( m->ibo ) { // with indices
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ibo); // <-- why intel?
         glDrawElements(GL_TRIANGLES, m->index_count, GL_UNSIGNED_INT, (char*)0);
-    } else {
-        // without indices
+    } else { // with vertices only
         glDrawArrays(GL_TRIANGLES, 0, m->vertex_count /* / 3 */);
     }
-
-    // unbind buffers
     glBindVertexArray(0);
 }
 
 void mesh2_destroy(mesh2* m) {
+/*
+    if(m->material) material_destroy(m->material);
+    for( int i = 0; i < sizeof(m->mesh.vbo) / sizeof(m->mesh.vbo[0]); ++i ) {
+        glDeleteBuffers(1, &m->mesh.vbo[i]);
+    }
+*/
     glDeleteBuffers(1, &m->ibo);
     glDeleteBuffers(1, &m->vbo);
     glDeleteVertexArrays(1, &m->vao);
+
+    mesh2 z = {0};
+    *m = z;
 }
 
 void mesh2_loadmem(mesh2 *self, const char *data, size_t length) {
@@ -251,4 +263,27 @@ void mesh2_loadfile(mesh2 *self, const char *pathfile) {
     mesh2_loadmem(self, file_read(pathfile), file_size(pathfile));
 }
 
+void mesh2_make_quad( mesh2 *m ) {
+    // A--B ; quad CDAB becomes triangle CAB and CBD.
+    // | /| 
+    // |/ | 
+    // C--D 
+    struct vertex_p3_c4b_t2 {
+        vec3 p;
+        uint32_t c;
+        vec2 t;
+    } stream[] = {
+        /*C*/ { vec3(-1, -1, 0), 0xFF0000FF, vec2(0, 1) },
+        /*A*/ { vec3(-1,  1, 0), 0xFF00FF00, vec2(0, 0) },
+        /*B*/ { vec3( 1,  1, 0), 0xFFFF0000, vec2(1, 0) },
+        /*C*/ { vec3(-1, -1, 0), 0xFF0000FF, vec2(0, 1) },
+        /*B*/ { vec3( 1,  1, 0), 0xFFFF0000, vec2(1, 0) },
+        /*D*/ { vec3( 1, -1, 0), 0xFFFFFFFF, vec2(1, 1) },
+    };
+
+    mesh2_create( m, "p3 c4b t2", 6,stream, 0,NULL, 0);
+}
+
 #endif
+
+

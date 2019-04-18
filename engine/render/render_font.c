@@ -40,9 +40,9 @@ enum FONT_FLAGS {
 API int font( const char *fontfile, int fontSize, int flags );
 API int font_mem( const void *fontData, int fileSize, int fontSize, int flags );
 
-// instantiate text mesh
+// bake text mesh
 
-API void font_mesh(rendernode *r, int font_id, const char *text );
+API void font_mesh(mesh2 *m, int font_id, const char *text);
 API material *font_material();
 
 // @todo: rethink this
@@ -94,11 +94,11 @@ static int fonts_count = 0;
 
 // ----------------------------------------------------------------------------
 
-int fillglyph(vec3 *positions, vec2 *uvs, font_t *f, uint32_t character, float *offsetX, float *offsetY) {
+// fill glyph (4 vertices quad)
+int fillglyph4(const void *positions, const void *uvs, font_t *f, uint32_t character, float *offsetX, float *offsetY, int stride) {
     uint32_t index = f->lookup[character];
-//    if(!index) index = f->lookup[(unsigned)'?'];
-
-    LOGEXTRA(TEXT, "%c(%d)(%d),", (char)character, character, index );
+    // if(!index) index = f->lookup[(unsigned)'?'];
+    // LOGEXTRA(TEXT, "%c(%d)(%d),", (char)character, character, index );
 
     stbtt_aligned_quad quad;
     stbtt_GetPackedQuad((stbtt_packedchar*)f->charInfo, f->atlasWidth, f->atlasHeight, index, offsetX, offsetY, &quad, 1);
@@ -108,14 +108,14 @@ int fillglyph(vec3 *positions, vec2 *uvs, font_t *f, uint32_t character, float *
     float ymin = -quad.y1;
     float ymax = -quad.y0;
 
-    positions[0] = vec3(xmin, ymin, 0);
-    positions[1] = vec3(xmin, ymax, 0);
-    positions[2] = vec3(xmax, ymax, 0);
-    positions[3] = vec3(xmax, ymin, 0);
-    uvs[0] = vec2(quad.s0, quad.t1);
-    uvs[1] = vec2(quad.s0, quad.t0);
-    uvs[2] = vec2(quad.s1, quad.t0);
-    uvs[3] = vec2(quad.s1, quad.t1);
+	*(vec3*)((char*)positions + (0*stride)) = vec3(xmin, ymin, 0);
+	*(vec3*)((char*)positions + (1*stride)) = vec3(xmin, ymax, 0);
+	*(vec3*)((char*)positions + (2*stride)) = vec3(xmax, ymax, 0);
+	*(vec3*)((char*)positions + (3*stride)) = vec3(xmax, ymin, 0);
+	*(vec2*)((char*)uvs + (0*stride)) = vec2(quad.s0, quad.t1);
+	*(vec2*)((char*)uvs + (1*stride)) = vec2(quad.s0, quad.t0);
+	*(vec2*)((char*)uvs + (2*stride)) = vec2(quad.s1, quad.t0);
+	*(vec2*)((char*)uvs + (3*stride)) = vec2(quad.s1, quad.t1);
 
     return 1;
 }
@@ -167,12 +167,15 @@ material* font_material() {
     static material m, *init = 0;
     if( !init ) {
         init = &m;
+        if( !fonts ) {
+            font_mem(0,0,0,0);
+        }
         const char* vs = 
             VS130
             "/* render_font.c */\n"
-            "layout (location = 0) in vec3 att_position;\n"
-            "layout (location = 1) in vec4 att_inColor0;\n"
-            "layout (location = 2) in vec2 att_texCoord0;\n"
+            "in vec3 att_position;\n"
+            "in vec4 att_inColor0;\n"
+            "in vec2 att_texCoord0;\n"
             "uniform mat4 u_M, u_VP;\n"
             "out vec4 v_color0;\n"
             "out vec2 v_uv0;\n"
@@ -192,7 +195,7 @@ material* font_material() {
             "    fragColor = v_color0 * r;\n"
             "}\n";
         material_create(&m);
-        m.shader = shader(vs, fs);
+        m.shader = shader2(vs, fs, "att_position,att_inColor0,att_texCoord0");
         m.u_VP = glGetUniformLocation(m.shader, "u_VP");
         m.u_M = glGetUniformLocation(m.shader, "u_M");
         m.u_texture = glGetUniformLocation(m.shader, "u_mainTex");
@@ -291,7 +294,7 @@ int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
     // config character spacing
     uint32_t default_char = 'W'; // 'A'
     vec3 temp_vtx[4]; vec2 temp_uv[4];
-    fillglyph( &temp_vtx[0], &temp_uv[0], f, default_char, &f->spaceX, &f->spaceY );
+    fillglyph4( &temp_vtx[0], &temp_uv[0], f, default_char, &f->spaceX, &f->spaceY, 0 );
     if( f->spaceX > f->spaceY ) f->spaceY = f->spaceX;
 
     // add fixed kerning & interlining
@@ -324,7 +327,7 @@ void font_destroy( int font_id ) {
     *f = zero;
 }
 
-void font_mesh(rendernode *r, int font_id, const char *text ) {
+void font_mesh(mesh2 *m, int font_id, const char *text ) {
     font_t *f = &fonts[ font_id ];
     if(!f) { /* init on demand */ font_mem(0, 0, 0, 0); f = &fonts[0]; }
 
@@ -335,24 +338,31 @@ void font_mesh(rendernode *r, int font_id, const char *text ) {
 
     // setup vertex+index data
 
+    typedef struct vertex_p3c4bt2 {
+        vec3 p;
+        uint32_t c;
+        vec2 t;
+    } vertex_p3c4bt2;
+
 #if 1
+    static vertex_p3c4bt2 *vertices = 0;
+    static uint32_t      *indices = 0;
+
     // 4 verts, 6 edges/2 polys
-    int vlen = 4 * count; void *vertices = (void*)MALLOC( vlen * sizeof(vec3) );
-    int ulen = 4 * count; void *uvs      = (void*)MALLOC( ulen * sizeof(vec2) );
-    int clen = 4 * count; void *colors   = (void*)MALLOC( clen * sizeof(uint32_t) );
-    int ilen = 6 * count; void *indexes  = (void*)MALLOC( ilen * sizeof(uint16_t) );
+    int vlen = 4 * count;
+    int ilen = 6 * count;
+    vertices  = REALLOC( vertices, vlen * sizeof(vertex_p3c4bt2) );
+    indices  = REALLOC( indices, ilen * sizeof(uint32_t) );
 #else
     static const int k_maxstrlen = 1024;
     static GLfloat vertdata[...];
     static GLuint idxdata[...];
 #endif
 
-    struct Vec3  { vec3 v; } *v = (struct Vec3 *)vertices;
-    struct Vec2  { vec2 v; } *u = (struct Vec2 *)uvs;
-    struct Col32 { uint32_t v; } *c = (struct Col32*)colors;
-    struct Idx16 { uint16_t i; } *i = (struct Idx16*)indexes;
+    vertex_p3c4bt2 *v = vertices;
+    uint32_t *i = indices;
 
-    uint16_t lastIndex = 0;
+    uint32_t lastIndex = 0;
     float offsetX = 0, offsetY = 0;
     for( int s = 0; s < count; ++s ) {
         uint32_t unicode = text32[s] & 0xffff;
@@ -368,29 +378,23 @@ void font_mesh(rendernode *r, int font_id, const char *text ) {
             continue;
         }
         // handle regular text
-        if( fillglyph( &v->v, &u->v, f, unicode, &offsetX, &offsetY ) ) {
-            v += 4;
-            u += 4;
-
+        int stride = (int)sizeof(vertex_p3c4bt2);
+        if( fillglyph4( &v->p, &v->t, f, unicode, &offsetX, &offsetY, stride ) ) {
 #if 0
-            c[0].v = 0xFF0000FF; // R
-            c[1].v = 0xFF00FF00; // G
-            c[2].v = 0xFFFF0000; // B
-            c[3].v = 0xFFFFFFFF; // W
+            v[0].c = 0xFF0000FF; // R
+            v[1].c = 0xFF00FF00; // G
+            v[2].c = 0xFFFF0000; // B
+            v[3].c = 0xFFFFFFFF; // W
 #else
-            c[0].v = 0xFFFFFFFF; // W
-            c[1].v = 0xFFFFFFFF; // W
-            c[2].v = 0xFFFFFFFF; // W
-            c[3].v = 0xFFFFFFFF; // W
+            v[0].c = 0xFFFFFFFF; // W
+            v[1].c = 0xFFFFFFFF; // W
+            v[2].c = 0xFFFFFFFF; // W
+            v[3].c = 0xFFFFFFFF; // W
 #endif
-            c += 4;
+            v += 4;
 
-            uint16_t idx[] = { 
-                lastIndex, lastIndex + 1, lastIndex + 2,
-                lastIndex, lastIndex + 2, lastIndex + 3,
-            };
-            memcpy( i, idx, sizeof(idx) );
-            i += 6;
+            *i++ = lastIndex; *i++ = lastIndex+1; *i++ = lastIndex+2;
+            *i++ = lastIndex; *i++ = lastIndex+2; *i++ = lastIndex+3;
 
             lastIndex += 4;
         }
@@ -398,23 +402,10 @@ void font_mesh(rendernode *r, int font_id, const char *text ) {
 
     // setup rendernode
 
-#if 1
-    buffer buffers[] = {
-        {indexes, MSIZE(indexes)},
-        {vertices, MSIZE(vertices)},
-        {colors, MSIZE(colors)},
-        {uvs, MSIZE(uvs)},
-    };
-    mesh(&r->mesh1, VERTEX_P|VERTEX_C|VERTEX_U | 16, ilen, buffers );
-#else
-    r->mesh = MALLOC( sizeof(mesh2) );
-    mesh2_create(r->mesh, vertices );
-#endif
+    mesh2_create(m, "p3 c4b t2", vlen, vertices, ilen, indices, 0 );
 
-    FREE(vertices);
-    FREE(colors);
-    FREE(uvs);
-    FREE(indexes);
+    //FREE(vertices);
+    //FREE(indexes);
     FREE(text32);
 }
 

@@ -3,7 +3,6 @@
 #pragma once
 
 #include "../engine/math/math.c"
-#include "../engine/render/rendernode_shape.c"
 
 #if 0
 // commented out because of m_math.h

@@ -62,8 +62,7 @@ void ddraw_quad(vec3 a, vec3 b, vec3 c, vec3 d);
 #ifdef DDRAW_C
 #pragma once
 #include "render_opengl.c"
-#include "rendernode_base.c"
-#include "rendernode_font.c"
+#include "render_font.c"
 #include "engine.h" // app/window
 //#include "render_ddraw.c"
 
@@ -148,12 +147,12 @@ static const char *ddraw_shader_vtxpc_vs =
     "/* project view matrix */\n"
     "uniform mat4 projview;\n"
     "/* stream buffer data: */\n"
-    "layout (location = 0) in vec4 att_position;\n"
-    "layout (location = 1) in vec4 att_color;\n"
+    "in vec3 att_position;\n"
+    "in vec4 att_color;\n"
     "/* transform vertex and transfer color */\n"
     "out vec4 var_color;\n"
     "void main() {\n"
-    "   gl_Position = projview * att_position;\n"
+    "   gl_Position = projview * vec4(att_position.xyz, 1.0);\n"
     "   gl_PointSize = 4.f;\n" // att_position.w?
     "   var_color = att_color;\n"
     "}\n";
@@ -196,7 +195,7 @@ void ddraw_begin(float projview[16]) {
     static int draw_uni_projview = -1;
 
     if (!draw_prog) {
-        draw_prog = shader(ddraw_shader_vtxpc_vs, ddraw_shader_vtxpc_fs);
+        draw_prog = shader2(ddraw_shader_vtxpc_vs, ddraw_shader_vtxpc_fs, "att_position,att_color");
         draw_uni_projview = glGetUniformLocation(draw_prog, "projview");
     }
 
@@ -208,10 +207,10 @@ void ddraw_begin(float projview[16]) {
         glBindBuffer(GL_ARRAY_BUFFER, draw_vbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof draw_buf, NULL, GL_STREAM_DRAW);
 
-        glEnableVertexAttribArray(ATT_POSITION);
-        glEnableVertexAttribArray(ATT_COLOR);
-        glVertexAttribPointer(ATT_POSITION, 3, GL_FLOAT, 0, sizeof draw_buf[0], (void*)0);
-        glVertexAttribPointer(ATT_COLOR, 4, GL_FLOAT, 0, sizeof draw_buf[0], (void*)12);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, 0, sizeof draw_buf[0], (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 4, GL_FLOAT, 0, sizeof draw_buf[0], (void*)12);
 
         glBindVertexArray(0);
     }
@@ -660,17 +659,18 @@ void (ddraw_console)(const char *buf) {
 
 // ----------------------------------------------------------------------------
 
-static rendernode shapes[1024] = {0};
+static mesh2 shapes[1024] = {0};
+static float matrices[1024][16] = {0};
 static int instanced_shapes = 0;
 
 static
-rendernode *ddraw_find_slot() {
+int ddraw_find_slot() {
     // find dead slot
     if( instanced_shapes < 1024 ) {
-        return &shapes[instanced_shapes++];
+        return instanced_shapes++;
     }
     // no luck
-    return 0;
+    return -1;
 }
 
 static
@@ -678,9 +678,9 @@ void ddraw_clear() {
     for( int i = 0; i < instanced_shapes; ++i ) {
         // bool is_defunct = shapes[i].age && shapes[i].tick > shapes[i].age;
         // bool is_volatile = !shapes[i].age;
-        rendernode_destroy(&shapes[i]);
+        mesh2_destroy(&shapes[i]);
     }
-    memset( shapes, 0, sizeof(rendernode) * 1024 );
+    memset( shapes, 0, sizeof(mesh2) * 1024 );
     instanced_shapes = 0;
 }
 
@@ -690,14 +690,16 @@ int ddraw_font = 0;
 int ddraw_spacey = 10; // fonts[0].spaceY
 
 void (ddraw_text2d)( vec2 pos, const char *buf ) {
-    rendernode *r = ddraw_find_slot();
-    if( !r ) return;
+    int slot = ddraw_find_slot();
+    if( slot < 0 ) return;
+
+    mesh2 *r = &shapes[slot];
+    float* tf = matrices[slot];
 
     // create mesh
-    font_mesh( r, ddraw_font, buf );
-
-    scaling44(r->tf.matrix, 1,1,1);
-    translate44( r->tf.matrix, pos.x, - pos.y, 0 );
+    font_mesh(r, ddraw_font, buf);
+    scaling44(tf, 1,1,1);
+    translate44(tf, pos.x, - pos.y, 0 );
 }
 
 //-----------------------------------------------------------------------------
@@ -705,7 +707,7 @@ void (ddraw_text2d)( vec2 pos, const char *buf ) {
 static int ddraw_printf_line = 0;
 
 void (ddraw_printf)(const char *buf) {
-    (ddraw_text2d)( vec2(3,ddraw_printf_line++ * ddraw_spacey), buf );
+    (ddraw_text2d)( vec2(3,++ddraw_printf_line * ddraw_spacey), buf );
 }
 
 // ----------------------------------------------------------------------------
@@ -715,7 +717,6 @@ void ddraw_render2d() {
     static material mat, *init = 0;
     if( !init ) {
         mat = *font_material();
-        if (!ddraw_font) ddraw_printf(""); // instance ddraw_font here :o)
         mat.texture = fonts[ddraw_font].texture_id;
         mat.depth_func = GL_LEQUAL;
         mat.alpha_enable = 1;
@@ -746,8 +747,10 @@ void ddraw_render2d() {
     // texts
     material_enable(&mat, projview2d_topleft);
     for( int i = 0; i < instanced_shapes; ++i ) {
-        shapes[i].material = &mat;
-        rendernode_draw(&shapes[i], shapes[i].tf.matrix);
+        mesh2 *r = &shapes[i];
+        r->material = &mat;
+        material_sendmodel(r->material, matrices[i]);
+        mesh2_render(r, mat.shader);
     }
 
     // draw console
@@ -759,13 +762,14 @@ void ddraw_render2d() {
         if( console_lines_[i] ) {
             mat44 m;
             identity44(m);
-            translate44( m, 0, (l+1) * spacing,0 );
+            translate44(m, 0,(l+1)*spacing,0);
 
-            rendernode r = { 0 };
+            mesh2 r = { 0 };
             font_mesh(&r, ddraw_font, console_lines_[i]);
             r.material = &mat;
-            rendernode_draw(&r, m);
-            rendernode_destroy(&r);
+            material_sendmodel(r.material, m);
+            mesh2_render(&r, mat.shader);
+            mesh2_destroy(&r);
         }
     }
     // draw console input
@@ -775,11 +779,12 @@ void ddraw_render2d() {
         identity44(m);
         translate44( m, 0, 0, 0 );
 
-        rendernode r = { 0 };
+        mesh2 r = { 0 };
         font_mesh(&r, ddraw_font, (++cursor & 0x20) ? ">_" : "> " ); // &0x20 =~ every 0.5s at 60fps
         r.material = &mat;
-        rendernode_draw(&r, m);
-        rendernode_destroy(&r);
+        material_sendmodel(r.material, m);
+        mesh2_render(&r, mat.shader);
+        mesh2_destroy(&r);
     }
 
     ddraw_clear();
