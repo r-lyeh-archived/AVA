@@ -1,17 +1,8 @@
-#if 0
-rm -f a.out
-clang -nostdlib -fno-stack-protector ../stdlib/syscall.s ../stdlib/main.s main.c -lglfw -lGL
-./a.out
-exit
-#endif
-
 #include <engine.h>
 
 const float mesh_vertices[] = {
 #include "00_mesh_vertices.h"
 };
-
-#define countof(x) ( sizeof(x) / sizeof((x)[0]) )
 
 int main() {
     window_create(0.75f, WINDOW_SQUARED | WINDOW_MSAA4);

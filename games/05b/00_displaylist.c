@@ -4,8 +4,6 @@ const float mesh_vertices[] = {
 #include "00_mesh_vertices.h"
 };
 
-#define countof(x) ( sizeof(x) / sizeof((x)[0]) )
-
 void CheckProgramCompileErrors() {
     printf("%s", (char *)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
 }

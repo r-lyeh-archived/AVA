@@ -16,8 +16,6 @@ const float mesh_normals[] = {
 #include "07_mesh_normals.h"
 };
 
-#define countof(x) ( sizeof(x) / sizeof((x)[0]) )
-
 
 int main() {
 

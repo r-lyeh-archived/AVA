@@ -7,8 +7,6 @@ exit
 
 #include <engine.h>
 
-#define countof(x) ( sizeof(x) / sizeof((x)[0]) )
-
 int main() {
     window_create(0.75f, WINDOW_SQUARED);
 
