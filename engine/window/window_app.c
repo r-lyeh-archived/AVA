@@ -19,7 +19,9 @@ enum {
 API int   window_create(float zoom /* 10.0f */, int flags);
 API int   window_update();
 API void  window_swap(void **pixels); // split into window_capture() and window_swap();
-API void  window_destroy();
+API void  window_destroy(void);
+
+API void  window_capture(void **pixels);
 
 API void  window_title( const char *title );
 API void  window_fullscreen(bool enabled);
@@ -57,15 +59,12 @@ API void  window_load_opengl();
 API void renderer_init();
 API void renderer_update(int width, int height);
 API void renderer_post(int width, int height);
-API void renderer_capture( int w, int h, int comps, void *pixels );
 API void renderer_quit();
 
 void renderer_init() {
-    #if 1 //def OPENGL3
     GLuint vao = 0;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
-    #endif
     glEnableVertexAttribArray(0);
 
     glClearColor(0.4,0.4,0.4,1);
@@ -84,15 +83,6 @@ void renderer_post(int width, int height) {
     if( !init ) material_create(init = &m);
     material_enable(&m, 0);
     // glDisable(GL_BLEND); // @fixme
-}
-void renderer_quit() {
-//  text_quit();
-}
-void renderer_capture( int w, int h, int comps, void *pixels ) {
-    // @todo, bench against http://roxlu.com/2014/048/fast-pixel-transfers-with-pixel-buffer-objects
-    // should we switch tech?
-    glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glReadPixels(0, 0, w, h, comps == 3 ? GL_RGB : GL_BGRA, GL_UNSIGNED_BYTE, pixels);
 }
 
 
@@ -254,6 +244,18 @@ void trap_gl() {
 
 #endif
 
+#ifdef __GNUC__ // also, clang
+    int __argc;
+    char **__argv;
+    __attribute__((constructor)) void init_argcv(int argc, char **argv) {
+        __argc = argc;
+        __argv = argv;
+    }
+#else
+    // MINGW: _argc, _argv
+    // HP-UX:  __argc_value, __argv_value 
+    // libc:  __libc_argc, __libc_argv
+#endif
 
 /*static*/ SDL_Window  * window = NULL;
 /*static*/ SDL_GLContext glcontext;
@@ -263,18 +265,6 @@ static int window_flags = 0;
 
 void window_title( const char *title_ ) {
     if( title_ ) strcpy(title, title_);
-}
-
-void window_destroy(void) {
-	ui_destroy();
-    renderer_quit();
-    if(window) {
-        SDL_DestroyWindow(window);
-        window = 0;
-        should_quit = 0;
-    }
-    // if( num_active_windows == 0 )
-    // glfwTerminate(); // exit(0)
 }
 
 void window_load_opengl(void) {
@@ -328,10 +318,9 @@ int window_create( float zoom, int flags ) {
 #endif
 */
 
-        // atexit(window_destroy);
+        atexit(window_destroy);
     }
 
-#ifdef _MSC_VER
     int arg0len = strlen( __argv[0] );
     if( arg0len > 4 ) {
         char *dot = &__argv[0][arg0len - 4];
@@ -340,9 +329,6 @@ int window_create( float zoom, int flags ) {
         }
     }
     const char *wtitle = __argv[0];
-#else
-    const char *wtitle = "";
-#endif
 
     flags |= WINDOW_LEGACY_OPENGL; // O:)
 
@@ -515,7 +501,17 @@ int window_update() {
     return 1;
 }
 
-void renderer_capture( int w, int h, int comp, void *pixels );
+void window_capture( void **pixels ) {
+    if( pixels ) {
+        int w = window_width(), h = window_height(), comps = 3;
+        *pixels = (unsigned char *)REALLOC(*pixels, w * h * comps);
+
+        // @todo, bench against http://roxlu.com/2014/048/fast-pixel-transfers-with-pixel-buffer-objects
+        // should we switch tech?
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glReadPixels(0, 0, w, h, comps == 3 ? GL_RGB : GL_BGRA, GL_UNSIGNED_BYTE, *pixels);
+    }
+}
 
 void window_swap( void **pixels ) {
     int *rect = window_size();
@@ -529,6 +525,27 @@ void window_swap( void **pixels ) {
         material_create(mi = &m);
     }
     material_enable(mi, 0);
+
+    if( pixels && !should_quit ) {
+        window_capture(pixels);
+    }
+
+#if !defined SHIPPING || !SHIPPING
+    static uint64_t num_frame = 0;
+    if( !num_frame++ ) {
+        void *pixels = 0;
+        window_capture(&pixels);
+        if( pixels ) {
+            stbi_flip_vertically_on_write(true);
+            stbi_write_png(va("%s.png", __argv[0]), window_width(), window_height(), 3, pixels, window_width()*3);
+            FREE(pixels);
+        }
+    }
+#endif
+
+    if( title[0] ) {
+        SDL_SetWindowTitle(window, title);
+    }
 
     SDL_GL_SwapWindow(window);
     glFinish();
@@ -556,16 +573,14 @@ void window_swap( void **pixels ) {
     // input
     memcpy(scancodes_old, scancodes_now, SDL_NUM_SCANCODES * sizeof(uint8_t));
     memcpy(scancodes_now, SDL_GetKeyboardState(NULL), SDL_NUM_SCANCODES * sizeof(uint8_t));
+}
 
-    if( pixels && !should_quit ) {
-    	w = window_width();
-    	h = window_height();
-        *pixels = (unsigned char *)realloc(*pixels, 4 * w * h);
-        renderer_capture(w,h,3,*pixels);
-    }
-
-    if( title[0] ) {
-        SDL_SetWindowTitle(window, title);
+void window_destroy(void) {
+    if(window) {
+        ui_destroy();
+        SDL_DestroyWindow(window);
+        window = 0;
+        should_quit = 0;
     }
 }
 
@@ -578,7 +593,7 @@ void window_fullscreen(bool enabled) {
 }
 
 char* window_timings() {
-    static double num_frames = 0, begin = FLT_MAX, fps = 0, prev_frame = 0;
+    static double num_frames = 0, begin = FLT_MAX, fps = 60, prev_frame = 0;
 
     double now = SDL_GetTicks() / 1000.0;
     if( begin > now ) {
@@ -593,10 +608,7 @@ char* window_timings() {
         num_frames = 0;
     }
 
-    const char *appname = "";
-#ifdef _MSC_VER
-    appname = __argv[0];
-#endif
+    const char *appname = __argv[0];
 
     char *buf = va("%s %5.2ffps %5.2fms", appname, fps, (now - prev_frame) * 1000.f);
     buf += (buf[0] == ' ');
