@@ -142,7 +142,7 @@ GLuint shader_generate( GLenum type, const char *source ) {
     return shader;
 }
 
-unsigned shader2(const char *vs, const char *fs, const char *attributes) {
+unsigned shader2(const char *vs, const char *fs, const char *attribs) {
     GLuint vert = shader_generate(GL_VERTEX_SHADER, vs);
     GLuint frag = shader_generate(GL_FRAGMENT_SHADER, fs);
   //GLuint geom = shader_generate(GL_GEOMETRY_SHADER, gs);
@@ -155,17 +155,14 @@ unsigned shader2(const char *vs, const char *fs, const char *attributes) {
         glAttachShader(program, frag);
         // glAttachShader(program, geom);
 
-        if( attributes ) {
-            char attribute[128] = {0};
-            int i = 0;
-            for( const char *substr = strstr(attributes, ","); substr ; ) {
-                const char *nextstr = substr ? strstr(substr+1, ",") : 0;
-                sprintf(attribute, "%.*s", nextstr ? (int)(nextstr - substr) : (int)strlen(substr), substr );
-                substr = nextstr;
-
-                glBindAttribLocation(program, i++, attribute);
-            }
-        }
+        for( int i = 0; attribs && attribs[0]; ++i ) {
+            char attrib[128] = {0};
+            sscanf(attribs, "%127[^,]", attrib); 
+            while( attribs[0] && attribs[0] != ',' ) attribs++;
+            while( attribs[0] && attribs[0] == ',' ) attribs++;
+            glBindAttribLocation(program, i, attrib);
+            // printf("%d --> %s\n", i, attrib);
+        } // puts("---");
 
         glLinkProgram(program);
 
