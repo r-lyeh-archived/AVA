@@ -28,6 +28,7 @@
 
 enum MESH2_FLAGS {
     MESH2_STATIC = 0, // , DYNAMIC, STREAM // zero|single|many updates per frame
+    MESH2_TRIANGLE_STRIP = 1,
 };
 
 typedef struct material3 {
@@ -43,14 +44,15 @@ typedef struct mesh2 {
     GLuint material_id;
     struct material *material;
     };
+    unsigned flags;
     vec3 minbb, maxbb; // center+extents instead ?
-    char name[64 - sizeof(GLuint) * 5 - sizeof(struct material*) - sizeof(vec3) * 2]; // char *name; instead?
+    char name[64 - sizeof(GLuint) * 5 - sizeof(struct material*) - sizeof(unsigned) - sizeof(vec3) * 2]; // char *name; instead?
 } mesh2;
 #pragma pack()
 
 
 API void   mesh2_create(mesh2* m, const char *format, int vertex_count, void *vertex_data, int index_count, void *index_data, int flags);
-API void   mesh2_render(mesh2* m, unsigned program); // , int instanceCount = 1, GLenum mode /*GL_TRIANGLES*/);
+API void   mesh2_render(mesh2* m, unsigned program); // , int instanceCount = 1);
 API void   mesh2_destroy(mesh2* m);
 
 API void   mesh2_make_quad( struct mesh2 *m );
@@ -82,6 +84,8 @@ void mesh2_create(mesh2* m, const char *format, int vertex_count, void *vertex_d
 
     mesh2 z = {0};
     *m = z;
+
+    m->flags = flags;
 
     // setup
     unsigned sizeof_index = sizeof(GLuint);
@@ -192,15 +196,23 @@ void mesh2_render(mesh2* m, unsigned program) {
     }
 #endif
 
+    if(program) {
+        glUseProgram(program);
+    }
+
     //
     glBindVertexArray(m->vao);
     if( m->ibo ) { // with indices
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ibo); // <-- why intel?
-        glDrawElements(GL_TRIANGLES, m->index_count, GL_UNSIGNED_INT, (char*)0);
+        glDrawElements(m->flags & 1 ? GL_TRIANGLE_STRIP : GL_TRIANGLES, m->index_count, GL_UNSIGNED_INT, (char*)0);
     } else { // with vertices only
-        glDrawArrays(GL_TRIANGLES, 0, m->vertex_count /* / 3 */);
+        glDrawArrays(m->flags & 1 ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, m->vertex_count /* / 3 */);
     }
     glBindVertexArray(0);
+
+    if(program) {
+        glUseProgram(0);
+    }
 }
 
 void mesh2_destroy(mesh2* m) {
