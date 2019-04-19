@@ -660,7 +660,7 @@ void (ddraw_console)(const char *buf) {
 // ----------------------------------------------------------------------------
 
 static mesh2 shapes[1024] = {0};
-static float matrices[1024][16] = {0};
+static mat44 matrices[1024] = {0};
 static int instanced_shapes = 0;
 
 static

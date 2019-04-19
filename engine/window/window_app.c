@@ -232,9 +232,9 @@ void glDebug(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int
         GL_ERROR_TYPE[type], */
 
 #ifdef _WIN32
-    /* if (type <= 2 && debugging()) {
+    if (type <= 2 && debugging()) {
         breakpoint();
-    } */
+    }
 #endif
 }
 

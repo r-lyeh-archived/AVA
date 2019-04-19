@@ -210,9 +210,11 @@ void mesh2_render(mesh2* m, unsigned program) {
     }
     glBindVertexArray(0);
 
+/*
     if(program) {
         glUseProgram(0);
     }
+*/
 }
 
 void mesh2_destroy(mesh2* m) {
