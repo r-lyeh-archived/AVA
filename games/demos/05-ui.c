@@ -7,6 +7,10 @@ int main() {
         // placeholder, upcoming ui demo
         ui_demo();
 
+        //
+        ddraw_printf(window_stats());
+        ddraw_printf("in-game UI widgets");
+
         // swap & capture
         static void *pixels = 0;
         window_swap( &pixels );

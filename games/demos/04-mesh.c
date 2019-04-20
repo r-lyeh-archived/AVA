@@ -1,4 +1,4 @@
-// Original sample by Constatine Tarasenkov (unlicensed)
+// Original sample by Constantine Tarasenkov (unlicensed)
 // - rlyeh, public domain.
 
 #include <engine.h>
@@ -39,7 +39,7 @@ int main() {
     mesh m;
     mesh_loadfile(&m, "assets/suzanne.bob");
 #else
-    mesh2 mesh2 = mesh2_load_obj(coord_system(axis_right, axis_up, axis_back), "demo.inl");
+    mesh2 mesh2 = mesh2_load_obj(coord_system(axis_right, axis_up, axis_back), vfs_find("04-mesh.inl"));
     mesh m = mesh2_as_mesh1( &mesh2, "p3" );
 #endif
 
@@ -73,7 +73,7 @@ int main() {
         mesh_render(&m, 0);
 
         ddraw_printf(window_stats());
-        ddraw_printf("mesh .obj loading, free camera");
+        ddraw_printf("mesh loading and fly camera");
         window_swap(0);
     }
 }

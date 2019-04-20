@@ -36,13 +36,16 @@ int main(int argc, char **argv) {
     };
     mesh m; mesh_create(&m, "p2 c3", 0,3,vertices, 3,indices, 0/*flags*/ );
 
+    float timer = 0;
+
     while (window_update()) {
         ddraw_printf("%s", window_stats());
         ddraw_printf("shaders, mesh, matrices & remote rendering");
 
         // model
         mat44 M;
-        rotation44(M, deg(time_ms()/1000.f), 0,0,1 );
+        rotation44(M, deg(timer), 0,0,1 );
+        timer = time_ms() / 1000.f;
 
         // proj, view and projview
         mat44 P,V,VP;

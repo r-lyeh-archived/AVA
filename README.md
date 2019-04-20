@@ -11,7 +11,7 @@
 <br/>|
   <a href="#licensing">Unlicense</a> |
   <a href="#documentation">Documentation</a> |
-  <a href="#todo-ᕕᐛᕗ">Todo ᕕ(ᐛ)ᕗ</a> |
+  <a href="#roadmap-ᕕᐛᕗ">Roadmap ᕕ(ᐛ)ᕗ</a> |
 <br/>
 <br/>
 <br/>
@@ -43,35 +43,54 @@
 - Generic 3D editor, that can be decoupled from the project.
 - Generic asset pipeline, that can be decoupled from the project.
 - JSON workflow: still human-readable, still mergeable.
-- Inspiration from: bitsquid, nothings, rlk, krig, ccxvii, rmitton, jo.
+- Inspiration from: ands, bitsquid, ccxvii, jo, krig, ocornut, procedural, rjm, rlk, sgorsten, stb, vurtun.
 
-## Todo ᕕ(ᐛ)ᕗ
-- [x] 00 [Project structure, build system and makefiles.](#00)
-- [x] 01 [Window creation and basic framework.](#01)
-- [x] 02 [Audio.](#02)
--
+## Roadmap ᕕ(ᐛ)ᕗ
+
+- [x] 00 Project structure, build system and makefiles.
+- [x] 01 Window, rendering contexts and game loop.
+- [ ] 02 File formats, hashing, encryption and compression.
+- [x] 03 Timers, easings and interpolation.
+- [ ] 04 HID bindings, digital+analog inputs, filters, gestures, chords and combos.
+- [x] 05 Linear math, geometry, volumes and collisions.
+- [ ] 06 Cameras and frustum culling.
+- [ ] 07 Regions, triggers, trees and spatial partioning.
+- [ ] 08 Data pipeline and asset journaling.
+- [ ] 09 World streaming and level loading.
+- [ ] 10 2D/2.5D/3D/VR renderer and post-effects.
+- [x] 11 Fonts, atlases and text rendering.
+- [ ] 12 Debug draw and debug UI.
+- [ ] 13 Procedural content, brushes, voxels, noise and CSG.
+- [ ] 14 Static meshes, decals, skyboxes and skydomes.
+- [ ] 15 Sprites, sheets and spines.
+- [ ] 16 Particles, billboards, emitters, trails and paths.
+- [ ] 17 Skeletal animation, blending, blendspaces, IKs.
+- [ ] 18 LODs, mesh instancing and scenegraphs.
+- [ ] 19 Server/client architecture.
+- [ ] 20 Message pipeline and serialization.
+- [ ] 21 Digital signals, message buffering and event polling.
+- [ ] 22 Entity/component/systems and world replication.
+- [ ] 23 Scripting, bindings and game modules.
+- [ ] 24 Navpoints, navmesh traversal and pathfinding.
+- [ ] 25 AI, H/FSM, behavior trees and flocking.
+- [ ] 26 Game flow and game UI.
+- [ ] 27 Localization, subtitles and unicode.
+- [ ] 28 2D/3D audio and FFT.
+- [ ] 29 Dialogue, quests and inventory.
+- [ ] 30 Full Motion Video and integrated cinematics.
+- [ ] 31 Editor, gizmos, properties, timeline and data tracks.
+- [ ] 32 Debugger, callstack, inspection, console, leaks, cvars and profiling.
 
 ## Screenshots
 
-### 00
-Project structure and build system.
-<img src="games/00/demo.gif" height="96px" align="right">
-<br><br>
-
-### 01
-Window creation.
-<img src="games/01/demo.png" height="96px" align="right">
-<br><br>
-
-### 02
-Audio.
-<img src="games/02/demo.png" height="96px" align="right">
-<br><br>
-
-### 03
-Triangle.
-<img src="games/03/demo.png" height="96px" align="right">
-<br><br>
+<p align="center">
+<!--img src="games/demos/00-build.gif" height="112px" title="Project structure and build system."-->
+<img src="games/demos/01-hello.png"    height="112px" title="Window creation.">
+<img src="games/demos/02-audio.png"    height="112px" title="Audio.">
+<img src="games/demos/03-triangle.png" height="112px" title="Triangle.">
+<img src="games/demos/04-mesh.png"     height="112px" title="Mesh and free camera.">
+<img src="games/demos/05-ui.png"       height="112px" title="Developer UI widgets (wip).">
+</p>
 
 ## Releases
 
@@ -127,41 +146,6 @@ clang++ game.c engine.c         && echo AVA as library (OSX)
 - game.rom/.pak        (ro data storage) | game :)
 - game.ram/.sql        (rw data storage) /
 ```
-
-## Roadmap
-- [x] 00 Project structure, build system and makefiles.
-- [x] 01 Window, rendering contexts and game loop.
-- [ ] 02 File formats, hashing, encryption and compression.
-- [x] 03 Timers, easings and interpolation.
-- [ ] 04 HID bindings, digital+analog inputs, filters, gestures, chords and combos.
-- [x] 05 Linear math, geometry, volumes and collisions.
-- [ ] 06 Cameras and frustum culling.
-- [ ] 07 Regions, triggers, trees and spatial partioning.
-- [ ] 08 Data pipeline and asset journaling.
-- [ ] 09 World streaming and level loading.
-- [ ] 10 2D/2.5D/3D/VR renderer and post-effects.
-- [x] 11 Fonts, atlases and text rendering.
-- [ ] 12 Debug draw and debug UI.
-- [ ] 13 Procedural content, brushes, voxels, noise and CSG.
-- [ ] 14 Static meshes, decals, skyboxes and skydomes.
-- [ ] 15 Sprites, sheets and spines.
-- [ ] 16 Particles, billboards, emitters, trails and paths.
-- [ ] 17 Skeletal animation, blending, blendspaces, IKs.
-- [ ] 18 LODs, mesh instancing and scenegraphs.
-- [ ] 19 Server/client architecture.
-- [ ] 20 Message pipeline and serialization.
-- [ ] 21 Digital signals, message buffering and event polling.
-- [ ] 22 Entity/component/systems and world replication.
-- [ ] 23 Scripting, bindings and game modules.
-- [ ] 24 Navpoints, navmesh traversal and pathfinding.
-- [ ] 25 AI, H/FSM, behavior trees and flocking.
-- [ ] 26 Game flow and game UI.
-- [ ] 27 Localization, subtitles and unicode.
-- [ ] 28 2D/3D audio and FFT.
-- [ ] 29 Dialogue, quests and inventory.
-- [ ] 30 Full Motion Video and integrated cinematics.
-- [ ] 31 Editor, gizmos, properties, timeline and data tracks.
-- [ ] 32 Debugger, callstack, inspection, console, leaks, cvars and profiling.
 
 ## Licensing
 The project is released into the public domain (as per [this notice](LICENSE)). Any contribution to this repository is implicitly subjected to the same release conditions.

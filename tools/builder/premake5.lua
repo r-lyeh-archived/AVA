@@ -63,39 +63,46 @@ project "launch"
     includedirs {"../../engine/"}
     links {"engine"}
 
+-- demos
+
+function demos(...)
+    for _, name in ipairs({...}) do
+        project (name)
+            uuid (os.uuid(name))
+            language "C++"
+            kind "WindowedApp" -- "ConsoleApp"
+            includedirs {"../../engine/"}
+            links {"engine"} defines {"LINKAGE=IMPORT"} -- kind "SharedLib" links {"engine"}
+            includedirs {"../../engine/", "../../editor/"}
+            files {
+                "../../games/demos/*"..name.."*.h*",
+                "../../games/demos/*"..name.."*.c*",
+                "../../games/demos/*"..name.."*.inl",
+            }
+        -- defaults()
+    end
+end
+
+demos("00-build","01-hello","02-audio","03-triangle","04-mesh","05-ui")
+
 -- games
 
-project "game01"
-    language "C++"
-    kind "WindowedApp" links {"engine"} defines {"LINKAGE=IMPORT"} -- kind "SharedLib" links {"engine"}
-    files { "../../games/01/**.c", "../../games/01/**.cc", "../../games/01/**.cpp", "../../games/01/**.cxx", "../../games/01/**.h", "../../games/01/**.hh", "../../games/01/**.hpp", "../../games/01/**.inl"}
-    includedirs {"../../engine/", "../../editor/"}
+function games(...)
+    for _, name in ipairs({...}) do
+        project ("game-" .. name)
+            uuid (os.uuid("game-" .. name))
+            language "C++"
+            kind "WindowedApp" -- "ConsoleApp"
+            includedirs {"../../engine/"}
+            links {"engine"} defines {"LINKAGE=IMPORT"} -- kind "SharedLib" links {"engine"}
+            includedirs {"../../engine/", "../../editor/"}
+            files {
+                "../../games/"..name.."/**.h*",
+                "../../games/"..name.."/**.c*",
+                "../../games/"..name.."/**.inl",
+            }
+        -- defaults()
+    end
+end
 
-project "game02"
-    language "C++"
-    kind "WindowedApp" links {"engine"} defines {"LINKAGE=IMPORT"} -- kind "SharedLib" links {"engine"}
-    files { "../../games/02/**.c", "../../games/02/**.cc", "../../games/02/**.cpp", "../../games/02/**.cxx", "../../games/02/**.h", "../../games/02/**.hh", "../../games/02/**.hpp", "../../games/02/**.inl"}
-    includedirs {"../../engine/", "../../editor/"}
-
-project "game03"
-    language "C++"
-    kind "WindowedApp" links {"engine"} defines {"LINKAGE=IMPORT"} -- kind "SharedLib" links {"engine"}
-    files { "../../games/03/**.c", "../../games/03/**.cc", "../../games/03/**.cpp", "../../games/03/**.cxx", "../../games/03/**.h", "../../games/03/**.hh", "../../games/03/**.hpp", "../../games/03/**.inl"}
-    includedirs {"../../engine/", "../../editor/"}
-
-project "game04"
-    language "C++"
-    kind "WindowedApp" links {"engine"} defines {"LINKAGE=IMPORT"} -- kind "SharedLib" links {"engine"}
-    files { "../../games/04/**.c", "../../games/04/**.cc", "../../games/04/**.cpp", "../../games/04/**.cxx", "../../games/04/**.h", "../../games/04/**.hh", "../../games/04/**.hpp", "../../games/04/**.inl"}
-    includedirs {"../../engine/", "../../editor/"}
-
-project "game05"
-    language "C++"
-    kind "WindowedApp" links {"engine"} defines {"LINKAGE=IMPORT"} -- kind "SharedLib" links {"engine"}
-    files { "../../games/05b/05_sponza.c"}
-    includedirs {"../../engine/", "../../editor/"}
-
--- copy a file from the objects directory to the target directory
--- postbuildcommands {
--- '{COPY} "%{cfg.targetdir}/../engine/3rd/SDL2.dll" "%{cfg.targetdir}"',
--- }
+games("untitled")

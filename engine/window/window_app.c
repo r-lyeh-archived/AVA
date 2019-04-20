@@ -453,7 +453,7 @@ int window_create( float zoom, int flags ) {
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
         glEnableVertexAttribArray(0);
-        viewport_color(vec3(0.4,0.4,0.4));
+        viewport_color(vec3(0.1/2,0.1/2,0.1));
 
     //glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropy);
     //glGetIntegerv(GL_MAX_SAMPLES, &max_supported_samples);

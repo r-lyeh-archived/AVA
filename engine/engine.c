@@ -78,6 +78,8 @@ int init() {
 #if 1 // DEBUG
     // in case binary is present in any _debug/, _debugopt/, _release/ folder
     vfs_import("../data/**");
+    vfs_import("../demo/**");
+    vfs_import("../demos/**");
     vfs_import("../game/**");
     vfs_import("../games/**");
     vfs_import("../assets/**");
