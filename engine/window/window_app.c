@@ -584,17 +584,17 @@ void window_destroy(void) {
 }
 
 void window_fullscreen(bool enabled) {
-    if( enabled ) {
-        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-    } else {
-        SDL_SetWindowFullscreen(window, 0);
-    }
+    SDL_SetWindowFullscreen(window, enabled ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }
 
 char* window_timings() {
-    static double num_frames = 0, begin = FLT_MAX, fps = 60, prev_frame = 0;
+    static double num_frames = 0, begin = FLT_MAX, fps = 60, prev_frame = 0, boot_time = 0;
 
     double now = SDL_GetTicks() / 1000.0;
+    if( !boot_time ) {
+        boot_time = now;
+        prev_frame = now;
+    }
     if( begin > now ) {
         begin = now;
         num_frames = 0;
@@ -607,9 +607,8 @@ char* window_timings() {
         num_frames = 0;
     }
 
-    const char *appname = __argv[0];
-
-    char *buf = va("%s %5.2ffps %5.2fms", appname, fps, (now - prev_frame) * 1000.f);
+    const char *appname = __argv[0]; // also print %used/%avail kib mem, %used/%avail objs
+    char *buf = va("%s - boot %5.2fs %5.2ffps %5.2fms", appname, boot_time, fps, (now - prev_frame) * 1000.f);
     buf += (buf[0] == ' ');
 
     prev_frame = now;
