@@ -45,7 +45,7 @@ API void  map_destroy(map_t *m);
 API void  map_insert(map_t *m, pair_t *p, void *key, void *value, uint64_t keyhash, void *super);
 API void  map_erase(map_t *m, void *key, uint64_t keyhash);
 API void* map_find(map_t *m, void *key, uint64_t keyhash);
-API int  map_count(map_t *m);
+API int   map_count(map_t *m);
 API void  map_gc(map_t *m); // only if using MAP_DONT_ERASE
 
 // ----------------
@@ -143,7 +143,7 @@ void (map_create)(map_t* m) {
     *m = c;
 
     array_resize(m->array, (MAP_HASHSIZE+1));
-    memset(m->array, 0, (MAP_HASHSIZE+1) * sizeof(m->array[0]) );
+    // memset(m->array, 0, (MAP_HASHSIZE+1) * sizeof(m->array[0]) ); // array_resize() just did memset()
 }
 
 void (map_insert)(map_t* m, pair_t *p, void *key, void *value, uint64_t keyhash, void *super) {
