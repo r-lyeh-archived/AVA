@@ -1,4 +1,4 @@
-// today() + now()
+// date() = today() + time()
 
 // clock10 format: printable base10 clock
 //
@@ -28,7 +28,7 @@ API char *   date_format(char out[32], uint64_t rtc10);
 #include <time.h>
 
 #if 0
-API uint64_t now_us();
+API uint64_t time_us();
 #endif
 
 static
@@ -59,7 +59,7 @@ uint64_t rtc10(int64_t unixstamp) {
 #if 1
     static int id = 0;
 #else
-    int id = (now_us() % 1000000);
+    int id = (time_us() % 1000000);
 #endif
 
     return
