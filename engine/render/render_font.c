@@ -42,7 +42,7 @@ API int font_mem( const void *fontData, int fileSize, int fontSize, int flags );
 
 // bake text mesh
 
-API void font_mesh(mesh2 *m, int font_id, const char *text);
+API void font_mesh(mesh *m, int font_id, const char *text);
 API material *font_material();
 
 // @todo: rethink this
@@ -327,7 +327,7 @@ void font_destroy( int font_id ) {
     *f = zero;
 }
 
-void font_mesh(mesh2 *m, int font_id, const char *text ) {
+void font_mesh(mesh *m, int font_id, const char *text ) {
     font_t *f = &fonts[ font_id ];
     if(!f) { /* init on demand */ font_mem(0, 0, 0, 0); f = &fonts[0]; }
 
@@ -402,7 +402,7 @@ void font_mesh(mesh2 *m, int font_id, const char *text ) {
 
     // setup rendernode
 
-    mesh2_create(m, "p3 c4b t2", vlen, vertices, ilen, indices, 0 );
+    mesh_create(m, "p3 c4b t2", vlen, vertices, ilen, indices, 0 );
 
     //FREE(vertices);
     //FREE(indexes);

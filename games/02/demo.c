@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     audio_play(bgm, 0);
 
     while( window_update() ) {
-        ddraw_printf(window_timings());
+        ddraw_printf(window_stats());
         ddraw_printf("audio playing '%s'", "Wrath of the Djinn");
         window_swap(NULL);
     }

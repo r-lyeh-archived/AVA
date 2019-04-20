@@ -659,7 +659,7 @@ void (ddraw_console)(const char *buf) {
 
 // ----------------------------------------------------------------------------
 
-static mesh2 shapes[1024] = {0};
+static mesh shapes[1024] = {0};
 static mat44 matrices[1024] = {0};
 static int instanced_shapes = 0;
 
@@ -678,9 +678,9 @@ void ddraw_clear() {
     for( int i = 0; i < instanced_shapes; ++i ) {
         // bool is_defunct = shapes[i].age && shapes[i].tick > shapes[i].age;
         // bool is_volatile = !shapes[i].age;
-        mesh2_destroy(&shapes[i]);
+        mesh_destroy(&shapes[i]);
     }
-    memset( shapes, 0, sizeof(mesh2) * 1024 );
+    memset( shapes, 0, sizeof(mesh) * 1024 );
     instanced_shapes = 0;
 }
 
@@ -693,7 +693,7 @@ void (ddraw_text2d)( vec2 pos, const char *buf ) {
     int slot = ddraw_find_slot();
     if( slot < 0 ) return;
 
-    mesh2 *r = &shapes[slot];
+    mesh *r = &shapes[slot];
     float* tf = matrices[slot];
 
     // create mesh
@@ -747,10 +747,10 @@ void ddraw_render2d() {
     // texts
     material_enable(&mat, projview2d_topleft);
     for( int i = 0; i < instanced_shapes; ++i ) {
-        mesh2 *r = &shapes[i];
+        mesh *r = &shapes[i];
         r->material = &mat;
         material_sendmodel(r->material, matrices[i]);
-        mesh2_render(r, mat.shader);
+        mesh_render(r, mat.shader);
     }
 
     // draw console
@@ -764,12 +764,12 @@ void ddraw_render2d() {
             identity44(m);
             translate44(m, 0,(l+1)*spacing,0);
 
-            mesh2 r = { 0 };
+            mesh r = { 0 };
             font_mesh(&r, ddraw_font, console_lines_[i]);
             r.material = &mat;
             material_sendmodel(r.material, m);
-            mesh2_render(&r, mat.shader);
-            mesh2_destroy(&r);
+            mesh_render(&r, mat.shader);
+            mesh_destroy(&r);
         }
     }
     // draw console input
@@ -779,12 +779,12 @@ void ddraw_render2d() {
         identity44(m);
         translate44( m, 0, 0, 0 );
 
-        mesh2 r = { 0 };
+        mesh r = { 0 };
         font_mesh(&r, ddraw_font, (++cursor & 0x20) ? "> " : ">_" ); // &0x20 =~ every 0.5s at 60fps
         r.material = &mat;
         material_sendmodel(r.material, m);
-        mesh2_render(&r, mat.shader);
-        mesh2_destroy(&r);
+        mesh_render(&r, mat.shader);
+        mesh_destroy(&r);
     }
 
     ddraw_clear();

@@ -30,7 +30,7 @@ API vec2  window_size();
 API int   window_width();
 API int   window_height();
 API float window_aspect();
-API char* window_timings();
+API char* window_stats();
 
 API int   window_is_minimized();
 API int   window_is_maximized();
@@ -587,7 +587,7 @@ void window_fullscreen(bool enabled) {
     SDL_SetWindowFullscreen(window, enabled ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }
 
-char* window_timings() {
+char* window_stats() {
     static double num_frames = 0, begin = FLT_MAX, fps = 60, prev_frame = 0, boot_time = 0;
 
     double now = SDL_GetTicks() / 1000.0;
@@ -608,7 +608,7 @@ char* window_timings() {
     }
 
     const char *appname = __argv[0]; // also print %used/%avail kib mem, %used/%avail objs
-    char *buf = va("%s - boot %5.2fs %5.2ffps %5.2fms", appname, boot_time, fps, (now - prev_frame) * 1000.f);
+    char *buf = va("%s - boot %.2fs %5.2ffps %5.2fms", appname, boot_time, fps, (now - prev_frame) * 1000.f);
     buf += (buf[0] == ' ');
 
     prev_frame = now;

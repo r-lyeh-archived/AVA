@@ -54,18 +54,23 @@
 ## Screenshots
 
 ### 00
-Project structure, build system and makefiles.
+Project structure and build system.
 <img src="games/00/demo.gif" height="96px" align="right">
 <br><br>
 
 ### 01
-Window creation and basic framework.
+Window creation.
 <img src="games/01/demo.png" height="96px" align="right">
 <br><br>
 
 ### 02
 Audio.
 <img src="games/02/demo.png" height="96px" align="right">
+<br><br>
+
+### 03
+Triangle.
+<img src="games/03/demo.png" height="96px" align="right">
 <br><br>
 
 ## Releases

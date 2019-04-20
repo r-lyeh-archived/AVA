@@ -400,7 +400,7 @@ int main() {
 
         static void *pixels = 0;
         window_swap(&pixels);
-        window_timings();
+        window_stats();
 
         network_sendbuf( pixels, rect.x, rect.y, 3, 7755 ); // 888, 332, 242, 7755
     }

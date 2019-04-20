@@ -1,4 +1,6 @@
-API void network_sendbuf( void *pixels, int w, int h, int comp, int rgb_out );
+// rgb_formats: 888 (RGB 3bytes/pixel), 332 (RGB 1byte/pixel), 242 (RGB 1byte/pixel), 7755 (YCoCg 3bytes/2pixels)
+
+API void network_sendbuf( void *pixels, int w, int h, int comp, int rgb_format );
 
 
 #ifdef SENDBUF_C
@@ -7,7 +9,7 @@ API void network_sendbuf( void *pixels, int w, int h, int comp, int rgb_out );
 #include "network.c"
 #include "network_oscpack.c"
 
-void network_sendbuf( void *pixels, int w, int h, int comp, int outfmt ) {
+void network_sendbuf( void *pixels, int w, int h, int comp, int rgb_format ) {
     static int s, *init = 0;
     if( !init ) { init = &s; s = osc_open("127.0.0.1", "9000"); }
     if( s <= 0 ) return;
@@ -29,30 +31,30 @@ void network_sendbuf( void *pixels, int w, int h, int comp, int outfmt ) {
     int stride = w * comp;
 
     line = line_b + stride; 
-    if( outfmt == 888 ) for( int y = 0; y < h; ++y ) { line -= stride;
-        int osclen = osc_pack( oscbuf, "/render/", "iiiib", w,h,outfmt, y, w*3,line);
+    if( rgb_format == 888 ) for( int y = 0; y < h; ++y ) { line -= stride;
+        int osclen = osc_pack( oscbuf, "/render/", "iiiib", w,h,rgb_format, y, w*3,line);
         bool sent = osc_send( s, oscbuf + 4, osclen - 4 );
         num_sent_packets += sent; sending |= sent;
     }
-    if( outfmt == 332 ) for( int y = 0; y < h; ++y ) { line -= stride;
+    if( rgb_format == 332 ) for( int y = 0; y < h; ++y ) { line -= stride;
         for( int x = 0; x < stride; ++x ) {
             unsigned char r = line[x*3+0], g = line[x*3+1], b = line[x*3+2];
             line[x] = (( r >> 5 ) << 5) | (( g >> 5 ) << 2) | (( b >> 6 ) << 0);
         }
-        int osclen = osc_pack( oscbuf, "/render/", "iiiib", w,h,outfmt, y, w,line);
+        int osclen = osc_pack( oscbuf, "/render/", "iiiib", w,h,rgb_format, y, w,line);
         bool sent = osc_send( s, oscbuf + 4, osclen - 4 );
         num_sent_packets += sent; sending |= sent;
     }
-    if( outfmt == 242 ) for( int y = 0; y < h; ++y ) { line -= stride;
+    if( rgb_format == 242 ) for( int y = 0; y < h; ++y ) { line -= stride;
         for( int x = 0; x < stride; ++x ) {
             unsigned char r = line[x*3+0], g = line[x*3+1], b = line[x*3+2];
             line[x] = (( r >> 6 ) << 6) | (( g >> 4 ) << 2) | (( b >> 6 ) << 0);
         }
-        int osclen = osc_pack( oscbuf, "/render/", "iiiib", w,h,outfmt, y, w,line);
+        int osclen = osc_pack( oscbuf, "/render/", "iiiib", w,h,rgb_format, y, w,line);
         bool sent = osc_send( s, oscbuf + 4, osclen - 4 );
         num_sent_packets += sent; sending |= sent;
     }
-    if( outfmt == 7755 ) for( int y = 0; y < h; ++y ) { line -= stride;
+    if( rgb_format == 7755 ) for( int y = 0; y < h; ++y ) { line -= stride;
         /**/ if( (w % 2) == 0 ) {}
         else if( (w % 2) == 1 ) w -= 1;
         assert( (w % 2) == 0 );
@@ -92,7 +94,7 @@ void network_sendbuf( void *pixels, int w, int h, int comp, int outfmt ) {
             // Y Y Y Y CoCg (7 7 7 7 6 6) : 5bytes == 4px
             // Y Y Y Y CoCg (6 6 6 6 8 8) : 5bytes == 4px
         }
-        int osclen = osc_pack( oscbuf, "/render/", "iiiib", w,h,outfmt, y, w*2,line);
+        int osclen = osc_pack( oscbuf, "/render/", "iiiib", w,h,rgb_format, y, w*2,line);
         bool sent = osc_send( s, oscbuf + 4, osclen - 4 );
         num_sent_packets += sent; sending |= sent;
     }

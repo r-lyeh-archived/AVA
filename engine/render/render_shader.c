@@ -14,13 +14,6 @@
 #define OpenGL43 "#version 430 core\n"
 #define OpenGL44 "#version 440 core\n"
 
-typedef GLuint Shader;
-typedef GLuint Buffer;
-typedef GLuint VAO;
-typedef GLuint Attribute;
-
-API Attribute get_attribute_location( Shader p, const char *name );
-
 #define GLSL(...) #__VA_ARGS__
 
 #define NO_LAYOUT \
@@ -172,12 +165,5 @@ API Attribute get_attribute_location( Shader p, const char *name );
 
 #ifdef SHADER_C
 #pragma once
-
-Attribute get_attribute_location( Shader p, const char *name ) {
-    glUseProgram(p);
-    Attribute rc = glGetAttribLocation(p, name);
-    glUseProgram(0);
-    return rc;
-}
 
 #endif

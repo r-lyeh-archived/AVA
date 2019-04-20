@@ -10,7 +10,7 @@
 #define MESH_C
 #define VIEWPORT2_C
 #define MATERIAL2_C
-#define MESH2_C
+#define MESH_C
 #define DDRAW2_C
 
 #define FONT_C
@@ -26,10 +26,9 @@
 #include "render_texture.c"
 #include "render_texture2.c"
 #include "render_fbo2.c"
-#include "render_mesh.c"
 #include "render_viewport2.c"
 #include "render_material2.c"
-#include "render_mesh2.c"
+#include "render_mesh.c"
 #include "render_ddraw2.c"
 
 #include "render_font.c"

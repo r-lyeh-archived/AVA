@@ -1,57 +1,65 @@
+// inspiration from glfw sample (https://github.com/glfw/glfw/blob/master/examples/simple.c)
+// - rlyeh, public domain.
+
 #include "engine.h"
 
 EXPORT
 int main(int argc, char **argv) {
-    window_create( 25.f /*25%*/, 0 );
+    // 25%, no flags
+    window_create( 25.f, 0 );
 
     // instance shader
-    const char* vertex_shader =
-        VS130 //VS130
-        "uniform mat4 MVP;\n"
+    const char* vertex =
+        VS120
+        "uniform mat4 M, VP;\n"
         "attribute vec2 att_pos;\n"
         "attribute vec3 att_col;\n"
         "varying vec3 color;\n"
         "void main() {\n"
-        "    gl_Position = MVP * vec4(att_pos, 0.0, 1.0);\n"
+        "    gl_Position = VP * M * vec4(att_pos, 0.0, 1.0);\n"
         "    color = att_col;\n"
         "}\n";
-    const char* fragment_shader =
-        FS130 //FS130
+    const char* fragment =
+        FS120
         "varying vec3 color;\n"
         "void main() {\n"
         "    fragColor = vec4(color, 1.0);\n"
         "}\n";
-    unsigned program = shader2( vertex_shader, fragment_shader, "att_pos,att_col" );
+    unsigned program = shader2( vertex, fragment, "att_pos,att_col" );
 
     // instance mesh
     unsigned indices[3] = {0,1,2};
-    struct { float x,y, r,g,b; } vertices[3] = {
+    struct { float px,py, cr,cg,cb; } vertices[3] = {
         { -0.6f, -0.4f, 1.f, 0.f, 0.f },
         {  0.6f, -0.4f, 0.f, 1.f, 0.f },
         {   0.f,  0.6f, 0.f, 0.f, 1.f }
     };
-    mesh2 m; mesh2_create(&m, "p2 c3", 3,vertices, 3,indices, 0/*flags*/ );
+    mesh m; mesh_create(&m, "p2 c3", 3,vertices, 3,indices, 0/*flags*/ );
 
     while (window_update()) {
-        ddraw_printf("%s", window_timings());
+        ddraw_printf("%s", window_stats());
         ddraw_printf("shaders, mesh, matrices & remote rendering");
 
-        // model, view, proj and modelviewproj
-        mat44 M,V,P,MVP;
+        // model
+        mat44 M;
         rotation44(M, deg(time_ms()/1000.f), 0,0,1 );
+
+        // proj, view and projview
+        mat44 P,V,VP;
         identity44(V);
         ortho44(P, -window_aspect(), window_aspect(), -1.f, 1.f, 1.f, -1.f);
-        multiply344(MVP, P, V, M);
+        multiply44(VP, P, V);
 
         // draw
-        shader_bind_mat44(program, "MVP", MVP);
-        mesh2_render(&m, 0);
+        shader_bind_mat44(program, "M", M);
+        shader_bind_mat44(program, "VP", VP);
+        mesh_render(&m, 0);
 
-        // swap & capture
+        // swap & capture screen
         static void *pixels = 0;
         window_swap( &pixels );
 
-        // send capture to remote view
+        // send screen capture to remote viewer (editor). 3 (components), 7755 (YCoCg format 3bytes/2pixels)
         network_sendbuf( pixels, window_width(), window_height(), 3, 7755 );
     }
 }
