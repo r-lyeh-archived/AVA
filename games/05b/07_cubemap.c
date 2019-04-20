@@ -181,12 +181,12 @@ int main() {
     glGenPipelines(1, &pipeline);
     glCompilePipeline(pipeline, &pipeline_info);
 
-    image cubemap_px = {0}; image_loadfile( &cubemap_px, vfs_read("data/cubemap/cubemap_px_right.png"),  IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_nx = {0}; image_loadfile( &cubemap_nx, vfs_read("data/cubemap/cubemap_nx_left.png"),   IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_py = {0}; image_loadfile( &cubemap_py, vfs_read("data/cubemap/cubemap_py_top.png"),    IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_ny = {0}; image_loadfile( &cubemap_ny, vfs_read("data/cubemap/cubemap_ny_bottom.png"), IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_pz = {0}; image_loadfile( &cubemap_pz, vfs_read("data/cubemap/cubemap_pz_front.png"),  IMAGE_RGBA | IMAGE_U8); 
-    image cubemap_nz = {0}; image_loadfile( &cubemap_nz, vfs_read("data/cubemap/cubemap_nz_back.png"),   IMAGE_RGBA | IMAGE_U8); 
+    image cubemap_px = {0}; image_loadfile( &cubemap_px, vfs_find("data/cubemap/cubemap_px_right.png"),  IMAGE_RGBA | IMAGE_U8); 
+    image cubemap_nx = {0}; image_loadfile( &cubemap_nx, vfs_find("data/cubemap/cubemap_nx_left.png"),   IMAGE_RGBA | IMAGE_U8);
+    image cubemap_py = {0}; image_loadfile( &cubemap_py, vfs_find("data/cubemap/cubemap_py_top.png"),    IMAGE_RGBA | IMAGE_U8);
+    image cubemap_ny = {0}; image_loadfile( &cubemap_ny, vfs_find("data/cubemap/cubemap_ny_bottom.png"), IMAGE_RGBA | IMAGE_U8);
+    image cubemap_pz = {0}; image_loadfile( &cubemap_pz, vfs_find("data/cubemap/cubemap_pz_front.png"),  IMAGE_RGBA | IMAGE_U8);
+    image cubemap_nz = {0}; image_loadfile( &cubemap_nz, vfs_find("data/cubemap/cubemap_nz_back.png"),   IMAGE_RGBA | IMAGE_U8);
     int cubemap_w = cubemap_px.w, cubemap_h = cubemap_px.h;
 
     unsigned cubemap = 0;
@@ -281,7 +281,7 @@ int main() {
     glEndList();
 
     for (float pos_x = 0, pos_y = 0, pos_z = -2, rot_x = 0, rot_y = 0; window_update(); ) {
-        int *rect = window_size();
+        vec2 rect = window_size();
 
         double mouse_x = 0;
         double mouse_y = 0;
@@ -344,14 +344,13 @@ int main() {
         glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vs_program);
         glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 0, pos_x, pos_y, pos_z, 0);
         glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 1, cosf(-rot_x), sinf(-rot_x), cosf(-rot_y), sinf(-rot_y));
-        glViewport(0, 0, rect[0], rect[1]);
-        glScissor( 0, 0, rect[0], rect[1]);
+        glViewport(0, 0, rect.x, rect.y);
+        glScissor( 0, 0, rect.x, rect.y);
         glCallList(list);
 
-        // window_swap( NULL );
         static void *pixels = 0;
         window_swap( &pixels );
-        network_sendbuf( pixels, rect[0], rect[1], 3, 332 );
+        network_sendbuf( pixels, rect.x, rect.y, 3, 332 );
 
         mouse_x_prev = mouse_x;
         mouse_y_prev = mouse_y;

@@ -39,11 +39,11 @@
 #define mat33(...)       M_CAST(mat33, __VA_ARGS__ )
 #define mat44(...)       M_CAST(mat44, __VA_ARGS__ )
 
-typedef union vec2 { struct { float x, y; }; struct { float r, g; }; float v[1]; } vec2;
-typedef union vec3 { struct { float x, y, z; }; struct { float r, g, b; }; vec2 vec2; float v[1]; } vec3;
-typedef union vec4 { struct { float x, y, z, w; }; struct { float r, g, b, a; }; vec2 vec2; vec3 vec3; float v[1]; } vec4;
-typedef union quat { struct { float x, y, z, w; }; vec3 vec3; vec4 vec4; float v[1]; } quat;
-typedef union axis { struct { float x, y, z; }; } axis;
+typedef union vec2 { struct { float x,y; }; struct { float r,g; }; struct { float w,h; }; float v[1]; } vec2;
+typedef union vec3 { struct { float x,y,z; }; struct { float r,g,b; }; struct { float w,h,d; }; vec2 vec2; float v[1]; } vec3;
+typedef union vec4 { struct { float x,y,z,w; }; struct { float r,g,b,a; }; vec2 vec2; vec3 vec3; float v[1]; } vec4;
+typedef union quat { struct { float x,y,z,w; }; vec3 vec3; vec4 vec4; float v[1]; } quat;
+typedef union axis { struct { float x,y,z; }; } axis;
 typedef float mat33[9];
 typedef float mat44[16];
 

@@ -22,7 +22,7 @@ extern "C" {
 #endif
 
 #include "engine_config.c"
-#include "engine_minimal.c"
+#include "engine_core.c"
 #include "engine_framework.c"
 #include "engine_server.c"
 

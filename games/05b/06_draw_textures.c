@@ -234,14 +234,14 @@ int main() {
     glEndList();
 
     for (int frame = 0; window_update(); ) {
-        int *rect = window_size();
+        vec2 rect = window_size();
 
-        glViewport(0, 0, rect[0], rect[1]);
-        glScissor( 0, 0, rect[0], rect[1]);
+        glViewport(0, 0, rect.x, rect.y);
+        glScissor( 0, 0, rect.x, rect.y);
         glCallList(list_clear);
 
-        glViewport(0, 0, rect[0], rect[1]);
-        glScissor( 0, 0, rect[0], rect[1]);
+        glViewport(0, 0, rect.x, rect.y);
+        glScissor( 0, 0, rect.x, rect.y);
         frame % 2 ? glCallList(list1) : glCallList(list2);
 
         window_swap(NULL);

@@ -94,7 +94,7 @@ int main() {
     glEndList();
 
     for (float pos_x = 0, pos_y = 0, pos_z = -2; window_update(); ) {
-        int *rect = window_size();
+        vec2 rect = window_size();
 
         pos_x += key('D') * 0.025f;
         pos_x -= key('A') * 0.025f;
@@ -107,8 +107,8 @@ int main() {
 
         glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vs_program);
         glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 0, pos_x, pos_y, pos_z, 0);
-        glViewport(0, 0, rect[0], rect[1]);
-        glScissor( 0, 0, rect[0], rect[1]);
+        glViewport(0, 0, rect.x, rect.y);
+        glScissor( 0, 0, rect.x, rect.y);
         glCallList(list);
 
         window_swap(NULL);

@@ -26,7 +26,7 @@ API void  window_capture(void **pixels);
 API void  window_title( const char *title );
 API void  window_fullscreen(bool enabled);
 
-API int*  window_size();
+API vec2  window_size();
 API int   window_width();
 API int   window_height();
 API float window_aspect();
@@ -55,36 +55,6 @@ API void  window_load_opengl();
 #include <stdlib.h>
 #include <math.h>
 #include <float.h>
-
-API void renderer_init();
-API void renderer_update(int width, int height);
-API void renderer_post(int width, int height);
-API void renderer_quit();
-
-void renderer_init() {
-    GLuint vao = 0;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glEnableVertexAttribArray(0);
-
-    glClearColor(0.4,0.4,0.4,1);
-}
-void renderer_update(int width, int height) {
-    glViewport(0, 0, width, height);
-    //glClearColor(1,0,1,1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-void renderer_post(int width, int height) {
-//  text_draw(width, height);
-    extern int ddraw_printf_line;
-    ddraw_printf_line = 0;
-    ddraw_render2d();
-    static material m, *init = 0;
-    if( !init ) material_create(init = &m);
-    material_enable(&m, 0);
-    // glDisable(GL_BLEND); // @fixme
-}
-
 
 
 int (*printf_handler)(const char *fmt, ...) = printf;
@@ -473,7 +443,12 @@ int window_create( float zoom, int flags ) {
     }
 #endif
 
-    renderer_init();
+    // renderer_init();
+        GLuint vao = 0;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+        glEnableVertexAttribArray(0);
+        viewport_color(vec3(0.4,0.4,0.4));
 
     //glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropy);
     //glGetIntegerv(GL_MAX_SAMPLES, &max_supported_samples);
@@ -487,19 +462,23 @@ int window_create( float zoom, int flags ) {
 
     return 1;
 }
-int* window_size() {
-    static int dim[2];
-    SDL_GL_GetDrawableSize(window, &dim[0], &dim[1]);
-    return dim;
+vec2 window_size() {
+    int rect[2];
+    SDL_GL_GetDrawableSize(window, &rect[0], &rect[1]);
+    return vec2(rect[0],rect[1]);
 }
 int window_update() {
     if( should_quit ) {
         return 0;
     }
-    int *rect = window_size();
-    int width = rect[0], height = rect[1];
+    vec2 rect = window_size();
+    int width = (int)rect.x, height = (int)rect.y;
     float ratio = width / (height + 1.f);
-    renderer_update(width, height);
+
+    //renderer_update(width, height);
+        viewport_clear(true, true);
+        viewport_clip(vec2(0,0),window_size());
+
     mouse_update();
 
     return 1;
@@ -518,17 +497,28 @@ void window_capture( void **pixels ) {
 }
 
 void window_swap( void **pixels ) {
-    int *rect = window_size();
-    int w = rect[0], h = rect[1];
+    vec2 rect = window_size();
 
-    renderer_post(w, h);
+    // renderer_post(rect.w, rect.h)
+    {
+        //  text_draw(width, height);
+        extern int ddraw_printf_line;
+        ddraw_printf_line = 0;
+        ddraw_render2d();
+        static material m, *init = 0;
+        if( !init ) material_create(init = &m);
+        material_enable(&m, 0);
+        // glDisable(GL_BLEND); // @fixme
+    }
 
     ui_render();
 
-    static material m = {0}, *mi = 0; if( !mi ) {
-        material_create(mi = &m);
+    {
+        static material m = {0}, *mi = 0; if( !mi ) {
+            material_create(mi = &m);
+        }
+        material_enable(mi, 0);
     }
-    material_enable(mi, 0);
 
     if( pixels && !should_quit ) {
         window_capture(pixels);
@@ -581,7 +571,7 @@ void window_swap( void **pixels ) {
 
 void window_destroy(void) {
     if(window) {
-        ui_destroy();
+        // ui_destroy(); // <-- commented because we want to exit quickier O:)
         SDL_DestroyWindow(window);
         window = 0;
         should_quit = 0;
@@ -623,9 +613,9 @@ char* window_timings() {
     return buf;
 }
 
-int window_width() { return window_size()[0]; }
-int window_height() { return window_size()[1]; }
-float window_aspect() { int *rect = window_size(); return rect[0]/(rect[1]+0.001f); }
+int window_width() { return window_size().x; }
+int window_height() { return window_size().y; }
+float window_aspect() { vec2 rect = window_size(); return rect.x/(rect.y+0.001f); }
 
 int window_is_minimized() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED ); }
 int window_is_maximized() { return !!(SDL_GetWindowFlags(window) & SDL_WINDOW_MAXIMIZED ); }

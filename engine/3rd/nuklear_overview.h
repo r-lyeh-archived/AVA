@@ -9,7 +9,7 @@ overview(struct nk_context *ctx)
     static int movable = nk_true;
     static int no_scrollbar = nk_false;
     static int scale_left = nk_false;
-    static nk_flags window_flags = 0;
+    static nk_flags window_flags = NK_WINDOW_MINIMIZED;
     static int minimizable = nk_true;
 
     /* popups */
@@ -17,14 +17,13 @@ overview(struct nk_context *ctx)
     static int show_app_about = nk_false;
 
     /* window flags */
-    window_flags = 0;
     ctx->style.window.header.align = header_align;
-    if (border) window_flags |= NK_WINDOW_BORDER;
-    if (resize) window_flags |= NK_WINDOW_SCALABLE;
-    if (movable) window_flags |= NK_WINDOW_MOVABLE;
-    if (no_scrollbar) window_flags |= NK_WINDOW_NO_SCROLLBAR;
-    if (scale_left) window_flags |= NK_WINDOW_SCALE_LEFT;
-    if (minimizable) window_flags |= NK_WINDOW_MINIMIZABLE;
+    if (border) window_flags |= NK_WINDOW_BORDER; else window_flags &= ~NK_WINDOW_BORDER;
+    if (resize) window_flags |= NK_WINDOW_SCALABLE; else window_flags &= ~NK_WINDOW_SCALABLE;
+    if (movable) window_flags |= NK_WINDOW_MOVABLE; else window_flags &= ~NK_WINDOW_MOVABLE;
+    if (no_scrollbar) window_flags |= NK_WINDOW_NO_SCROLLBAR; else window_flags &= ~NK_WINDOW_NO_SCROLLBAR;
+    if (scale_left) window_flags |= NK_WINDOW_SCALE_LEFT; else window_flags &= ~NK_WINDOW_SCALE_LEFT;
+    if (minimizable) window_flags |= NK_WINDOW_MINIMIZABLE; else window_flags &= ~NK_WINDOW_MINIMIZABLE;
 
     if (nk_begin(ctx, "Overview", nk_rect(10, 10, 400, 600), window_flags))
     {

@@ -103,7 +103,7 @@ int main() {
     glEndList();
 
     for (float pos_x = 0, pos_y = 0, pos_z = -2, rot_x = 0, rot_y = 0; window_update(); ) {
-        int *rect = window_size();
+        vec2 rect = window_size();
 
         double mouse_x = 0;
         double mouse_y = 0;
@@ -163,8 +163,8 @@ int main() {
         glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vs_program);
         glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 0, pos_x, pos_y, pos_z, 0);
         glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 1, cosf(-rot_x), sinf(-rot_x), cosf(-rot_y), sinf(-rot_y));
-        glViewport(0, 0, rect[0], rect[1]);
-        glScissor( 0, 0, rect[0], rect[1]);
+        glViewport(0, 0, rect.x, rect.y);
+        glScissor( 0, 0, rect.x, rect.y);
         glCallList(list);
 
         window_swap(NULL);

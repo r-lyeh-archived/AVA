@@ -104,9 +104,9 @@ int main() {
     glEndList();
 
     while( window_update() ) {
-        int *rect = window_size();
-        glViewport(0, 0, rect[0], rect[1]);
-        glScissor(0, 0, rect[0], rect[1]);
+        vec2 rect = window_size();
+        glViewport(0, 0, rect.x, rect.y);
+        glScissor(0, 0, rect.x, rect.y);
         glCallList(list);
         window_swap(NULL);
     }

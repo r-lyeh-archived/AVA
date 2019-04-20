@@ -30,7 +30,8 @@ int start(int argc, char **argv) {
 
     void *pixels = 0;
     while( window_update() ) {
-        int *rect = window_size(), w = rect[0], h = rect[1];
+        vec2 rect = window_size();
+        int w = (int)rect.w, h = (int)rect.h;
 
         for( int i = 0; i < 256; ++i ) {
             if( on_step[i] ) {

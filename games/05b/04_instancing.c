@@ -107,7 +107,7 @@ int main() {
     glEndList();
 
     for (float pos_x = -50, pos_y = 0, pos_z = 5, rot_x = 0, rot_y = 0; window_update(); ) {
-        int *rect = window_size();
+        vec2 rect = window_size();
 
         double mouse_x = 0;
         double mouse_y = 0;
@@ -164,16 +164,16 @@ int main() {
         pos_y += move_vec_y * 0.5;
         pos_z += move_vec_z * 0.5;
 
-        glViewport(0, 0, rect[0], rect[1]);
-        glScissor( 0, 0, rect[0], rect[1]);
+        glViewport(0, 0, rect.x, rect.y);
+        glScissor( 0, 0, rect.x, rect.y);
         glCallList(list_clear);
         glBindProgramARB(GL_VERTEX_PROGRAM_ARB, vs_program);
         glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 1, cosf(-rot_x), sinf(-rot_x), cosf(-rot_y), sinf(-rot_y));
         for (int j = 0; j < 3 * 30; j += 3) {
             for (int i = 0; i < 3 * 30; i += 3) {
                 glProgramLocalParameter4fARB(GL_VERTEX_PROGRAM_ARB, 0, pos_x + i, pos_y, pos_z + j, 0);
-                glViewport(0, 0, rect[0], rect[1]);
-                glScissor( 0, 0, rect[0], rect[1]);
+                glViewport(0, 0, rect.x, rect.y);
+                glScissor( 0, 0, rect.x, rect.y);
                 glCallList(list);
             }
         }

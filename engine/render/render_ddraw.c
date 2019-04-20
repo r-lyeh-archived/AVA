@@ -104,8 +104,8 @@ enum {
 void ortho(mat44 proj, int flags) {
     // void ortho4(mat44 M, float l, float r, float b, float t, float n, float f);
     // @todo: test all configurations
-    int *rect = window_size();
-    float w = rect[0], h = rect[1] + 1;
+    vec2 rect = window_size();
+    float w = rect.x, h = rect.y + 1;
     if( flags & ORTHO_CENTERED ) {
         if( flags & ORTHO_NORMALIZED ) {
             // (-1,-1) top-left, (+1,+1) bottom-right

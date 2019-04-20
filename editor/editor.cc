@@ -1,5 +1,5 @@
 #define API
-#include <engine_minimal.c>
+#include "engine_core.c"
 #define OSCRECV_C
 #include "network/network_oscrecv.c"
 #if 0
@@ -15,12 +15,11 @@ extern "C" {
 }
 */
 #endif
+#define GL(...) __VA_ARGS__
 
 
 // include opengl, imgui and all widgets.
-#define GL(...) __VA_ARGS__
 #include "imgui/imgui.cpp"
-
 
 #include <timeapi.h> // timeBeginPeriod, timeEndPeriod
 #include <thread>
