@@ -13,10 +13,13 @@ API void viewport_clip(vec2 from, vec2 to);
 static
 void viewport(float x, float y, float w, float h) {
     // top-left
-    glViewport(x, window_height()-y-h, w, h); 
+    y = window_height()-y-h;
+    glViewport(x, y, w, h);
+    glScissor(x, y, w, h);
 
     // bottom-left
     // glViewport(x, y, w, h)
+    // glScissor(x, y, w, h)
 
     // ideas
     // if( flags & (TOPLEFT|UNIT))          ortho44(proj, -1, +1, -1, +1, -1, 1 );       // 0,0 top-left, 1-1 bottom-right
@@ -29,6 +32,8 @@ void viewport_color(vec3 color3) {
 }
 
 void viewport_clear(bool color, bool depth) {
+    glClearDepthf(1);
+    glClearStencil(0);
     glClear((color ? GL_COLOR_BUFFER_BIT : 0) | (depth ? GL_DEPTH_BUFFER_BIT : 0));
 }
 

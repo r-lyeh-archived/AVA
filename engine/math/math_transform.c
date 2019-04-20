@@ -43,7 +43,7 @@ static m_inline vec3 transform_axis(const coord_system basis, const coord_axis t
         {+1,-1,0,0,0,0},{-1,+1,0,0,0,0},{0,0,+1,-1,0,0},
         {0,0,-1,+1,0,0},{0,0,0,0,+1,-1},{0,0,0,0,-1,+1},
     };
-    return vec3( dot_table[basis[0]][to], dot_table[basis[1]][to], dot_table[basis[2]][to] );
+    return vec3( dot_table[basis.x][to], dot_table[basis.y][to], dot_table[basis.z][to] );
 }
 
 // A vector is the difference between two points in 3D space, possessing both direction and magnitude

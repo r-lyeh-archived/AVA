@@ -402,7 +402,7 @@ void font_mesh(mesh *m, int font_id, const char *text ) {
 
     // setup rendernode
 
-    mesh_create(m, "p3 c4b t2", vlen, vertices, ilen, indices, 0 );
+    mesh_create(m, "p3 c4b t2", 0,vlen,vertices, ilen,indices, 0 );
 
     //FREE(vertices);
     //FREE(indexes);

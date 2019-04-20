@@ -1,7 +1,7 @@
 // inspiration from glfw sample (https://github.com/glfw/glfw/blob/master/examples/simple.c)
 // - rlyeh, public domain.
 
-#include "engine.h"
+#include <engine.h>
 
 EXPORT
 int main(int argc, char **argv) {
@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
         {  0.6f, -0.4f, 0.f, 1.f, 0.f },
         {   0.f,  0.6f, 0.f, 0.f, 1.f }
     };
-    mesh m; mesh_create(&m, "p2 c3", 3,vertices, 3,indices, 0/*flags*/ );
+    mesh m; mesh_create(&m, "p2 c3", 0,3,vertices, 3,indices, 0/*flags*/ );
 
     while (window_update()) {
         ddraw_printf("%s", window_stats());

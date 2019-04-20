@@ -16,6 +16,7 @@
 // (t)excoord
 // (c)olor
 // (w)eight
+// w(e)ight ids
 // t(a)ngent
 // b(i)tangent
 // vec(1)
@@ -51,7 +52,7 @@ typedef struct mesh {
 #pragma pack()
 
 
-API void   mesh_create(mesh* m, const char *format, int vertex_count, void *vertex_data, int index_count, void *index_data, int flags);
+API void   mesh_create(mesh* m, const char *format, int vertex_stride_optional,int vertex_count,void *vertex_data, int index_count,void *index_data, int flags);
 API void   mesh_render(mesh* m, unsigned program); // , int instanceCount = 1);
 API void   mesh_destroy(mesh* m);
 
@@ -79,7 +80,7 @@ unsigned int *index_optimize(unsigned int *index_data, int index_count, int vert
 
 typedef int mesh_static_assert[ sizeof(mesh) == 64 ];
 
-void mesh_create(mesh* m, const char *format, int vertex_count, void *vertex_data, int index_count, void *index_data, int flags) {
+void mesh_create(mesh* m, const char *format, int vertex_stride,int vertex_count,void *vertex_data, int index_count,void *index_data, int flags) {
     // assert( is_any_shader_bound() ); 
 
     mesh z = {0};
@@ -116,6 +117,8 @@ void mesh_create(mesh* m, const char *format, int vertex_count, void *vertex_dat
         break; default: if( !strchr("pntcwai", *format) ) PANIC("unsupported vertex type '%c'", *format);
     } while (*format++);
 
+    if(vertex_stride > 0) sizeof_vertex = vertex_stride;
+
     // layout
     glGenVertexArrays(1, &m->vao);
     glBindVertexArray(m->vao);
@@ -145,9 +148,9 @@ void mesh_create(mesh* m, const char *format, int vertex_count, void *vertex_dat
     // vertex setup: iterate descriptors
     for( int i = 0; i < countof(descriptor); ++i ) {
         if( descriptor[i].num_components ) {
-            glVertexAttribPointer(i, 
-                descriptor[i].num_components,  descriptor[i].vertex_type, descriptor[i].vertex_type == GL_UNSIGNED_BYTE ? GL_TRUE : GL_FALSE,
-                sizeof_vertex, (GLchar*)NULL + descriptor[i].offset );
+            glVertexAttribPointer(i,
+                descriptor[i].num_components, descriptor[i].vertex_type, descriptor[i].vertex_type == GL_UNSIGNED_BYTE ? GL_TRUE : GL_FALSE,
+                sizeof_vertex, (GLchar*)NULL + descriptor[i].offset);
             glEnableVertexAttribArray(i);
         } else {
             glDisableVertexAttribArray(i);
@@ -267,7 +270,7 @@ void mesh_loadmem(mesh *self, const char *data, size_t length) {
         *ptr++ = ((float*)vn)[ i*3 + 1 ];
         *ptr++ = ((float*)vn)[ i*3 + 2 ];
     }
-    mesh_create(self, "p3 t2 n3", vcount, vtx, bytes_id / sizeof(uint32_t), idx, 0);
+    mesh_create(self, "p3 t2 n3", 0,vcount,vtx, bytes_id/sizeof(uint32_t),idx, 0);
 
     FREE(vtx);
     FREE(idx);
@@ -295,7 +298,7 @@ void mesh_make_quad( mesh *m ) {
         /*D*/ { vec3( 1, -1, 0), 0xFFFFFFFF, vec2(1, 1) },
     };
 
-    mesh_create( m, "p3 c4b t2", 6,stream, 0,NULL, 0);
+    mesh_create( m, "p3 c4b t2", 0,6,stream, 0,NULL, 0);
 }
 
 #endif
