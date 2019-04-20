@@ -780,7 +780,7 @@ void ddraw_render2d() {
         translate44( m, 0, 0, 0 );
 
         mesh2 r = { 0 };
-        font_mesh(&r, ddraw_font, (++cursor & 0x20) ? ">_" : "> " ); // &0x20 =~ every 0.5s at 60fps
+        font_mesh(&r, ddraw_font, (++cursor & 0x20) ? "> " : ">_" ); // &0x20 =~ every 0.5s at 60fps
         r.material = &mat;
         material_sendmodel(r.material, m);
         mesh2_render(&r, mat.shader);
