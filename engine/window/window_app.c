@@ -301,7 +301,7 @@ int window_create( float zoom, int flags ) {
     }
     // truncate paths
     char *s1 = strrchr(__argv[0], '/'), *s2 = strrchr(__argv[0], '\\');
-    __argv[0] = s1 > s2 ? s1 : s2 > s1 ? s2 : __argv[0];
+    __argv[0] = s1 > s2 ? s1+1 : s2 > s1 ? s2+1 : __argv[0];
     //
     const char *wtitle = __argv[0];
 
