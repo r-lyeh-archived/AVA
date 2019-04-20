@@ -12,11 +12,17 @@ typedef struct camera {
     float sensitivity, invert_x, invert_y;
     float enabled;
 
+    vec2  mouse;
+    float mouse_friction;
+    vec3  keyboard;
+    float keyboard_friction;
+
     mat44 view;
 } camera;
 
 API void camera_create(camera *cam, float sensitivity, bool invert_x, bool invert_y);
 API void camera_enable(camera *cam, bool enabled);
+API void camera_friction(camera *cam, float keyboard, float mouse);
 
 API void camera_fps(camera *cam, vec3 keyboard, vec2 mouse);
 API void camera_orbit(camera *cam, float distance, vec2 mouse);
@@ -44,6 +50,9 @@ void camera_create(camera *cam, float sensitivity, bool invert_x, bool invert_y)
     cam->invert_y = invert_y ? -1 : 1;
     cam->enabled = 1;
 
+    cam->mouse_friction = 0.5f;
+    cam->keyboard_friction = 0.1f;
+
     identity44(cam->view);
 }
 
@@ -51,13 +60,22 @@ void camera_enable(camera *cam, bool enabled) {
     cam->enabled = enabled;
 }
 
-void camera_fps(camera* cam, vec3 keyboard, vec2 mouse) {
-    // look: update angles
-    float offset_x = ( mouse.x - cam->last_x ) * cam->sensitivity * cam->invert_x;
-    float offset_y = ( mouse.y - cam->last_y ) * cam->sensitivity * cam->invert_y;
+void camera_friction(camera *cam, float keyboard, float mouse) {
+    cam->mouse_friction = mouse;
+    cam->keyboard_friction = keyboard;
+}
 
-    cam->last_x = mouse.x;
-    cam->last_y = mouse.y;
+void camera_fps(camera* cam, vec3 keyboard, vec2 mouse) {
+    // smooth input
+    cam->mouse = add2( scale2(cam->mouse,1-cam->mouse_friction), scale2(mouse,cam->mouse_friction));
+    cam->keyboard = add3( scale3(cam->keyboard,1-cam->keyboard_friction), scale3(keyboard,cam->keyboard_friction));
+
+    // look: update angles
+    float offset_x = ( cam->mouse.x - cam->last_x ) * cam->sensitivity * cam->invert_x;
+    float offset_y = ( cam->mouse.y - cam->last_y ) * cam->sensitivity * cam->invert_y;
+
+    cam->last_x = cam->mouse.x;
+    cam->last_y = cam->mouse.y;
 
     if( cam->enabled ) {
         cam->yaw += offset_x;
@@ -77,7 +95,7 @@ void camera_fps(camera* cam, vec3 keyboard, vec2 mouse) {
         cam->right = norm3(cross3(cam->forward, cam->up));
 
         // move: offset position
-        float right = keyboard.x, top = keyboard.y, front = keyboard.z;
+        float right = cam->keyboard.x, top = cam->keyboard.y, front = cam->keyboard.z;
         cam->position = add3(cam->position, mul3(cam->forward, vec3(front, front, front)));
         cam->position = add3(cam->position, mul3(cam->up, vec3(top, top, top)));
         cam->position = add3(cam->position, mul3(cam->right, vec3(right, right, right)));
@@ -88,12 +106,15 @@ void camera_fps(camera* cam, vec3 keyboard, vec2 mouse) {
 }
 
 void camera_orbit( camera *cam, float distance, vec2 mouse ) {
-    // look: update angles
-    float offset_x = ( mouse.x - cam->last_x ) * cam->sensitivity * cam->invert_x;
-    float offset_y = ( mouse.y - cam->last_y ) * cam->sensitivity * cam->invert_y;
+    // smooth input
+    cam->mouse = add2( scale2(cam->mouse,1-cam->mouse_friction), scale2(mouse,cam->mouse_friction));
 
-    cam->last_x = mouse.x;
-    cam->last_y = mouse.y;
+    // look: update angles
+    float offset_x = ( cam->mouse.x - cam->last_x ) * cam->sensitivity * cam->invert_x;
+    float offset_y = ( cam->mouse.y - cam->last_y ) * cam->sensitivity * cam->invert_y;
+
+    cam->last_x = cam->mouse.x;
+    cam->last_y = cam->mouse.y;
 
     if( cam->enabled ) {
         cam->yaw += offset_x;
