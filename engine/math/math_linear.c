@@ -3,7 +3,7 @@
 #ifndef LINEAR_H
 #define LINEAR_H
 
-#include "core/detect/detect_inline.c"
+#include "detect/detect_inline.c"
 
 #include "math_linear2.c"
 

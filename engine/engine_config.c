@@ -7,7 +7,7 @@
 
 // detect platform
 
-#include "core/detect/detect.c"
+#include "detect/detect.c"
 
 // code annotations
 

@@ -374,7 +374,6 @@ int window_create( float zoom, int flags ) {
     sdl_window_flags |= fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
     sdl_window_flags |= fullscreen ? 0 : SDL_WINDOW_RESIZABLE;
     sdl_window_flags |= fullscreen ? SDL_WINDOW_INPUT_GRABBED : 0; // grabbed -> mouse confined to window
-    // glfwWindowHint(GLFW_REFRESH_RATE, desktop->refreshRate);
 
     if( flags & WINDOW_MSAA4 ) {
         int msaa_samples = 4;
@@ -387,14 +386,19 @@ int window_create( float zoom, int flags ) {
     }
 
     /*
-    glfwWindowHint(GLFW_RED_BITS, desktop->redBits);
-    glfwWindowHint(GLFW_GREEN_BITS, desktop->greenBits);
-    glfwWindowHint(GLFW_BLUE_BITS, desktop->blueBits);
+    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 0);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
     glfwWindowHint(GLFW_STENCIL_BITS, 32); // 0 == GLFW_DONT_CARE
-    glfwWindowHint(GLFW_DEPTH_BITS, 0);
+    // glfwWindowHint(GLFW_REFRESH_RATE, desktop->refreshRate);
     */
 
     SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 ); // ALSO 32, OR 0 == DONT care
+    SDL_GL_SetAttribute( SDL_GL_STENCIL_SIZE, 8 );
 
     // #ifndef RELEASE
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
