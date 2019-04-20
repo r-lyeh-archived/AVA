@@ -132,19 +132,19 @@ clang++ game.c engine.c         && echo AVA as library (OSX)
 - [x] 00 Project structure, build system and makefiles.
 - [x] 01 Window, rendering contexts and game loop.
 - [ ] 02 File formats, hashing, encryption and compression.
-- [ ] 03 Timers, easings and interpolation.
+- [x] 03 Timers, easings and interpolation.
 - [ ] 04 HID bindings, digital+analog inputs, filters, gestures, chords and combos.
-- [ ] 05 Linear math, geometry, volumes and collisions.
+- [x] 05 Linear math, geometry, volumes and collisions.
 - [ ] 06 Cameras and frustum culling.
 - [ ] 07 Regions, triggers, trees and spatial partioning.
 - [ ] 08 Data pipeline and asset journaling.
 - [ ] 09 World streaming and level loading.
 - [ ] 10 2D/2.5D/3D/VR renderer and post-effects.
-- [ ] 11 Fonts, atlases and text rendering.
+- [x] 11 Fonts, atlases and text rendering.
 - [ ] 12 Debug draw and debug UI.
 - [ ] 13 Procedural content, brushes, voxels, noise and CSG.
 - [ ] 14 Static meshes, decals, skyboxes and skydomes.
-- [ ] 15 Sprites, spritesheets and spines.
+- [ ] 15 Sprites, sheets and spines.
 - [ ] 16 Particles, billboards, emitters, trails and paths.
 - [ ] 17 Skeletal animation, blending, blendspaces, IKs.
 - [ ] 18 LODs, mesh instancing and scenegraphs.
