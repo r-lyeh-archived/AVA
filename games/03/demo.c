@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
 
         // model, view, proj and modelviewproj
         mat44 M,V,P,MVP;
-        rotation44(M, deg((float)now_ms()/1000), 0,0,1 );
+        rotation44(M, deg(time_ms()/1000.f), 0,0,1 );
         identity44(V);
         ortho44(P, -window_aspect(), window_aspect(), -1.f, 1.f, 1.f, -1.f);
         multiply344(MVP, P, V, M);
