@@ -30,28 +30,27 @@
 
 // ----------------------------------------------------------------------------
 
-#define ptr(type)        0[&(type).x]
-#define vec2(x, y      ) M_CAST(vec2, (float)(x), (float)(y)                        )
-#define vec3(x, y, z   ) M_CAST(vec3, (float)(x), (float)(y), (float)(z),           )
-#define vec4(x, y, z, w) M_CAST(vec4, (float)(x), (float)(y), (float)(z), (float)(w))
-#define quat(x, y, z, w) M_CAST(quat, (float)(x), (float)(y), (float)(z), (float)(w))
-#define axis(x, y, z)    M_CAST(axis, (float)(x), (float)(y), (float)(z))
-#define mat33(...)       M_CAST(mat33, __VA_ARGS__ )
-#define mat44(...)       M_CAST(mat44, __VA_ARGS__ )
+#define ptr(type)         0[&(type).x]
+#define vec2(x, y      )  M_CAST(vec2, (float)(x), (float)(y)                        )
+#define vec3(x, y, z   )  M_CAST(vec3, (float)(x), (float)(y), (float)(z),           )
+#define vec4(x, y, z, w)  M_CAST(vec4, (float)(x), (float)(y), (float)(z), (float)(w))
+#define quat(x, y, z, w)  M_CAST(quat, (float)(x), (float)(y), (float)(z), (float)(w))
+#define axis(x, y, z)     M_CAST(axis, (float)(x), (float)(y), (float)(z))
+#define mat33(...)        M_CAST(mat33, __VA_ARGS__ )
+#define mat44(...)        M_CAST(mat44, __VA_ARGS__ )
+#define coord_system(...) M_CAST(coord_system, __VA_ARGS__)
 
 typedef union vec2 { struct { float x,y; }; struct { float r,g; }; struct { float w,h; }; float v[1]; } vec2;
 typedef union vec3 { struct { float x,y,z; }; struct { float r,g,b; }; struct { float w,h,d; }; vec2 vec2; float v[1]; } vec3;
 typedef union vec4 { struct { float x,y,z,w; }; struct { float r,g,b,a; }; vec2 vec2; vec3 vec3; float v[1]; } vec4;
 typedef union quat { struct { float x,y,z,w; }; vec3 vec3; vec4 vec4; float v[1]; } quat;
-typedef union axis { struct { float x,y,z; }; } axis;
 typedef float mat33[9];
 typedef float mat44[16];
 
 // A value type representing an abstract direction vector in 3D space, independent of any coordinate system.
 // A concrete 3D coordinate system with defined x, y, and z axes.
-
-typedef enum { axis_forward, axis_back, axis_left, axis_right, axis_up, axis_down } coord_axis;
-typedef coord_axis coord_system[3];
+typedef enum { axis_front, axis_back, axis_left, axis_right, axis_up, axis_down } coord_axis;
+typedef union coord_system { struct { coord_axis x,y,z; }; } coord_system;
 
 // ----------------------------------------------------------------------------
 
@@ -517,9 +516,9 @@ static m_inline bool unproject44(vec3 *out, vec3 xyd, vec4 viewport, mat44 mvp) 
 
 static m_inline vec3 transform_axis(const coord_system, const coord_axis);
 static m_inline void rebase44(mat44 m, const coord_system src_basis, const coord_system dst_basis) {
-    vec3 v1 = transform_axis(src_basis, dst_basis[0]);
-    vec3 v2 = transform_axis(src_basis, dst_basis[1]);
-    vec3 v3 = transform_axis(src_basis, dst_basis[2]);
+    vec3 v1 = transform_axis(src_basis, dst_basis.x);
+    vec3 v2 = transform_axis(src_basis, dst_basis.y);
+    vec3 v3 = transform_axis(src_basis, dst_basis.z);
     m[ 0] = v1.x; m[ 1] = v1.y; m[ 2] = v1.z; m[ 3] = 0;
     m[ 4] = v2.x; m[ 5] = v2.y; m[ 6] = v2.z; m[ 7] = 0;
     m[ 8] = v3.x; m[ 9] = v3.y; m[10] = v3.z; m[11] = 0;
