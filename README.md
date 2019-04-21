@@ -51,7 +51,7 @@
 - [x] 01 Window, rendering contexts and game loop.
 - [ ] 02 File formats, hashing, encryption and compression.
 - [x] 03 Timers, easings and interpolation.
-- [ ] 04 HID bindings, digital+analog inputs, filters, gestures, chords and combos.
+- [ ] 04 Input bindings, digital+analog buttons, filters, gestures, chords and combos.
 - [x] 05 Linear math, geometry, volumes and collisions.
 - [ ] 06 Cameras and frustum culling.
 - [ ] 07 Regions, triggers, trees and spatial partioning.
@@ -75,7 +75,7 @@
 - [ ] 25 AI, H/FSM, behavior trees and flocking.
 - [ ] 26 Game flow and game UI.
 - [ ] 27 Localization, subtitles and unicode.
-- [ ] 28 2D/3D audio and FFT.
+- [ ] 28 2D/3D audio, HRTF, FFT, filtering and sound occlusion.
 - [ ] 29 Dialogue, quests and inventory.
 - [ ] 30 Full Motion Video and integrated cinematics.
 - [ ] 31 Editor, gizmos, properties, timeline and data tracks.
@@ -94,7 +94,7 @@
 
 ## Releases
 
-v001_Monkey3_Icarus, v000_YOB_Marrow
+2019.2 (Monkey3_Icarus), 2019.1 (YOB_Marrow)
 
 ## Getting started
 
@@ -110,11 +110,10 @@ Additionally:
 
 ## Disk structure
 
-- `.git/`, dot folders are always ignored.
 - `editor/`, generic 3d editor and viewer.
-- `engine/`, engine runtime.
-- `games/`, all your game sources here.
-- `tools/`, build & data pipeline that imports foreign data.
+- `engine/`, portable engine runtime.
+- `games/`, games and demos.
+- `tools/`, build tools & generic asset pipeline.
 
 ## Download
 
@@ -147,7 +146,7 @@ clang++ game.c engine.c         && echo AVA as library (OSX)
 - game.ram/.sql        (rw data storage) /
 ```
 
-## Licensing
+## License
 The project is released into the public domain (as per [this notice](LICENSE)). Any contribution to this repository is implicitly subjected to the same release conditions.
 
 ## Alternatives
