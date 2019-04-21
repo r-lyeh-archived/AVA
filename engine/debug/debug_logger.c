@@ -51,6 +51,11 @@ API logger_callstack_handler* logger_handle();
 #define LOGERROR LOG
 #endif
 
+#if LOGLEVEL <= 0
+#undef  LOG
+#define LOG(tags, fmt, ...)
+#endif
+
 // ---
 
 // extra tools
