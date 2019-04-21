@@ -430,6 +430,9 @@ int window_create( float zoom, int flags ) {
         die_callback("Error: Cannot create window (SDL_CreateWindow)");
     }
 
+    // assign icon (if exists)
+    window_icon( vfs_find(va("%s.ico", __argv[0])) );
+
     glcontext = SDL_GL_CreateContext(window);
     if( !glcontext ) {
         die_callback("Error: Cannot create GL context (SDL_GL_CreateContext)"); //, SDL_GetError());
