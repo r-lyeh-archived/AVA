@@ -1,0 +1,1 @@
+- documentation generator: stddoc -> source/ to _docs/

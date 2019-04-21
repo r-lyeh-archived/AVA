@@ -1,0 +1,7 @@
+- buildid generators from vcs
+- ui (fossil) (move to editor?)
+- server (fossil) (move to editor?)
+- webadmin (fossil) (move to editor?)
+- bug/tracker server (move to editor?)
+- crash server (move to editor?)
+- symbol server (move to editor?)
