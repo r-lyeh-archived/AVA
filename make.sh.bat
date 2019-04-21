@@ -92,16 +92,16 @@ exit
             REM project generation
             REM premake5.exe codelite
             REM premake5.exe gmake
-            ..\colorizer premake5.exe vs2015
+            ..\colorizer\colorizer premake5.exe vs2015
             REM premake5.exe vs2013
             REM premake5.exe xcode4
-            ..\colorizer premake5.exe ninja
+            ..\colorizer\colorizer premake5.exe ninja
 
             REM actual build
             set NINJA_STATUS="[%%r/%%f] [%%e] "
-            if "%1"=="debugopt" ( ..\colorizer ninja.exe -v -C ..\..\_project debugopt ) else ( ^
-            if "%1"=="release"  ( ..\colorizer ninja.exe -v -C ..\..\_project release  ) else ( ^
-                                  ..\colorizer ninja.exe -v -C ..\..\_project                   ^
+            if "%1"=="debugopt" ( ..\colorizer\colorizer ninja.exe -v -C ..\..\_project debugopt ) else ( ^
+            if "%1"=="release"  ( ..\colorizer\colorizer ninja.exe -v -C ..\..\_project release  ) else ( ^
+                                  ..\colorizer\colorizer ninja.exe -v -C ..\..\_project                   ^
             ) )
             set OK=%ERRORLEVEL%
 
