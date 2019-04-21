@@ -314,7 +314,7 @@ HEAP char *dir_ls2(const char *pathmask) {
 #endif
 
 
-#ifdef DIR_DEMO
+#if defined DIR_C && defined DIR_DEMO
 #pragma once
 #include <assert.h>
 #include <stdio.h>
