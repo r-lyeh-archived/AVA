@@ -160,7 +160,7 @@ static void APIENTRY glDebug(GLenum source, GLenum type, GLuint id, GLenum sever
     }
 }
 
-void trap_gl() {
+void glEnableDebug() {
 #ifndef SHIPPING
     if (!glDebugMessageCallback) return;
     int flags;
@@ -208,8 +208,17 @@ void glDebug(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int
 #endif
 }
 
-void trap_gl() {
-
+void glEnableDebug() {
+    // Enable the debug callback
+    // #ifndef RELEASE
+    typedef void (*GLDEBUGPROC)(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, const void * userParam);
+    typedef void (*GLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC callback, const void * userParam);
+    void (*glDebugMessageCallback)(GLDEBUGPROC callback, const void * userParam) = (GLDEBUGMESSAGECALLBACKPROC)SDL_GL_GetProcAddress("glDebugMessageCallback");
+    // glEnable(GL_DEBUG_OUTPUT);
+    // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    // glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, /*NULL*/0, GL_TRUE);
+    glDebugMessageCallback((GLDEBUGPROC)glDebug, NULL);
+    // #endif
 }
 
 #endif
@@ -261,16 +270,7 @@ void window_load_opengl(void) {
 
     SDL_GL_SetSwapInterval(1); // Enable vsync, also check -1
 
-    // Enable the debug callback
-    // #ifndef RELEASE
-    typedef void (*GLDEBUGPROC)(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, const void * userParam);
-    typedef void (*GLDEBUGMESSAGECALLBACKPROC)(GLDEBUGPROC callback, const void * userParam);
-    void (*glDebugMessageCallback)(GLDEBUGPROC callback, const void * userParam) = (GLDEBUGMESSAGECALLBACKPROC)SDL_GL_GetProcAddress("glDebugMessageCallback");
-    // glEnable(GL_DEBUG_OUTPUT);
-    // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-    // glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, /*NULL*/0, GL_TRUE);
-    glDebugMessageCallback((GLDEBUGPROC)glDebug, NULL);
-    // #endif
+    glEnableDebug();
 }
 
 int window_create( float zoom, int flags ) {

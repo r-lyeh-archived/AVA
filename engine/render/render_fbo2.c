@@ -1,8 +1,8 @@
 // fbo, render to texture. based on code by @evanw (CC0). see: https://github.com/evanw/gl4
 // - rlyeh, public domain.
 
-#ifndef FBO_H
-#define FBO_H
+#ifndef FBO2_H
+#define FBO2_H
 
 // A framebuffer object that can take color attachments. Draw calls between
 // bind() and unbind() are drawn to the attached textures.
@@ -18,8 +18,8 @@
 //
 
 enum fbo_flags {
-    FBO_DONT_AUTODEPTH,
-    FBO_DONT_AUTORESIZE,
+    FBO_DONT_AUTODEPTH = 1,
+    FBO_DONT_AUTORESIZE = 2,
 };
 
 typedef struct fbo {
@@ -34,13 +34,14 @@ typedef struct fbo {
 
 // 
 // 
-API fbo* fbo_create(fbo*, int flags);
+API void fbo_create(fbo*, int flags);
 API void fbo_destroy(fbo*);
 
 // Draw to texture 2D in the indicated attachment location (or a 2D layer of a 3D texture).
 // Stop drawing to the indicated color attachment
-API void fbo_attach_color(fbo*, texture2 t, unsigned attachment /*= 0*/, unsigned layer /*= 0*/);
+API void fbo_attach_color(fbo*, texture2 t, unsigned attachment /*= 0*/, unsigned layer3d /*= 0*/);
 API void fbo_detach_color(fbo*, unsigned attachment /*= 0*/);
+API void fbo_check(fbo*);
 
 // Draw calls between these will be drawn to attachments. If resizeViewport is true this will automatically resize the viewport to the size of the last attached texture.
 API void fbo_bind(fbo*);
@@ -48,7 +49,7 @@ API void fbo_unbind(fbo*);
 
 
 #endif
-#ifdef FBO_C
+#ifdef FBO2_C
 #pragma once
 
 
@@ -57,9 +58,7 @@ void fbo_create(fbo *f, int flags) {
     i.autoDepth = flags & FBO_DONT_AUTODEPTH ? 0 : 1;
     i.resizeViewport = flags & FBO_DONT_AUTORESIZE ? 0 : 1;
     glGenFramebuffers(1, &i.id);
-    glGenRenderbuffers(1, &i.renderbuffer);
     *f = i;
-    return f;
 }
 
 void fbo_destroy(fbo *f) {
@@ -85,7 +84,7 @@ void fbo_unbind(fbo *f) {
     }
 }
 
-void fbo_attach_color(fbo *f, texture2 texture, unsigned attachment, unsigned layer) {
+void fbo_attach_color(fbo *f, texture2 texture, unsigned attachment, unsigned layer3d) {
     f->newViewport[2] = texture.width;
     f->newViewport[3] = texture.height;
 
@@ -95,7 +94,7 @@ void fbo_attach_color(fbo *f, texture2 texture, unsigned attachment, unsigned la
     if (texture.target == GL_TEXTURE_2D) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment, texture.target, texture.id, 0);
     } else {
-        glFramebufferTexture3D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment, texture.target, texture.id, 0, layer);
+        glFramebufferTexture3D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + attachment, texture.target, texture.id, 0, layer3d);
     }
 
     // Need to call glDrawBuffers() for OpenGL to draw to multiple attachments
@@ -105,29 +104,40 @@ void fbo_attach_color(fbo *f, texture2 texture, unsigned attachment, unsigned la
     f->drawBuffers[attachment] = GL_COLOR_ATTACHMENT0 + attachment;
     glDrawBuffers(array_count(f->drawBuffers), f->drawBuffers);
 
+    fbo_unbind(f);
+}
+
+void fbo_check(fbo *f) {
+    fbo_bind(f);
+
     // fbo_check
     if (f->autoDepth) {
         if (f->renderbufferWidth != f->newViewport[2] || f->renderbufferHeight != f->newViewport[3]) {
             f->renderbufferWidth = f->newViewport[2];
             f->renderbufferHeight = f->newViewport[3];
+            #if 1
+            if(!f->renderbuffer) glGenRenderbuffers(1, &f->renderbuffer);
             glBindRenderbuffer(GL_RENDERBUFFER, f->renderbuffer);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24/*32*/, f->renderbufferWidth, f->renderbufferHeight);
             glBindRenderbuffer(GL_RENDERBUFFER, 0);
+            #endif
         }
+        #if 1
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, f->renderbuffer);
+        #endif
     }
     switch (glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
         case GL_FRAMEBUFFER_COMPLETE: break;
-        case GL_FRAMEBUFFER_UNDEFINED: assert(!"GL_FRAMEBUFFER_UNDEFINED\n");
-        case GL_FRAMEBUFFER_UNSUPPORTED: assert(!"GL_FRAMEBUFFER_UNSUPPORTED\n");
-        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: assert(!"GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT\n");
-        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: assert(!"GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER\n");
-        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: assert(!"GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER\n");
-        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: assert(!"GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE\n");
-        case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT: assert(!"GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT\n");
-        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: assert(!"GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS\n");
-        case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT: assert(!"GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT\n");
-        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: assert(!"GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT\n");
+        case GL_FRAMEBUFFER_UNDEFINED: assert(!"GL_FRAMEBUFFER_UNDEFINED");
+        case GL_FRAMEBUFFER_UNSUPPORTED: assert(!"GL_FRAMEBUFFER_UNSUPPORTED");
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: assert(!"GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: assert(!"GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: assert(!"GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: assert(!"GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE");
+        case GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT: assert(!"GL_FRAMEBUFFER_INCOMPLETE_FORMATS_EXT");
+        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: assert(!"GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
+        case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT: assert(!"GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS_EXT");
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: assert(!"GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
         default: assert(!"Unknown glCheckFramebufferStatus error");
     }
 
