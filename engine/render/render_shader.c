@@ -82,42 +82,57 @@
     COMMON \
     NO_LAYOUT \
     "#define in attribute\n" \
-    "#define out varying\n"
+    "#define IN attribute\n" \
+    "#define out varying\n" \
+    "#define OUT varying\n"
 
 #define VS130 \
     "#version 130\n" \
     COMMON \
     HAS_LAYOUT /*gl3*/ \
     /*NO_LAYOUT: gl2 */ \
+    "#define OUT out\n" \
     "#define attribute in\n" \
-    "#define varying out\n"
+    "#define ATTRIBUTE in\n" \
+    "#define varying out\n" \
+    "#define VARYING out\n"
 
 #define VS140 \
     "#version 140\n" \
     COMMON \
     HAS_LAYOUT /*gl3*/ \
     /*NO_LAYOUT: gl2 */ \
+    "#define OUT out\n" \
     "#define attribute in\n" \
-    "#define varying out\n"
+    "#define ATTRIBUTE in\n" \
+    "#define varying out\n" \
+    "#define VARYING out\n"
 
 #define VS150 \
     "#version 150\n" \
     COMMON \
     HAS_LAYOUT \
+    "#define OUT out\n" \
     "#define attribute in\n" \
-    "#define varying out\n"
+    "#define ATTRIBUTE in\n" \
+    "#define varying out\n" \
+    "#define VARYING out\n"
 
 #define VS330 \
     "#version 330\n" \
     COMMON \
+    "#define OUT out\n" \
     "#define attribute in\n" \
-    "#define varying out\n"
+    "#define ATTRIBUTE in\n" \
+    "#define varying out\n" \
+    "#define VARYING out\n"
 
 #define FS120 \
     "#version 120\n" \
     COMMON \
     NO_LAYOUT \
     "#define in varying\n" \
+    "#define IN varying\n" \
     "#define texCoord gl_TexCoord[0]\n" \
     "#define fragColor gl_FragColor\n" \
     "#define texture texture2D\n" \
@@ -127,7 +142,9 @@
     "#version 130\n" \
     COMMON \
     NO_LAYOUT \
+    "#define IN in\n" \
     "#define varying in\n" \
+    "#define VARYING in\n" \
 /*  "#define texCoord gl_TexCoord[0]\n" */ \
     "#define fragColor gl_FragColor\n" \
 /*    "#define texture texture2D\n"*/ \
@@ -137,7 +154,9 @@
     "#version 140\n" \
     COMMON \
     NO_LAYOUT \
+    "#define IN in\n" \
     "#define varying in\n" \
+    "#define VARYING in\n" \
 /*  "#define texCoord gl_TexCoord[0]\n" */ \
     "#define fragColor gl_FragColor\n" \
 /*    "#define texture texture2D\n"*/ \
@@ -147,7 +166,9 @@
     "#version 150\n" \
     COMMON \
     NO_LAYOUT \
+    "#define IN in\n" \
     "#define varying in\n" \
+    "#define VARYING in\n" \
     "in vec2 texCoord;\n" \
     "out vec4 fragColor;\n"
 
@@ -155,7 +176,9 @@
     "#version 330\n" \
     COMMON \
     NO_LAYOUT \
+    "#define IN in\n" \
     "#define varying in\n" \
+    "#define VARYING in\n" \
     "in vec2 texCoord;\n" \
     "out vec4 fragColor;\n"
 
