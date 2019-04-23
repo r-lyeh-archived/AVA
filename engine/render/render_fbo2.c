@@ -50,6 +50,7 @@ API void fbo_unbind(fbo*);
 // ---
 
 API unsigned fbo2( texture3 color, texture3 depth );
+API void     fbo2_destroy(unsigned id);
 API void     fbo2_bind(unsigned id);
 API void     fbo2_unbind();
 
@@ -167,14 +168,17 @@ unsigned fbo2( texture3 color, texture3 depth ) {
         // https://community.khronos.org/t/rendering-the-depth-buffer-to-a-texture-in-a-fbo/64739/5
         glBindTexture(GL_TEXTURE_2D, depth.id);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth.id, 0);
-    } else {
-        // create a renderbuffer object for depth and stencil attachment (you cant sample this)
+    }
+#if 0 // this is working; it's just i dont want to watch rbo and delete it on fbo2_destroy() for now
+    else {
+        // create a non-sampleable renderbuffer object for depth and stencil attachments
         unsigned int rbo;
         glGenRenderbuffers(1, &rbo);
         glBindRenderbuffer(GL_RENDERBUFFER, rbo);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, color.width, color.height); // use a single renderbuffer object for both a depth AND stencil buffer.
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
     }
+#endif
 
     switch (glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
         case GL_FRAMEBUFFER_COMPLETE: break;
@@ -200,6 +204,11 @@ void fbo2_bind(unsigned id) {
 }
 void fbo2_unbind() {
     fbo2_bind(0);
+}
+
+void fbo2_destroy(unsigned id) {
+    // glDeleteRenderbuffers(1, &renderbuffer);
+    glDeleteFramebuffers(1, &id);
 }
 
 #endif

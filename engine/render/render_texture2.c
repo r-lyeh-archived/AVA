@@ -24,6 +24,7 @@ API texture3 texture3_create(int unit, int w, int h, int d, int internal_format,
 API void     texture3_bind(texture3 t);
 API void     texture3_unbind(texture3 t);
 API texture2 texture3_to2( texture3 t );
+API void     texture3_destroy(texture3 t);
 
 #endif
 
@@ -93,6 +94,10 @@ texture3 texture3_create(int unit, int w, int h, int d, int internal_format, int
 
     texture3_unbind(t);
     return t;
+}
+
+void texture3_destroy(texture3 t) {
+    glDeleteTextures(1, &t.id);
 }
 
 #endif
