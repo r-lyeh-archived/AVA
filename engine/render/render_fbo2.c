@@ -47,6 +47,13 @@ API void fbo_check(fbo*);
 API void fbo_bind(fbo*);
 API void fbo_unbind(fbo*);
 
+// ---
+
+API unsigned fbo2( texture3 color, texture3 depth );
+API void     fbo2_bind(unsigned id);
+API void     fbo2_unbind();
+
+
 
 #endif
 #ifdef FBO2_C
@@ -126,6 +133,49 @@ void fbo_check(fbo *f) {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, f->renderbuffer);
         #endif
     }
+
+    fbo_unbind(f);
+}
+
+void fbo_detach_color(fbo *f, unsigned attachment) {
+    fbo_bind(f);
+
+    // Update the draw buffers
+    if (attachment < array_count(f->drawBuffers)) {
+        f->drawBuffers[attachment] = GL_NONE;
+        glDrawBuffers(array_count(f->drawBuffers), f->drawBuffers);
+    }
+
+    fbo_unbind(f);
+}
+
+// ---
+
+unsigned fbo2( texture3 color, texture3 depth ) {
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    // color
+    if( color.id ) {
+        glBindTexture(GL_TEXTURE_2D, color.id);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color.id, 0);
+    }
+
+    // depth
+    if( depth.id ) {
+        // https://community.khronos.org/t/rendering-the-depth-buffer-to-a-texture-in-a-fbo/64739/5
+        glBindTexture(GL_TEXTURE_2D, depth.id);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth.id, 0);
+    } else {
+        // create a renderbuffer object for depth and stencil attachment (you cant sample this)
+        unsigned int rbo;
+        glGenRenderbuffers(1, &rbo);
+        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, color.width, color.height); // use a single renderbuffer object for both a depth AND stencil buffer.
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
+    }
+
     switch (glCheckFramebufferStatus(GL_FRAMEBUFFER)) {
         case GL_FRAMEBUFFER_COMPLETE: break;
         case GL_FRAMEBUFFER_UNDEFINED: assert(!"GL_FRAMEBUFFER_UNDEFINED");
@@ -141,19 +191,15 @@ void fbo_check(fbo *f) {
         default: assert(!"Unknown glCheckFramebufferStatus error");
     }
 
-    fbo_unbind(f);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    return framebuffer;
 }
 
-void fbo_detach_color(fbo *f, unsigned attachment) {
-    fbo_bind(f);
-
-    // Update the draw buffers
-    if (attachment < array_count(f->drawBuffers)) {
-        f->drawBuffers[attachment] = GL_NONE;
-        glDrawBuffers(array_count(f->drawBuffers), f->drawBuffers);
-    }
-
-    fbo_unbind(f);
+void fbo2_bind(unsigned id) {
+    glBindFramebuffer(GL_FRAMEBUFFER, id);
+}
+void fbo2_unbind() {
+    fbo2_bind(0);
 }
 
 #endif
