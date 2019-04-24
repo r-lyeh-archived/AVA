@@ -90,6 +90,7 @@
 <img src="games/demos/03-triangle.png" height="112px" title="Triangle.">
 <img src="games/demos/04-mesh.png"     height="112px" title="Mesh and free camera.">
 <img src="games/demos/05-ui.png"       height="112px" title="Developer UI widgets (wip).">
+<img src="games/demos/06-postfx.png"   height="112px" title="Post-effects.">
 </p>
 
 ## Releases

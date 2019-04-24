@@ -16,6 +16,7 @@
 
 #define FONT_C
 #define DDRAW_C
+#define POSTFX_C
 #endif
 
 #include <stdlib.h>
@@ -35,3 +36,4 @@
 
 #include "render_font.c"
 #include "render_ddraw.c"
+#include "render_postfx.c"

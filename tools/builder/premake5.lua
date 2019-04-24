@@ -83,7 +83,7 @@ function demos(...)
     end
 end
 
-demos("00-build","01-hello","02-audio","03-triangle","04-mesh","05-ui")
+demos("00-build","01-hello","02-audio","03-triangle","04-mesh","05-ui","06-postfx")
 
 -- games
 

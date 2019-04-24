@@ -21,6 +21,12 @@ API void shader_bind_mat44(unsigned program, const char *uniform, mat44);
 API const char *shader_default_diffuse_fs();
 API const char *shader_default_fullscreen_vs();
 
+// usage: bind empty vao & commit call for 6 (quad) or 3 vertices (tri).
+// ie, glBindVertexArray(empty_vao); glDrawArrays(GL_TRIANGLES, 0, 3);
+
+API const char *shader_fullscreen_quad_vs();
+API const char *shader_fullscreen_triangle_vs();
+
 #endif
 
 // ----------------------------------------------------------------------------
@@ -172,6 +178,8 @@ unsigned shader2(const char *vs, const char *fs, const char *attribs) {
             glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
             GLchar *buf = (GLchar*)MALLOC(length);
             glGetProgramInfoLog(program, length, NULL, buf);
+            dump_shader_log( vs );
+            dump_shader_log( fs );
             fprintf(stderr, "Error: Shader/program link: %s\n", buf);
             FREE(buf);
             exit(-1);
@@ -196,6 +204,26 @@ unsigned shader(const char *vs, const char *fs) {
 
 void shader_bind(unsigned shader) {
     glUseProgram(shader);
+}
+
+const char *shader_fullscreen_quad_vs() {
+    return VS130
+        "out vec2 texcoord;\n"
+        "void main() {\n"
+        "   float x = float(((uint(gl_VertexID) + 2u) / 3u)%2u); \n"
+        "   float y = float(((uint(gl_VertexID) + 1u) / 3u)%2u); \n"
+        "   gl_Position = vec4(-1.0f + x*2.0f, -1.0f+y*2.0f, 0.0f, 1.0f);\n"
+        "   texcoord = vec2(x, y);\n"
+        "}\n";
+}
+
+const char *shader_fullscreen_triangle_vs() {
+    return VS130
+        "out vec2 texcoord;\n"
+        "void main() {\n"
+        "   texcoord = vec2( (gl_VertexID << 1) & 2, gl_VertexID & 2 );\n"
+        "   gl_Position = vec4( texCoord * 2.0 - 1.0, 0.0, 1.0 );\n"
+        "}\n";
 }
 
 #endif
