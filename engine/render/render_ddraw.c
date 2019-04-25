@@ -1,59 +1,61 @@
-// based on code by @glampert (public domain).
+// based on code by @glampert (public domain) and @vurtun (public domain).
+// [src] https://gist.github.com/vurtun/95f088e4889da2474ad1ce82d7911fee
 // - rlyeh, public domain.
 //
-// @todo: split into ddraw_render2d and ddraw_render3d ?
+// @todo: split into 2d and 3d? dd2_ dd3_ prefixes?
 
 #ifndef DDRAW_H
 #define DDRAW_H
 
-// add functions
+// global state
 
-API void ddraw_begin(float projview[16]);
-API void ddraw_end(void);
+API void ddraw_color4(vec4 rgba);
+API void ddraw_color3(vec3 rgb);
+//API void ddraw_enable(bool on);
+//API void ddraw_push( float scale, float expire_ss, bool depth_on );
+//API void ddraw_pop();
 
-API void ddraw_color(vec4 color);
-
-API void ddraw_aabb(vec3 minbb, vec3 maxbb);
-API void ddraw_arrow(vec3 from, vec3 to);
-API void ddraw_axis(vec3 center, float radius);
-API void ddraw_box(vec3 center, vec3 extents);
-API void ddraw_circle(vec3 center, vec3 dir, float radius);
-API void ddraw_cone(vec3 pos1, vec3 pos2, float radius);
-API void ddraw_cross(vec3 center, float radius);
-API void ddraw_frustum(float projview_matrix[16]);
-API void ddraw_grid(int hcols, int hrows, float step);
-API void ddraw_line(vec3 from, vec3 to);
-API void ddraw_normal(vec3 center, vec3 dir, float radius);
-API void ddraw_ring(vec3 center, vec3 dir, float radius);
-API void ddraw_sphere(vec3 center, float radius);
-API void ddraw_sphere2(vec3 center, float radius);
-API void ddraw_xzgrid(float mins, float maxs, float y, float step);
-
-//
+// 2d
 
 API void ddraw_printf( const char *buf );
 API void ddraw_console( const char *buf );
 API void ddraw_text2d( vec2 center, const char *buf );
+
+// 3d
+
+API void ddraw_begin(float projview[16]);
+API void ddraw_aabb(vec3 minbb, vec3 maxbb);
+API void ddraw_arrow(vec3 from, vec3 to);
+API void ddraw_axis(vec3 center, float radius);
+API void ddraw_bounds(const vec3 points[8]);
+API void ddraw_box(vec3 center, vec3 extents);
+API void ddraw_capsule(vec3 from, vec3 to, float r);
+API void ddraw_circle(vec3 center, vec3 dir, float radius);
+API void ddraw_cone(vec3 pos1, vec3 pos2, float radius);
+API void ddraw_cross(vec3 center, float radius);
+API void ddraw_diamond(vec3 from, vec3 to, float size);
+API void ddraw_frustum(float projview_matrix[16]);
+API void ddraw_grid(int hcols, int hrows, float step);
+API void ddraw_line(vec3 from, vec3 to);
+API void ddraw_line2(vec3 src, vec3 dst, vec4 col); // src_col, dst_col
+API void ddraw_normal(vec3 center, vec3 dir, float radius);
+API void ddraw_plane(vec3 p, vec3 n, float scale);
+API void ddraw_pyramid(vec3 f, vec3 t, float size);
+API void ddraw_quad(vec3 a, vec3 b, vec3 c, vec3 d);
+API void ddraw_ring(vec3 center, vec3 dir, float radius);
+API void ddraw_sphere(vec3 center, float radius);
+API void ddraw_sphere2(vec3 center, float radius);
+API void ddraw_triangle(vec3 p, vec3 q, vec3 r);
+//API void ddraw_rect(float a[2], float b[2]);
 //API void ddraw_text3d( vec3 center, const char *fmt, ... );
+//API void ddraw_point(vec3 location);
+API void ddraw_end(void);
+
+// --
 
 #define ddraw_printf(...)   ddraw_printf(va(__VA_ARGS__))
 #define ddraw_console(...)   ddraw_console(va(__VA_ARGS__))
 #define ddraw_text2d(p,...) ddraw_text2d(p,va(__VA_ARGS__))
-
-// void pushScale(x);
-// void popScale();
-// void pushExpire(ms);
-// void popExpire();
-// void pushDepth(on/off);
-// void popDepth();
-//
-// void ddraw_point(vec3 location);
-// void ddraw_enable(int debugMode);
-
-void ddraw_lineEx( vec3 src, vec3 dst, vec4 col ); // src_col, dst_col
-void ddraw_triangle(vec3 p, vec3 q, vec3 r);
-void ddraw_quad(vec3 a, vec3 b, vec3 c, vec3 d);
-//void ddraw_rect(float a[2], float b[2]);
 
 #endif
 
@@ -64,7 +66,6 @@ void ddraw_quad(vec3 a, vec3 b, vec3 c, vec3 d);
 #include "render_opengl.c"
 #include "render_font.c"
 #include "engine.h" // app/window
-//#include "render_ddraw.c"
 
 // 
 
@@ -168,10 +169,6 @@ static const char *ddraw_shader_vtxpc_fs =
 
 // ----------------------------------------------------------------------------
 
-enum {
-    DRAW_LINES, // to material?
-};
-
 /*
  * Line and rect drawing.
  */
@@ -185,10 +182,6 @@ static struct vertex_p3c4_ { vec3 position; vec4 color; } draw_buf[MAXBUFFER];
 
 static vec4 draw_color = { 1, 1, 1, 1 };
 static int draw_kind = GL_LINES;
-
-void ddraw_color(vec4 c) {
-    draw_color = c;
-}
 
 void ddraw_begin(float projview[16]) {
     static int draw_prog = 0;
@@ -251,15 +244,13 @@ static void ddraw_vertex(vec3 pos) {
     ddraw_vertexEx(pos, draw_color);
 }
 
-void ddraw_line(vec3 p, vec3 q) {
-    if( draw_kind != GL_LINES || draw_buf_len + 2 >= MAXBUFFER ) {
-        ddraw_flush();
-    }
-
-    draw_kind = GL_LINES;
-    ddraw_vertex(p);
-    ddraw_vertex(q);
+/*
+void ddraw_triangle_(vec3 a, vec3 b, vec3 c) {
+    ddraw_line(a,b);
+    ddraw_line(b,c);
+    ddraw_line(c,a);
 }
+*/
 
 void ddraw_triangle(vec3 p, vec3 q, vec3 r) {
     if( draw_kind != GL_TRIANGLES || draw_buf_len + 3 >= MAXBUFFER ) {
@@ -309,30 +300,45 @@ void ddraw_rect(vec2 a, vec2 b) {
 
 // ----------------------------------------------------------------------------
 
-#define DDRAW_INIT(NUM_LINES) do { \
+#define DDRAW_LINES(NUM_LINES) do { \
     int num_vertices = NUM_LINES * 2; \
-    if( draw_kind != GL_TRIANGLES || (draw_buf_len + num_vertices >= MAXBUFFER)) { \
+    if( draw_kind != GL_LINES || (draw_buf_len + num_vertices >= MAXBUFFER)) { \
         ddraw_flush(); \
     } \
 } while(0)
-#define DDRAW_CALC(min,max,step) ((max + 1 - min) / step)
 
 static
-void DDRAW_LINE( vec3 src, vec3 dst, vec4 color ) {
+void DDRAW_LINE4( vec3 src, vec3 dst, vec4 color ) {
     ddraw_vertexEx( src, color );
-    ddraw_vertexEx( dst ,color );
+    ddraw_vertexEx( dst, color );
 }
 
+static
+void DDRAW_LINE( vec3 src, vec3 dst ) {
+    DDRAW_LINE4( src, dst, draw_color );
+}
 
-void ddraw_lineEx( vec3 src, vec3 dst, vec4 col ) {
-    DDRAW_INIT(1);
-    DDRAW_LINE(src, dst, col);
+void ddraw_line(vec3 p, vec3 q) {
+    if( draw_kind != GL_LINES || draw_buf_len + 2 >= MAXBUFFER ) {
+        ddraw_flush();
+    }
+
+    draw_kind = GL_LINES;
+    ddraw_vertex(p);
+    ddraw_vertex(q);
+}
+
+void ddraw_line2( vec3 src, vec3 dst, vec4 col ) {
+    DDRAW_LINES(1);
+    DDRAW_LINE4(src, dst, col);
 }
 
 /*
-void ddraw_line( vec3 src, vec3 dst ) {
-    DDRAW_INIT(1);
-    DDRAW_LINE(src, dst, yellow );
+void ddraw_grid_(float mins, float maxs, float y, float step) {
+    for( float i = mins; i <= maxs; i += step ) {
+        ddraw_line(vec3(mins,y,i), vec3(maxs,y,i));
+        ddraw_line(vec3(i,y,mins), vec3(i,y,maxs));
+    }
 }
 */
 
@@ -348,18 +354,18 @@ void ddraw_grid(int hcols, int hrows, float step) {
     float z = 0.0f;
     float x = 0.0f;
 
-    DDRAW_INIT( (cols+rows)*2 + 5 );
+    DDRAW_LINES( (cols+rows)*2 + 5 );
 
     /* Column lines and axis. */
     for (int i = 1; i < cols; ++i) {
         x = -half_size_w + i * step;
 
         if (i != half_cols) {
-            DDRAW_LINE(vec3(x, 0.0f, -half_size_h), vec3(x, 0.0f, half_size_h), gray);
+            DDRAW_LINE4(vec3(x, 0.0f, -half_size_h), vec3(x, 0.0f, half_size_h), gray);
         } else {
             /* Z-axis. */
-            DDRAW_LINE(vec3(x, 0.0f, 0.0f), vec3(x, 0.0f, half_size_h), blue);
-            DDRAW_LINE(vec3(x, 0.0f, -half_size_h), vec3(x, 0.0f, 0.0f), gray);
+            DDRAW_LINE4(vec3(x, 0.0f, 0.0f), vec3(x, 0.0f, half_size_h), blue);
+            DDRAW_LINE4(vec3(x, 0.0f, -half_size_h), vec3(x, 0.0f, 0.0f), gray);
         }
     }
 
@@ -368,182 +374,63 @@ void ddraw_grid(int hcols, int hrows, float step) {
         z = -half_size_h + j * step;
 
         if (j != half_rows) {
-            DDRAW_LINE(vec3(-half_size_w, 0.0f, z), vec3(half_size_w, 0.0f, z), gray);
+            DDRAW_LINE4(vec3(-half_size_w, 0.0f, z), vec3(half_size_w, 0.0f, z), gray);
         } else {
             /* X-axis. */
-            DDRAW_LINE(vec3(0.0f, 0.0f, z), vec3(half_size_w, 0.0f, z), red);
-            DDRAW_LINE(vec3(-half_size_w, 0.0f, z), vec3(0.0f, 0.0f, z), gray);
+            DDRAW_LINE4(vec3(0.0f, 0.0f, z), vec3(half_size_w, 0.0f, z), red);
+            DDRAW_LINE4(vec3(-half_size_w, 0.0f, z), vec3(0.0f, 0.0f, z), gray);
         }
     }
 
     /* Y-axis */
-    DDRAW_LINE(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, half_size_w, 0.0f), green);
+    DDRAW_LINE4(vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, half_size_w, 0.0f), green);
 
     /* Lines around grid. */
-    DDRAW_LINE(vec3(-half_size_w, 0.0f, half_size_h), vec3(half_size_w, 0.0f, half_size_h), white);
-    DDRAW_LINE(vec3(-half_size_w, 0.0f, -half_size_h), vec3(half_size_w, 0.0f, -half_size_h), white);
+    DDRAW_LINE4(vec3(-half_size_w, 0.0f, half_size_h), vec3(half_size_w, 0.0f, half_size_h), white);
+    DDRAW_LINE4(vec3(-half_size_w, 0.0f, -half_size_h), vec3(half_size_w, 0.0f, -half_size_h), white);
 
-    DDRAW_LINE(vec3(-half_size_w, 0.0f, half_size_h), vec3(-half_size_w, 0.0f, -half_size_h), white);
-    DDRAW_LINE(vec3(half_size_w, 0.0f, half_size_h), vec3(half_size_w, 0.0f, -half_size_h), white);
-}
-
-void ddraw_xzgrid(float mins, float maxs, float y, float step) {
-    DDRAW_INIT( 2 * DDRAW_CALC(mins,maxs,step) );
-    vec3 from, to;
-    for( float i = mins; i <= maxs; i += step ) {
-        // Horizontal line (along the X)
-        from = vec3(mins, y, i);
-        to = vec3(maxs, y, i);
-        DDRAW_LINE(from, to, gray);
-
-        // Vertical line (along the Z)
-        from = vec3(i, y, mins);
-        to = vec3(i, y, maxs);
-        DDRAW_LINE(from, to, gray);
-    }
+    DDRAW_LINE4(vec3(-half_size_w, 0.0f, half_size_h), vec3(-half_size_w, 0.0f, -half_size_h), white);
+    DDRAW_LINE4(vec3(half_size_w, 0.0f, half_size_h), vec3(half_size_w, 0.0f, -half_size_h), white);
 }
 
 void ddraw_normal(vec3 pos, vec3 dir, float length) {
-    DDRAW_INIT(1);
-    vec3 dst = {pos.x+dir.x*length, pos.y+dir.y*length, pos.z+dir.z*length};
-    DDRAW_LINE(pos, dst, white);
+    DDRAW_LINES(1);
+    DDRAW_LINE4(pos, add3(pos,scale3(dir,length)), white);
 }
 
 void ddraw_axis(vec3 center, float radius) {
-    // Red line: X to X + radius
-    // Green line: Y to Y + radius
-    // Blue line: Z to Z + radius
-    DDRAW_INIT(3);
-    DDRAW_LINE(center, add3(center, vec3(radius,0,0)), red);
-    DDRAW_LINE(center, add3(center, vec3(0,radius,0)), green);
-    DDRAW_LINE(center, add3(center, vec3(0,0,radius)), blue);
+    DDRAW_LINES(3);
+    DDRAW_LINE4(center, add3(center, vec3(radius,0,0)), red);
+    DDRAW_LINE4(center, add3(center, vec3(0,radius,0)), green);
+    DDRAW_LINE4(center, add3(center, vec3(0,0,radius)), blue);
 }
 
 void ddraw_cross(vec3 center, float radius) {
-    DDRAW_INIT(6);
-    vec3 pos, neg;
+    DDRAW_LINES(6);
 
-    const float cx = center.x;
-    const float cy = center.y;
-    const float cz = center.z;
-    const float hl = radius * 0.5f; // Half on each side.
+    float hl = radius * 0.5f; // Half on each side.
+    float cx = center.x, cy = center.y, cz = center.z;
 
     // Cyan/Red line: X - radius/2 to X + radius/2
-    pos = vec3(cx + hl, cy, cz);
-    neg = vec3(cx - hl, cy, cz);
-    DDRAW_LINE(center, pos, red);
-    DDRAW_LINE(center, neg, cyan);
+    vec3 pos = vec3(cx + hl, cy, cz);
+    vec3 neg = vec3(cx - hl, cy, cz);
+    DDRAW_LINE4(center, pos, red);
+    DDRAW_LINE4(center, neg, cyan);
 
     // Magenta/Green line: Y - radius/2 to Y + radius/2
     pos = vec3(cx, cy + hl, cz);
     neg = vec3(cx, cy - hl, cz);
-    DDRAW_LINE(center, pos, green);
-    DDRAW_LINE(center, neg, magenta);
+    DDRAW_LINE4(center, pos, green);
+    DDRAW_LINE4(center, neg, magenta);
 
     // Yellow/Blue line: Z - radius/2 to Z + radius/2
     pos = vec3(cx, cy, cz + hl);
     neg = vec3(cx, cy, cz - hl);
-    DDRAW_LINE(center, pos, blue);
-    DDRAW_LINE(center, neg, yellow);
-}
-
-
-
-void ddraw_sphere(vec3 center, float radius) {
-    const int stepSize = 15;
-    vec3 cache[360 / 15/*stepSize*/];
-    vec3 radiusVec;
-
-    DDRAW_INIT( 2 * DDRAW_CALC(stepSize,360,stepSize) * DDRAW_CALC(stepSize, 360, stepSize) );
-
-    radiusVec = vec3(0.0f, 0.0f, radius);
-
-    cache[0] = add3(center, radiusVec);
-    for (int n = 1; n < sizeof(cache)/sizeof(cache[0]); ++n) {
-        cache[n] = cache[0];
-    }
-
-    vec3 lastPoint, temp;
-    for (int i = stepSize; i <= 360; i += stepSize) {
-        const float s = sinf(rad(i));
-        const float c = cosf(rad(i));
-
-        lastPoint.x = center.x;
-        lastPoint.y = center.y + radius * s;
-        lastPoint.z = center.z + radius * c;
-
-        for (int n = 0, j = stepSize; j <= 360; j += stepSize, ++n) {
-            temp.x = center.x + sinf(rad(j)) * radius * s;
-            temp.y = center.y + cosf(rad(j)) * radius * s;
-            temp.z = lastPoint.z;
-
-            DDRAW_LINE(lastPoint, temp, magenta);
-            DDRAW_LINE(lastPoint, cache[n], magenta);
-
-            cache[n] = lastPoint;
-            lastPoint = temp;
-        }
-    }
-
-}
-
-static
-void ddraw_box_(vec3 points[8]) {
-    DDRAW_INIT( 3 * 4 );
-    // Build the lines from points using clever indexing tricks:
-    // (& 3 is a fancy way of doing % 4, but avoids the expensive modulo operation)
-    for( int i = 0; i < 4; ++i ) {
-        DDRAW_LINE(points[i], points[(i + 1) & 3], cyan);
-        DDRAW_LINE(points[4 + i], points[4 + ((i + 1) & 3)], cyan);
-        DDRAW_LINE(points[i], points[4 + i], cyan);
-    }
-}
-
-void ddraw_box(vec3 center, vec3 extents) {
-    const float cx = center.x;
-    const float cy = center.y;
-    const float cz = center.z;
-    const float w  = extents.x * 0.5f;
-    const float h  = extents.y * 0.5f;
-    const float d  = extents.z * 0.5f;
-
-    // Create all the 8 points:
-    vec3 points[8];
-    #define DDRAW_BOX_POINT(v, op1, op2, op3) \
-        { v.x = cx op1 w; v.y = cy op2 h; v.z = cz op3 d; }
-    DDRAW_BOX_POINT(points[0], -, +, +);
-    DDRAW_BOX_POINT(points[1], -, +, -);
-    DDRAW_BOX_POINT(points[2], +, +, -);
-    DDRAW_BOX_POINT(points[3], +, +, +);
-    DDRAW_BOX_POINT(points[4], -, -, +);
-    DDRAW_BOX_POINT(points[5], -, -, -);
-    DDRAW_BOX_POINT(points[6], +, -, -);
-    DDRAW_BOX_POINT(points[7], +, -, +);
-    #undef DDRAW_BOX_POINT
-
-    ddraw_box_(points);
-}
-
-void ddraw_aabb(vec3 minbb, vec3 maxbb) {
-    vec3 bb[2];
-    vec3 points[8];
-
-    bb[0] = minbb;
-    bb[1] = maxbb;
-
-    // Expand min/max bounds:
-    for (int i = 0; i < 8; ++i) {
-        points[i].x = bb[(i ^ (i >> 1)) & 1].x;
-        points[i].y = bb[     (i >> 1)  & 1].y;
-        points[i].z = bb[     (i >> 2)  & 1].z;
-    }
-
-    ddraw_box_(points);
+    DDRAW_LINE4(center, pos, blue);
+    DDRAW_LINE4(center, neg, yellow);
 }
 
 void ddraw_circle(vec3 center, vec3 normal, float radius) {
-    const float segments = 32;
-
     vec3 left = {0}, up = {0};
     ortho3(&left, &up, normal);
 
@@ -552,6 +439,7 @@ void ddraw_circle(vec3 center, vec3 normal, float radius) {
     left = scale3(left, radius);
     lastPoint = add3(center, up);
 
+    enum { segments = 32 };
     for (int i = 1; i <= segments; ++i) {
         const float radians = (C_PI * 2) * i / segments;
 
@@ -571,32 +459,18 @@ void ddraw_ring(vec3 center, vec3 normal, float radius) {
     ddraw_circle( center, normal, radius * 0.75f );
 }
 
-
 void ddraw_cone(vec3 begin, vec3 end, float radius) {
-    const float bars = 12;
-
     vec3 x = {0}, y = {0}, n = norm3(sub3(end, begin));
     ortho3(&x, &y, n);
 
+    enum { bars = 12 };
     ddraw_circle(end, n, radius);
-    for (int i=0; i<bars; ++i) {
-        float angle = (i / bars) * 2 * C_PI;
+    for (int i = 0; i < bars; ++i) {
+        float angle = ((float)i / bars) * 2 * C_PI;
         float c = cosf(angle), s = sinf(angle);
         vec3 end2 = add3( end, add3(scale3(x,radius*c), scale3(y,radius*s)) );
         ddraw_line(begin, end2);
     }
-}
-
-void ddraw_arrow(vec3 begin, vec3 end) {
-    vec3 diff = sub3(end, begin);
-    float len = len3(diff);
-
-    const float head_height = len / 3, head_radius = len / 6;
-
-    vec3 stick = add3(begin, scale3(norm3(diff), head_height*2));
-
-    ddraw_line(begin, stick);
-    ddraw_cone(end, stick, head_radius);
 }
 
 void ddraw_sphere2(vec3 center, float radius) {
@@ -610,7 +484,7 @@ void ddraw_frustum(float projview[16]) {
     invert44(clipmatrix, projview);
 
     // Start with the standard clip volume, then bring it back to world space.
-    static const vec3 planes[8] = {
+    const vec3 planes[8] = {
         // near plane
         { -1.0f, -1.0f, -1.0f }, {  1.0f, -1.0f, -1.0f },
         {  1.0f,  1.0f, -1.0f }, { -1.0f,  1.0f, -1.0f },
@@ -640,7 +514,242 @@ void ddraw_frustum(float projview[16]) {
     }
 
     // Connect the dots:
-    ddraw_box_(points);
+    ddraw_bounds(points);
+}
+
+// ----------------------------------------------------------------------------
+
+void ddraw_color4(vec4 c) {
+    draw_color = c;
+}
+
+void ddraw_color3(vec3 rgb) {
+    ddraw_color4(vec34(rgb,1));
+}
+
+void ddraw_plane(vec3 p, vec3 n, float scale) {
+    vec3 tangent, bitangent;
+    ortho3(&tangent, &bitangent, n);
+
+    vec3 v1, v2, v3, v4;
+    #define DD_PLANE_V(v, op1, op2) \
+        v.x = (p.x op1 (tangent.x*scale) op2 (bitangent.x*scale)); \
+        v.y = (p.y op1 (tangent.y*scale) op2 (bitangent.y*scale)); \
+        v.z = (p.z op1 (tangent.z*scale) op2 (bitangent.z*scale))
+    DD_PLANE_V(v1,-,-);
+    DD_PLANE_V(v2,+,-);
+    DD_PLANE_V(v3,+,+);
+    DD_PLANE_V(v4,-,+);
+    #undef DD_PLANE_V
+
+    ddraw_line(v1,v2);
+    ddraw_line(v2,v3);
+    ddraw_line(v3,v4);
+    ddraw_line(v4,v1);
+}
+
+void ddraw_capsule(vec3 from, vec3 to, float r) {
+    /* calculate axis */
+    vec3 up, right, forward;
+    forward = sub3(to, from);
+    forward = norm3(forward);
+    ortho3(&right, &up, forward);
+
+    /* calculate first two cone verts (buttom + top) */
+    vec3 lastf, lastt;
+    lastf = scale3(up,r);
+    lastt = add3(to,lastf);
+    lastf = add3(from,lastf);
+
+    /* step along circle outline and draw lines */
+    enum { step_size = 20 };
+    for (int i = step_size; i <= 360; i += step_size) {
+        /* calculate current rotation */
+        vec3 ax = scale3(right, sinf(i*TO_RAD));
+        vec3 ay = scale3(up, cosf(i*TO_RAD));
+
+        /* calculate current vertices on cone */
+        vec3 tmp = add3(ax, ay);
+        vec3 pf = scale3(tmp, r);
+        vec3 pt = scale3(tmp, r);
+
+        pf = add3(pf, from);
+        pt = add3(pt, to);
+
+        /* draw cone vertices */
+        ddraw_line(lastf, pf);
+        ddraw_line(lastt, pt);
+        ddraw_line(pf, pt);
+
+        lastf = pf;
+        lastt = pt;
+
+        /* calculate first top sphere vert */
+        vec3 prevt = scale3(tmp, r);
+        vec3 prevf = add3(prevt, from);
+        prevt = add3(prevt, to);
+
+        /* sphere (two half spheres )*/
+        for (int j = 1; j < 180/step_size; j++) {
+            /* angles */
+            float ta = j*step_size;
+            float fa = 360-(j*step_size);
+
+            /* top half-sphere */
+            ax = scale3(forward, sinf(ta*TO_RAD));
+            ay = scale3(tmp, cosf(ta*TO_RAD));
+
+            vec3 t = add3(ax, ay);
+            pf = scale3(t, r);
+            pf = add3(pf, to);
+            ddraw_line(pf, prevt);
+            prevt = pf;
+
+            /* bottom half-sphere */
+            ax = scale3(forward, sinf(fa*TO_RAD));
+            ay = scale3(tmp, cosf(fa*TO_RAD));
+
+            t = add3(ax, ay);
+            pf = scale3(t, r);
+            pf = add3(pf, from);
+            ddraw_line(pf, prevf);
+            prevf = pf;
+        }
+    }
+}
+
+void ddraw_pyramid(vec3 f, vec3 t, float size) {
+    poly p = pyramid(f, t, size);
+    vec3 *pyr = p.verts;
+
+    vec3 *a = pyr + 0;
+    vec3 *b = pyr + 1;
+    vec3 *c = pyr + 2;
+    vec3 *d = pyr + 3;
+    vec3 *r = pyr + 4;
+
+    /* draw vertices */
+    ddraw_line(*a, *b);
+    ddraw_line(*b, *c);
+    ddraw_line(*c, *d);
+    ddraw_line(*d, *a);
+
+    /* draw root */
+    ddraw_line(*a, *r);
+    ddraw_line(*b, *r);
+    ddraw_line(*c, *r);
+    ddraw_line(*d, *r);
+
+    array_free(pyr);
+}
+
+void ddraw_diamond(vec3 from, vec3 to, float size) {
+    poly p = diamond(from, to, size);
+    vec3 *dmd = p.verts;
+
+    vec3 *a = dmd + 0;
+    vec3 *b = dmd + 1;
+    vec3 *c = dmd + 2;
+    vec3 *d = dmd + 3;
+    vec3 *t = dmd + 4;
+    vec3 *f = dmd + 5;
+
+    /* draw vertices */
+    ddraw_line(*a, *b);
+    ddraw_line(*b, *c);
+    ddraw_line(*c, *d);
+    ddraw_line(*d, *a);
+
+    /* draw roof */
+    ddraw_line(*a, *t);
+    ddraw_line(*b, *t);
+    ddraw_line(*c, *t);
+    ddraw_line(*d, *t);
+
+    /* draw floor */
+    ddraw_line(*a, *f);
+    ddraw_line(*b, *f);
+    ddraw_line(*c, *f);
+    ddraw_line(*d, *f);
+
+    array_free(dmd);
+}
+
+void ddraw_aabb(vec3 minbb, vec3 maxbb) {
+    vec3 points[8], bb[2] = { minbb, maxbb };
+    for (int i = 0; i < 8; ++i) {
+        points[i].x = bb[(i ^ (i >> 1)) & 1].x;
+        points[i].y = bb[     (i >> 1)  & 1].y;
+        points[i].z = bb[     (i >> 2)  & 1].z;
+    }
+    ddraw_bounds(points);
+}
+
+void ddraw_bounds(const vec3 points[8]) {
+    DDRAW_LINES( 4 * 3 );
+    for( int i = 0; i < 4; ++i ) {
+        DDRAW_LINE(points[i], points[(i + 1) & 3]);
+        DDRAW_LINE(points[i], points[4 + i]);
+        DDRAW_LINE(points[4 + i], points[4 + ((i + 1) & 3)]);
+    }
+}
+
+void ddraw_arrow(vec3 begin, vec3 end) {
+    vec3 diff = sub3(end, begin);
+    float len = len3(diff);
+
+    const float head_height = len / 3, head_radius = len / 6;
+
+    vec3 stick = add3(begin, scale3(norm3(diff), head_height*2));
+
+    ddraw_line(begin, stick);
+    ddraw_cone(end, stick, head_radius);
+}
+
+void ddraw_sphere(vec3 center, float radius) {
+    enum { STEP = 15 };
+    vec3 cache[360 / STEP], last, tmp;
+
+    DDRAW_LINES( 2 * ((360+1-STEP)/STEP) * ((360+1-STEP)/STEP) );
+
+    cache[0] = add3(center, vec3(0,0,radius));
+    for (int n = 1; n < countof(cache); ++n) {
+        cache[n] = cache[0];
+    }
+
+    /* 1st circle iteration */
+    for (int i = STEP; i <= 360; i += STEP) {
+        float r = rad(i), s = sinf(r), c = cosf(r);
+        last = add3(center, vec3(0,radius*s,radius*c));
+
+        /* 2nd circle iteration */
+        for (int j = STEP, n = 0; j <= 360; j += STEP, ++n) {
+            tmp.x = center.x + sinf(rad(j)) * radius * s;
+            tmp.y = center.y + cosf(rad(j)) * radius * s;
+            tmp.z = last.z;
+
+            DDRAW_LINE(last, tmp);
+            DDRAW_LINE(last, cache[n]);
+
+            cache[n] = last;
+            last = tmp;
+        }
+    }
+}
+
+void ddraw_box(vec3 c, vec3 extents) {
+    vec3 points[8], whd = scale3(extents, 0.5f);
+    #define DD_BOX_V(v, op1, op2, op3) (v).x = c.x op1 whd.x; (v).y = c.y op2 whd.y; (v).z = c.z op3 whd.z
+    DD_BOX_V(points[0], -, +, +);
+    DD_BOX_V(points[1], -, +, -);
+    DD_BOX_V(points[2], +, +, -);
+    DD_BOX_V(points[3], +, +, +);
+    DD_BOX_V(points[4], -, -, +);
+    DD_BOX_V(points[5], -, -, -);
+    DD_BOX_V(points[6], +, -, -);
+    DD_BOX_V(points[7], +, -, +);
+    #undef DD_BOX_V
+    ddraw_bounds(points);
 }
 
 // ----------------------------------------------------------------------------
@@ -712,6 +821,7 @@ void (ddraw_printf)(const char *buf) {
 
 // ----------------------------------------------------------------------------
 
+static
 void ddraw_render2d() {
     // setup material
     static material mat, *init = 0;
