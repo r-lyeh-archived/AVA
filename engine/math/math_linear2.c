@@ -183,7 +183,7 @@ static m_inline quat  mixq(quat a, quat b, float t) { return normq(dotq(a,b) < 0
     return norm(quat((1-s)*a.x + s*b.x, (1-s)*a.y + s*b.y, (1-s)*a.z + s*b.z, (1-s)*a.w + s*b.w));
 }*/
 static m_inline quat slerpq(quat a, quat b, float s) { //ok ?
-    float t = acos(dot(a,b)), st = sin(t), wa = sin((1-s)*t)/st, wb = sin(s*t)/st;
+    float t = acos(dotq(a,b)), st = sin(t), wa = sin((1-s)*t)/st, wb = sin(s*t)/st;
     return normq(quat(wa*a.x + wb*b.x, wa*a.y + wb*b.y, wa*a.z + wb*b.z, wa*a.w + wb*b.w));
 }
 
