@@ -1,4 +1,4 @@
-// Original authors: @ands (PD), @vurtun (PD), @datenwolf (WTFPL2), @evanw (CC0), @sgorsten (Unlicense).
+// Original authors: @ands+@vurtun (PD), @datenwolf (WTFPL2), @evanw+@barerose (CC0), @sgorsten (Unlicense).
 // - rlyeh, public domain.
 
 #pragma once
@@ -41,9 +41,9 @@
 #define coord_system(...) M_CAST(coord_system, __VA_ARGS__)
 
 typedef union vec2 { struct { float x,y; }; struct { float r,g; }; struct { float w,h; }; float v[1]; } vec2;
-typedef union vec3 { struct { float x,y,z; }; struct { float r,g,b; }; struct { float w,h,d; }; vec2 vec2; float v[1]; } vec3;
-typedef union vec4 { struct { float x,y,z,w; }; struct { float r,g,b,a; }; vec2 vec2; vec3 vec3; float v[1]; } vec4;
-typedef union quat { struct { float x,y,z,w; }; vec3 vec3; vec4 vec4; float v[1]; } quat;
+typedef union vec3 { struct { float x,y,z; }; struct { float r,g,b; }; struct { float w,h,d; }; vec2 xy; float v[1]; } vec3;
+typedef union vec4 { struct { float x,y,z,w; }; struct { float r,g,b,a; }; vec2 xy; vec3 xyz; float v[1]; } vec4;
+typedef union quat { struct { float x,y,z,w; }; vec3 xyz; vec4 xyzw; float v[1]; } quat;
 typedef float mat33[9];
 typedef float mat44[16];
 
@@ -85,13 +85,13 @@ static m_inline vec2  abs2     (vec2   a          ) { return vec2(absf(a.x), abs
 static m_inline vec2  floor2   (vec2   a          ) { return vec2(floorf(a.x), floorf(a.y)); }
 static m_inline vec2  ceil2    (vec2   a          ) { return vec2(ceilf (a.x), ceilf (a.y)); }
 static m_inline float dot2     (vec2   a, vec2   b) { return a.x * b.x + a.y * b.y; }
+static m_inline vec2  refl2    (vec2   a, vec2   b) { return sub2(a, scale2(b, 2*dot2(a,b))); }
 static m_inline float cross2   (vec2   a, vec2   b) { return a.x * b.y - a.y * b.x; } // pseudo cross product
 static m_inline float len2sq   (vec2   a          ) { return a.x * a.x + a.y * a.y; }
 static m_inline float len2     (vec2   a          ) { return sqrtf(len2sq(a)); }
 static m_inline vec2  norm2    (vec2   a          ) { return /*dot(2) == 0 ? a :*/ div2(a, len2(a)); }
 static m_inline int   finite2  (vec2   a          ) { return m_finite(a.x) && m_finite(a.y); }
 static m_inline vec2  mix2  (vec2 a,vec2 b,float t) { return add2(scale2((a),1-(t)), scale2((b), t)); }
-
 // ----------------------------------------------------------------------------
 
 static m_inline vec3  ptr3     (const float *a    ) { return vec3(a[0],a[1],a[2]); }
@@ -111,6 +111,7 @@ static m_inline vec3  floor3   (vec3   a          ) { return vec3(floorf(a.x), f
 static m_inline vec3  ceil3    (vec3   a          ) { return vec3(ceilf (a.x), ceilf (a.y), ceilf (a.z)); }
 static m_inline vec3  cross3   (vec3   a, vec3   b) { return vec3(a.y * b.z - b.y * a.z, a.z * b.x - b.z * a.x, a.x * b.y - b.x * a.y); }
 static m_inline float dot3     (vec3   a, vec3   b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+static m_inline vec3  refl3    (vec3   a, vec3   b) { return sub3(a, scale3(b, 2*dot3(a, b))); }
 static m_inline float len3sq   (vec3   a          ) { return dot3(a,a); }
 static m_inline float len3     (vec3   a          ) { return sqrtf(len3sq(a)); }
 static m_inline vec3  norm3    (vec3   a          ) { return /*dot3(a) == 0 ? a :*/ div3(a, len3(a)); }
@@ -154,6 +155,7 @@ static m_inline vec4  abs4     (vec4   a          ) { return vec4(absf(a.x), abs
 static m_inline vec4  floor4   (vec4   a          ) { return vec4(floorf(a.x), floorf(a.y), floorf(a.z), floorf(a.w)); }
 static m_inline vec4  ceil4    (vec4   a          ) { return vec4(ceilf (a.x), ceilf (a.y), ceilf (a.z), ceilf (a.w)); }
 static m_inline float dot4     (vec4   a, vec4   b) { return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w; }
+static m_inline vec4  refl4    (vec4   a, vec4   b) { return sub4(a, scale4(b, 2*dot4(a, b))); }
 static m_inline float len4sq   (vec4   a          ) { return dot4(a,a); }
 static m_inline float len4     (vec4   a          ) { return sqrtf(len4sq(a)); }
 static m_inline vec4  norm4    (vec4   a          ) { return /*dot4(a) == 0 ? a :*/ div4(a, len4(a)); }
@@ -172,11 +174,18 @@ static m_inline quat  negq     (quat   a          ) { return quat(-a.x,-a.y,-a.z
 static m_inline quat  conjq    (quat   a          ) { return quat(-a.x,-a.y,-a.z,a.w); }
 static m_inline quat  addq     (quat   a, quat   b) { return quat(a.x+b.x,a.y+b.y,a.z+b.z,a.w+b.w); }
 static m_inline quat  subq     (quat   a, quat   b) { return quat(a.x-b.x,a.y-b.y,a.z-b.z,a.w-b.w); }
-static m_inline quat  mulq     (quat   p, quat   q) { vec3 w = scale3(p.vec3, q.w), r = add3(add3(cross3(p.vec3, q.vec3), w), scale3(q.vec3, p.w)); return quat(r.x,r.y,r.z,p.w*q.w - dot3(p.vec3, q.vec3)); }
+static m_inline quat  mulq     (quat   p, quat   q) { vec3 w = scale3(p.xyz, q.w), r = add3(add3(cross3(p.xyz, q.xyz), w), scale3(q.xyz, p.w)); return quat(r.x,r.y,r.z,p.w*q.w - dot3(p.xyz, q.xyz)); }
 static m_inline quat  scaleq   (quat   a, float  s) { return quat(a.x*s,a.y*s,a.z*s,a.w*s); }
-static m_inline quat  normq    (quat   a          ) { vec4 v = norm4(a.vec4); return quat(v.x,v.y,v.z,v.w); }
+static m_inline quat  normq    (quat   a          ) { vec4 v = norm4(a.xyzw); return quat(v.x,v.y,v.z,v.w); }
 static m_inline float dotq     (quat   a, quat   b) { return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w; }
 static m_inline quat  mixq(quat a, quat b, float t) { return normq(dotq(a,b) < 0 ? addq(negq(a),scaleq(addq(b,a),t)) : addq(a,scaleq(subq(b,a),t))); }
+/* static m_inline quat lerpq(quat a, quat b, float s) {
+    return norm(quat((1-s)*a.x + s*b.x, (1-s)*a.y + s*b.y, (1-s)*a.z + s*b.z, (1-s)*a.w + s*b.w));
+}*/
+static m_inline quat slerpq(quat a, quat b, float s) { //ok ?
+    float t = acos(dot(a,b)), st = sin(t), wa = sin((1-s)*t)/st, wb = sin(s*t)/st;
+    return normq(quat(wa*a.x + wb*b.x, wa*a.y + wb*b.y, wa*a.z + wb*b.z, wa*a.w + wb*b.w));
+}
 
 static m_inline quat  rotationq(float deg,float x,float y,float z){ deg=rad(deg)*0.5f; return vec3q(scale3(vec3(x,y,z),sinf(deg)),cosf(deg)); }
 static m_inline quat  mat44q   (mat44 M) {

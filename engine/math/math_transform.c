@@ -22,7 +22,7 @@ static m_inline vec4 transform444(const mat44 m, const vec4 p) {
 
 static m_inline vec3 transform344(const mat44 m, const vec3 p) {
     vec4 v = transform444(m, vec34(p, 1));
-    return scale3(v.vec3, 1.f / v.w);
+    return scale3(v.xyz, 1.f / v.w);
 }
 
 static m_inline vec3 transformq(const quat q, const vec3 v) {  // !!! ok, i guess
@@ -72,7 +72,7 @@ static m_inline vec3 transform_normal  (const mat44 m, const vec3 normal)   {
 
 // A quaternion can describe both a rotation and a uniform scaling in 3D space
 static m_inline quat transform_quat     (const mat44 m, const quat q)      {
-    vec3 s = scale3(transform_vector(m, q.vec3), det44(m) < 0 ? -1 : 1);
+    vec3 s = scale3(transform_vector(m, q.xyz), det44(m) < 0 ? -1 : 1);
     return quat(s.x,s.y,s.z,q.w);
 }
 

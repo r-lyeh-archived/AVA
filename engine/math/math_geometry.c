@@ -1,18 +1,19 @@
-// original code by @vurtun (PD).
+// original code by @vurtun (PD) and @barerose (CC0).
 // [src] https://gist.github.com/vurtun/95f088e4889da2474ad1ce82d7911fee
 // - rlyeh, public domain.
 
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
-typedef struct line     { vec3 a, b;                  } line;
-typedef struct sphere   { vec3 c; float r;            } sphere;
-typedef struct aabb     { vec3 min, max;              } aabb;
-typedef struct plane    { vec3 p, n;                  } plane;
-typedef struct capsule  { vec3 a, b; float r;         } capsule;
-typedef struct ray      { vec3 p, d;                  } ray;
-typedef struct triangle { vec3 p0,p1,p2;              } triangle;
-typedef struct poly     { array(vec3) verts; int cnt; } poly;
+typedef struct line     { vec3 a, b;                                                  } line;
+typedef struct sphere   { vec3 c; float r;                                            } sphere;
+typedef struct aabb     { vec3 min, max;                                              } aabb;
+typedef struct plane    { vec3 p, n;                                                  } plane;
+typedef struct capsule  { vec3 a, b; float r;                                         } capsule;
+typedef struct ray      { vec3 p, d;                                                  } ray;
+typedef struct triangle { vec3 p0,p1,p2;                                              } triangle;
+typedef struct poly     { array(vec3) verts; int cnt;                                 } poly;
+typedef union  frustum  { struct { vec4 l, r, t, b, n, f; }; vec4 pl[6]; float v[24]; } frustum;
 
 #define line(...)       M_CAST(line, __VA_ARGS__)
 #define sphere(...)     M_CAST(sphere, __VA_ARGS__)
@@ -22,6 +23,7 @@ typedef struct poly     { array(vec3) verts; int cnt; } poly;
 #define ray(p,d)        M_CAST(ray, p, norm3(d))
 #define triangle(...)   M_CAST(triangle, __VA_ARGS__)
 #define poly(...)       M_CAST(poly, __VA_ARGS__)
+#define frustum(...)    M_CAST(frustum, __VA_ARGS__)
 
 // ----------------------------------------------------------------------------
 
@@ -107,19 +109,22 @@ API int     poly_hit_poly_transform(gjk_result *res, poly a, vec3 at3, mat33 ar3
 
 API vec4    plane4(vec3 p, vec3 n);
 
-API poly    poly_make(int cnt);
+API frustum frustum_build(mat44 m);
+API int     frustum_test_sphere(frustum f, sphere s);
+API int     frustum_test_aabb(frustum f, aabb a);
+
+API poly    poly_alloc(int cnt);
 API void    poly_free(poly *p);
-API poly    pyramid(vec3 from, vec3 to, float size);
-API poly    diamond(vec3 from, vec3 to, float size);
 
-
+API poly    pyramid(vec3 from, vec3 to, float size); // poly_free() required
+API poly    diamond(vec3 from, vec3 to, float size); // poly_free() required
 
 #endif
 #ifdef GEOMETRY_C
 #pragma once
 
 /* poly */
-poly poly_make(int cnt) {
+poly poly_alloc(int cnt) {
     poly p = {0};
     p.cnt = cnt;
     array_resize(p.verts, cnt);
@@ -997,6 +1002,31 @@ hit *ray_hit_aabb(ray r, aabb a) {
     if (d < min)
         o->n = scale3(vec3(0,0,1), signf(pnt.z));
     return o;
+}
+
+frustum frustum_build(mat44 m) {
+    frustum f;
+    f.l = vec4(m[0*4+3]+m[0*4+0], m[1*4+3]+m[1*4+0], m[2*4+3]+m[2*4+0], m[3*4+3]+m[3*4+0]);
+    f.r = vec4(m[0*4+3]-m[0*4+0], m[1*4+3]-m[1*4+0], m[2*4+3]-m[2*4+0], m[3*4+3]-m[3*4+0]);
+    f.t = vec4(m[0*4+3]-m[0*4+1], m[1*4+3]-m[1*4+1], m[2*4+3]-m[2*4+1], m[3*4+3]-m[3*4+1]);
+    f.b = vec4(m[0*4+3]+m[0*4+1], m[1*4+3]+m[1*4+1], m[2*4+3]+m[2*4+1], m[3*4+3]+m[3*4+1]);
+    f.n = vec4(m[0*4+3]+m[0*4+2], m[1*4+3]+m[1*4+2], m[2*4+3]+m[2*4+2], m[3*4+3]+m[3*4+2]);
+    f.f = vec4(m[0*4+3]-m[0*4+2], m[1*4+3]-m[1*4+2], m[2*4+3]-m[2*4+2], m[3*4+3]-m[3*4+2]);
+    for (int i = 0; i < 6; i++) f.pl[i] = div4(f.pl[i], len3(f.pl[i].xyz));
+    return f;
+}
+int frustum_test_sphere(frustum f, sphere s) {
+    for(int i = 0; i < 6; i++) {
+        if((dot3(f.pl[i].xyz, s.c) + f.pl[i].w + s.r) < 0) return 0;
+    }
+    return 1;
+}
+int frustum_test_aabb(frustum f, aabb a) {
+    for(int i = 0; i < 6; i++) {
+        vec3 v = vec3(f.pl[i].x > 0 ? a.max.x : a.min.x, f.pl[i].y > 0 ? a.max.y : a.min.y, f.pl[i].z > 0 ? a.max.z : a.min.z);
+        if((dot3(f.pl[i].xyz, v) + f.pl[i].w) < 0) return 0;
+    }
+    return 1;
 }
 
 #endif
