@@ -4,7 +4,7 @@
 #include <engine.h>
 
 int main(void) {
-    window_create(0.75f, 0);
+    window_create(0.75f, WINDOW_MSAA4);
 
     // Camera
     camera cam;
@@ -13,6 +13,8 @@ int main(void) {
     // point to origin
     cam.position = vec3(0,30,-30); cam.pitch = -45;
     camera_fps(&cam, vec3(0,0,0), vec2(0,0));
+
+    int paused = 0;
 
     // main loop
     while(window_update()) {
@@ -24,8 +26,9 @@ int main(void) {
         if (key_down('ESC')) break;
 
         // animation
-        float delta = 1 / 60.f;
         static float dx = 0, dy = 0;
+        if (key_down(' ')) paused ^= 1;
+        float delta = (0.25f / 60.f) * !paused;
         dx = dx + delta * 2.0f;
         dy = dy + delta * 0.8f;
 
@@ -565,6 +568,7 @@ int main(void) {
         ddraw_end();
 
         ddraw_printf( window_stats() );
+        ddraw_printf( "space - pause simulation");
         window_swap(0);
     }
 }

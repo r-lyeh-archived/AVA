@@ -20,7 +20,7 @@ typedef union  frustum  { struct { vec4 l, r, t, b, n, f; }; vec4 pl[6]; float v
 #define aabb(...)       M_CAST(aabb, __VA_ARGS__)
 #define plane(...)      M_CAST(plane, __VA_ARGS__)
 #define capsule(...)    M_CAST(capsule, __VA_ARGS__)
-#define ray(p,d)        M_CAST(ray, p, norm3(d))
+#define ray(p,normdir)  M_CAST(ray, p, normdir)
 #define triangle(...)   M_CAST(triangle, __VA_ARGS__)
 #define poly(...)       M_CAST(poly, __VA_ARGS__)
 #define frustum(...)    M_CAST(frustum, __VA_ARGS__)
@@ -456,24 +456,35 @@ int sphere_test_capsule(sphere s, capsule c) {
     return capsule_test_sphere(c, s);
 }
 hit *sphere_hit_capsule(sphere s, capsule c) {
-    /* find closest capsule point to sphere center point */
-    vec3 cp = capsule_closest_point(c, s.c);
-    hit *m = hit_next();
-    m->normal = sub3(cp, s.c);
-    float d2 = dot3(m->normal, m->normal);
-    if (d2 > s.r*s.r) return 0;
+#if 0
+        // original code
+        /* find closest capsule point to sphere center point */
+        hit *m = hit_next();
+        vec3 cp = capsule_closest_point(c, s.c);
+        m->normal = sub3(cp, s.c);
+        float d2 = dot3(m->normal, m->normal);
+        if (d2 > s.r*s.r) return 0;
 
-    /* normalize hit normal vector */
-    float l = d2 != 0.0f ? sqrtf(d2): 1;
-    float linv = 1.0f/l;
-    m->normal = scale3(m->normal, linv);
+        /* normalize hit normal vector */
+        m->normal = norm3(m->normal);
 
-    /* calculate penetration depth */
-    m->contact_point = scale3(m->normal, s.r);
-    m->contact_point = add3(s.c, m->contact_point);
-    m->depth = d2 - s.r*s.r;
-    m->depth = m->depth != 0.0f ? sqrtf(m->depth): 0.0f;
-    return m;
+        /* calculate penetration depth */
+        m->depth = d2 - s.r*s.r;
+        m->depth = m->depth != 0.0f ? sqrtf(m->depth): 0.0f;
+        m->contact_point = add3(s.c, scale3(m->normal, s.r));
+        return m;
+#else
+        // aproximation of I would expect this function to return instead
+        vec3 l = sub3(c.a,c.b); float len = len3(l);
+        vec3 d = norm3(l);
+        ray r = ray(add3(c.a,scale3(d,-2*len)), d);
+        s.r += c.r;
+        hit *h = ray_hit_sphere(r, s);
+        if(!h) return 0;
+        s.r -= c.r;
+        h->contact_point = add3(s.c,scale3(norm3(sub3(h->contact_point,s.c)),s.r));
+        return h;
+#endif
 }
 int sphere_test_poly(sphere s, poly p) {
     return poly_test_sphere(p, s);
@@ -630,8 +641,7 @@ vec3 capsule_closest_point(capsule c, vec3 p) {
     vec3 pp = line_closest_point(line(c.a,c.b), p);
 
     /* extend point out by radius in normal direction */
-    vec3 d = sub3(p,pp);
-    d = norm3(d);
+    vec3 d = norm3(sub3(p,pp));
     return add3(pp, scale3(d, c.r));
 }
 int capsule_test_capsule(capsule a, capsule b) {
