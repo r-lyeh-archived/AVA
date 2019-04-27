@@ -86,13 +86,13 @@
 <p align="center">
 <!--img src="games/demos/00-build.gif"  height="112px" title="Project structure and build system."-->
 <img src="games/demos/01-hello.png"     height="112px" title="Window creation.">
-<img src="games/demos/02-audio.png"     height="112px" title="Audio.">
-<img src="games/demos/03-triangle.png"  height="112px" title="Triangle.">
-<img src="games/demos/04-mesh.png"      height="112px" title="Mesh and free camera.">
-<img src="games/demos/05-ui.png"        height="112px" title="Developer UI widgets (wip).">
-<img src="games/demos/06-postfx.png"    height="112px" title="Post-effects.">
-<img src="games/demos/07-debugdraw.png" height="112px" title="Debug draw.">
-<img src="games/demos/08-collision.png" height="112px" title="Collision.">
+<img src="games/demos/02-ui.png"        height="112px" title="Devtools widgets (wip).">
+<img src="games/demos/03-debugdraw.png" height="112px" title="DebugDraw.">
+<img src="games/demos/04-collision.png" height="112px" title="Collision.">
+<img src="games/demos/05-audio.png"     height="112px" title="Audio.">
+<img src="games/demos/06-triangle.png"  height="112px" title="Triangle.">
+<img src="games/demos/07-mesh.png"      height="112px" title="Mesh.">
+<img src="games/demos/08-postfx.png"    height="112px" title="Post-effects.">
 </p>
 
 ## Releases
@@ -150,7 +150,8 @@ clang++ game.c engine.c         && echo AVA as library (OSX)
 ```
 
 ## License
-The project is released into the public domain (as per [this notice](LICENSE)). Any contribution to this repository is implicitly subjected to the same release conditions.
+The project is released into the public domain (as per [this notice](LICENSE)).<br/>
+Any contribution to this repository is implicitly subjected to the same release conditions.
 
 ## Alternatives
 [amulet](https://google.com/search?q=game+engine+amulet&type=),

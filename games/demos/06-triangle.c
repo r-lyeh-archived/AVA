@@ -5,8 +5,8 @@
 
 EXPORT
 int main(int argc, char **argv) {
-    // 25%, no flags
-    window_create( 25.f, 0 );
+    // 50% size, no flags
+    window_create( 50.f, 0 );
 
     // instance shader
     const char* vertex =

@@ -1,6 +1,7 @@
 #include <engine.h>
 
 int main() {
+    // 50% sized, no flags
     window_create(50, 0);
 
     while (window_update()) {

@@ -2,7 +2,8 @@
 
 EXPORT
 int main(int argc, char **argv) {
-    window_create(0.25f, 0);
+    // 50% sized, no flags
+    window_create(0.50f, 0);
 
     while( window_update() ) {
         ddraw_printf("%s", window_stats());

@@ -4,7 +4,8 @@
 #include <engine.h>
 
 int main(void) {
-    window_create(0.75f, WINDOW_MSAA4);
+    // 50% sized, msaa x4 enabled
+    window_create(0.50f, WINDOW_MSAA4);
 
     // Camera
     camera cam;

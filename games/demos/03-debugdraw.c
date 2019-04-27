@@ -1,7 +1,7 @@
 #include <engine.h>
 
 int main() {
-    window_create(0.5, WINDOW_MSAA4);
+    window_create(0.50f, WINDOW_MSAA4);
 
     while( window_update()) {
         // projection

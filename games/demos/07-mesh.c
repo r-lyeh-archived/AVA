@@ -39,7 +39,7 @@ int main() {
     mesh m;
     mesh_loadfile(&m, "assets/suzanne.bob");
 #else
-    mesh2 mesh2 = mesh2_load_obj(coord_system(axis_right, axis_up, axis_back), vfs_find("04-mesh.inl"));
+    mesh2 mesh2 = mesh2_load_obj(coord_system(axis_right, axis_up, axis_back), vfs_find("07-mesh.inl"));
     mesh m = mesh2_as_mesh1( &mesh2, "p3" );
 #endif
 
