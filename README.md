@@ -53,7 +53,7 @@
 - [x] 03 Timers, easings and interpolation.
 - [ ] 04 Input bindings, digital+analog buttons, filters, gestures, chords and combos.
 - [x] 05 Linear math, geometry, volumes and collisions.
-- [ ] 06 Cameras and frustum culling.
+- [x] 06 Cameras and frustum culling.
 - [ ] 07 Regions, triggers, trees and spatial partioning.
 - [ ] 08 Data pipeline and asset journaling.
 - [ ] 09 World streaming and level loading.
@@ -93,6 +93,7 @@
 <img src="games/demos/06-triangle.png"  height="112px" title="Triangle.">
 <img src="games/demos/07-mesh.png"      height="112px" title="Mesh.">
 <img src="games/demos/08-postfx.png"    height="112px" title="Post-effects.">
+<img src="games/demos/09-frustum.png"   height="112px" title="Frustum culling.">
 </p>
 
 ## Releases

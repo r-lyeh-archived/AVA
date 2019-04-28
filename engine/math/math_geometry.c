@@ -109,7 +109,7 @@ API int     poly_hit_poly_transform(gjk_result *res, poly a, vec3 at3, mat33 ar3
 
 API vec4    plane4(vec3 p, vec3 n);
 
-API frustum frustum_build(mat44 m);
+API frustum frustum_build(mat44 projview);
 API int     frustum_test_sphere(frustum f, sphere s);
 API int     frustum_test_aabb(frustum f, aabb a);
 
@@ -1014,14 +1014,14 @@ hit *ray_hit_aabb(ray r, aabb a) {
     return o;
 }
 
-frustum frustum_build(mat44 m) {
+frustum frustum_build(mat44 pv) {
     frustum f;
-    f.l = vec4(m[0*4+3]+m[0*4+0], m[1*4+3]+m[1*4+0], m[2*4+3]+m[2*4+0], m[3*4+3]+m[3*4+0]);
-    f.r = vec4(m[0*4+3]-m[0*4+0], m[1*4+3]-m[1*4+0], m[2*4+3]-m[2*4+0], m[3*4+3]-m[3*4+0]);
-    f.t = vec4(m[0*4+3]-m[0*4+1], m[1*4+3]-m[1*4+1], m[2*4+3]-m[2*4+1], m[3*4+3]-m[3*4+1]);
-    f.b = vec4(m[0*4+3]+m[0*4+1], m[1*4+3]+m[1*4+1], m[2*4+3]+m[2*4+1], m[3*4+3]+m[3*4+1]);
-    f.n = vec4(m[0*4+3]+m[0*4+2], m[1*4+3]+m[1*4+2], m[2*4+3]+m[2*4+2], m[3*4+3]+m[3*4+2]);
-    f.f = vec4(m[0*4+3]-m[0*4+2], m[1*4+3]-m[1*4+2], m[2*4+3]-m[2*4+2], m[3*4+3]-m[3*4+2]);
+    f.l = vec4(pv[ 3]+pv[ 0], pv[ 7]+pv[ 4], pv[11]+pv[ 8], pv[15]+pv[12]);
+    f.r = vec4(pv[ 3]-pv[ 0], pv[ 7]-pv[ 4], pv[11]-pv[ 8], pv[15]-pv[12]);
+    f.t = vec4(pv[ 3]-pv[ 1], pv[ 7]-pv[ 5], pv[11]-pv[ 9], pv[15]-pv[13]);
+    f.b = vec4(pv[ 3]+pv[ 1], pv[ 7]+pv[ 5], pv[11]+pv[ 9], pv[15]+pv[13]);
+    f.n = vec4(pv[ 3]+pv[ 2], pv[ 7]+pv[ 6], pv[11]+pv[10], pv[15]+pv[14]);
+    f.f = vec4(pv[ 3]-pv[ 2], pv[ 7]-pv[ 6], pv[11]-pv[10], pv[15]-pv[14]);
     for (int i = 0; i < 6; i++) f.pl[i] = div4(f.pl[i], len3(f.pl[i].xyz));
     return f;
 }
