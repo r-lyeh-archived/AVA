@@ -173,12 +173,13 @@ static const char *ddraw_shader_vtxpc_fs =
  * Line and rect drawing.
  */
 
-#define MAXBUFFER (4096) // 512*3)   /* size of our triangle buffer */
+#define DD_MAXBUFFER (1024 * 1024)
 
 static unsigned int draw_vao = 0;
 static unsigned int draw_vbo = 0;
 static int draw_buf_len = 0;
-static struct vertex_p3c4_ { vec3 position; vec4 color; } draw_buf[MAXBUFFER];
+static struct vertex_p3c4_ { vec3 position; vec4 color; } *draw_buf = 0; // [DD_MAXBUFFER];
+static int sizeof_drawbuf = sizeof(struct vertex_p3c4_) * DD_MAXBUFFER;
 
 static vec4 draw_color = { 1, 1, 1, 1 };
 static int draw_kind = GL_LINES;
@@ -186,6 +187,10 @@ static int draw_kind = GL_LINES;
 void ddraw_begin(float projview[16]) {
     static int draw_prog = 0;
     static int draw_uni_projview = -1;
+
+    if( !draw_buf ) {
+        draw_buf = (struct vertex_p3c4_ *)MALLOC( sizeof_drawbuf );
+    }
 
     if (!draw_prog) {
         draw_prog = shader2(ddraw_shader_vtxpc_vs, ddraw_shader_vtxpc_fs, "att_position,att_color");
@@ -198,12 +203,12 @@ void ddraw_begin(float projview[16]) {
 
         glGenBuffers(1, &draw_vbo);
         glBindBuffer(GL_ARRAY_BUFFER, draw_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof draw_buf, NULL, GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof_drawbuf, NULL, GL_STREAM_DRAW);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, 0, sizeof draw_buf[0], (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, 0, sizeof(struct vertex_p3c4_), (void*)0);
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 4, GL_FLOAT, 0, sizeof draw_buf[0], (void*)12);
+        glVertexAttribPointer(1, 4, GL_FLOAT, 0, sizeof(struct vertex_p3c4_), (void*)12);
 
         glBindVertexArray(0);
     }
@@ -253,7 +258,7 @@ void ddraw_triangle_(vec3 a, vec3 b, vec3 c) {
 */
 
 void ddraw_triangle(vec3 p, vec3 q, vec3 r) {
-    if( draw_kind != GL_TRIANGLES || draw_buf_len + 3 >= MAXBUFFER ) {
+    if( draw_kind != GL_TRIANGLES || draw_buf_len + 3 >= DD_MAXBUFFER ) {
         ddraw_flush();
     }
 
@@ -264,7 +269,7 @@ void ddraw_triangle(vec3 p, vec3 q, vec3 r) {
 }
 
 void ddraw_quad(vec3 a, vec3 b, vec3 c, vec3 d) {
-    if( draw_kind != GL_TRIANGLES || draw_buf_len + 6 >= MAXBUFFER ) {
+    if( draw_kind != GL_TRIANGLES || draw_buf_len + 6 >= DD_MAXBUFFER ) {
         ddraw_flush();
     }
 
@@ -284,7 +289,7 @@ static void ddraw_vertex3(float x, float y, float z){
 }
 
 void ddraw_rect(vec2 a, vec2 b) {
-    if( draw_kind != GL_TRIANGLES || draw_buf_len + 6 >= MAXBUFFER ) {
+    if( draw_kind != GL_TRIANGLES || draw_buf_len + 6 >= DD_MAXBUFFER ) {
         ddraw_flush();
     }
 
@@ -302,7 +307,7 @@ void ddraw_rect(vec2 a, vec2 b) {
 
 #define DDRAW_LINES(NUM_LINES) do { \
     int num_vertices = NUM_LINES * 2; \
-    if( draw_kind != GL_LINES || (draw_buf_len + num_vertices >= MAXBUFFER)) { \
+    if( draw_kind != GL_LINES || (draw_buf_len + num_vertices >= DD_MAXBUFFER)) { \
         ddraw_flush(); \
     } \
 } while(0)
@@ -319,7 +324,7 @@ void DDRAW_LINE( vec3 src, vec3 dst ) {
 }
 
 void ddraw_line(vec3 p, vec3 q) {
-    if( draw_kind != GL_LINES || draw_buf_len + 2 >= MAXBUFFER ) {
+    if( draw_kind != GL_LINES || draw_buf_len + 2 >= DD_MAXBUFFER ) {
         ddraw_flush();
     }
 
