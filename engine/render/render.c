@@ -12,8 +12,9 @@
 #define MATERIAL2_C
 #define MESH_C
 #define MESH2_C
-#define DDRAW2_C
+#define CUBEMAP_C
 
+#define DDRAW2_C
 #define FONT_C
 #define DDRAW_C
 #define POSTFX_C
@@ -32,8 +33,9 @@
 #include "render_material2.c"
 #include "render_mesh.c"
 #include "render_mesh2.c"
-#include "render_ddraw2.c"
+#include "render_cubemap.c"
 
+#include "render_ddraw2.c"
 #include "render_font.c"
 #include "render_ddraw.c"
 #include "render_postfx.c"
