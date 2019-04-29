@@ -66,6 +66,8 @@ static m_inline vec3 transform_tangent (const mat44 m, const vec3 tangent)  { re
 
 // A normal is a unit-length bivector which is perpendicular to a piece of geometry, such as a surface or a curve
 static m_inline vec3 transform_normal  (const mat44 m, const vec3 normal)   {
+    return transform_tangent(m, normal); // ok?
+
     mat44 t; transpose44(t,m); mat44 i; invert44(i,t);
     return scale3(norm3(transform_vector(i, normal)), det44(m) < 0 ? -1 : 1);
 }

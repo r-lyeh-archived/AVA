@@ -54,7 +54,7 @@ const char *vfs_find( const char *file ) {
             }
         }
     }
-    printf("warning: cannot find '%s' in vfs registry\n", file, dir_registry ? dir_registry : "");
+    printf("warning: cannot find '%s' in vfs registry\n", file); // dir_registry ? dir_registry : "");
     return file;
 }
 char *vfs_read( const char *file ) {
