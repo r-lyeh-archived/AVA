@@ -94,6 +94,7 @@
 <img src="games/demos/07-mesh.png"      height="112px" title="Mesh.">
 <img src="games/demos/08-postfx.png"    height="112px" title="Post-effects.">
 <img src="games/demos/09-frustum.png"   height="112px" title="Frustum culling.">
+<img src="games/demos/10-cubemap.png"   height="112px" title="Cubemaps and SH.">
 </p>
 
 ## Releases
