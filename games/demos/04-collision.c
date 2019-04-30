@@ -7,13 +7,10 @@ int main(void) {
     // 50% sized, msaa x4 enabled
     window_create(0.50f, WINDOW_MSAA4);
 
-    // Camera
+    // camera that points to origin
     camera cam;
     camera_create(&cam, 0.25f, false, true);
-
-    // point to origin
-    cam.position = vec3(0,30,-30); cam.pitch = -45;
-    camera_fps(&cam, vec3(0,0,0), vec2(0,0));
+    camera_teleport(&cam, vec3(0,30,-30), vec2(90,-45));
 
     int paused = 0;
 

@@ -11,7 +11,7 @@ int main() {
 
     camera cam;
     camera_create(&cam, 0.25f, false, true);
-    cam.pitch -= 15; camera_fps(&cam, vec3(0,0,0), vec2(0,0));
+    camera_teleport(&cam, vec3(0,0,0), vec2(0,-15));
 
     while( window_update() ) {
         bool active = !!mouse('L') || !!mouse('R');

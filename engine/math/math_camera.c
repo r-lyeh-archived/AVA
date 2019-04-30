@@ -23,6 +23,7 @@ typedef struct camera {
 API void camera_create(camera *cam, float sensitivity, bool invert_x, bool invert_y);
 API void camera_enable(camera *cam, bool enabled);
 API void camera_friction(camera *cam, float keyboard, float mouse);
+API void camera_teleport(camera *cam, vec3 position, vec2 yp_rotation);
 
 API void camera_fps(camera *cam, vec3 keyboard, vec2 mouse);
 API void camera_orbit(camera *cam, float distance, vec2 mouse);
@@ -127,6 +128,13 @@ void camera_orbit( camera *cam, float distance, vec2 mouse ) {
     // compute view matrix
     float x = rad(cam->yaw), y = rad(cam->pitch), cx = cosf(x), cy = cosf(y), sx = sinf(x), sy = sinf(y);
     lookat44(cam->view, vec3( cx*cy*distance, sy*distance, sx*cy*distance ), vec3(0,0,0), vec3(0,1,0) );
+}
+
+void camera_teleport(camera *cam, vec3 position, vec2 yp_rotation) {
+    cam->position = position;
+    cam->yaw = yp_rotation.x;
+    cam->pitch = yp_rotation.y;
+    camera_fps(cam, vec3(0,0,0), vec2(0,0));
 }
 
 // ideas
