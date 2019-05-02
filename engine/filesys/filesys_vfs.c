@@ -46,6 +46,8 @@ void vfs_import( const char *pathmask ) {
     vfs_changed = 1;
 }
 const char *vfs_find( const char *file ) {
+    file = string_replace_inline(va("%s", file), "//", "/" ); // remove duplicated slashes
+
     char *found = dir_registry ? strstr(dir_registry, va("%s\n", file)) : 0;
     if( found ) {
         for( char *back = found; back > dir_registry; --back ) {
@@ -54,7 +56,7 @@ const char *vfs_find( const char *file ) {
             }
         }
     }
-    printf("warning: cannot find '%s' in vfs registry\n", file); // dir_registry ? dir_registry : "");
+    printf("warning: cannot find '%s' in vfs registry (try vfs_find_fuzzy instead?)\n", file);
     return file;
 }
 char *vfs_read( const char *file ) {
