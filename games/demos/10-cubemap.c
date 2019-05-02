@@ -20,6 +20,7 @@ const char *OBJ_MDLS[] = {
 
 typedef struct scene {
     bool init;
+    bool must_reload;
 
     struct {
         GLuint program;
@@ -177,6 +178,22 @@ static void scene_destroy(scene *scene) {
     mesh_destroy(&scene->mesh.m);
 }
 
+void menu( scene *scene ) {
+    if( ui_begin("SH Coefficients", 0)) {
+        if( ui_combo("skybox", &SKY_DIR, SKY_DIRS, countof(SKY_DIRS)) ) {
+            scene->must_reload = 1;
+        }
+        if( ui_combo("model", &OBJ_MDL, OBJ_MDLS, countof(OBJ_MDLS)) ) {
+            scene->must_reload = 1;
+        }
+        for (int i = 0; i < 9; i++) {
+            vec3 remapped = scale3(add3(scene->mesh.c.sh[i], vec3(1,1,1)), 0.5f);
+            ui_color3(va("SH Coefficient [%d]", i), &remapped.x);
+            scene->mesh.c.sh[i] = sub3(scale3(remapped, 2), vec3(1,1,1));
+        }
+        ui_end();
+    }
+}
 
 int main(int argc, char** argv) {
     window_create(50,0);
@@ -185,7 +202,6 @@ int main(int argc, char** argv) {
     camera_create(&cam, 0.25f, false, true);
     camera_teleport(&cam, vec3(3.97,0.45,1.55), vec2(-520,-7));
 
-    int must_reload = 0;
     scene scene = {0};
 
     while( window_update()) {
@@ -193,17 +209,17 @@ int main(int argc, char** argv) {
         viewport_clear( false, true );
         viewport_clip( vec2(0,0), window_size() );
 
-        if( key_down('1') ) SKY_DIR = 0, must_reload = 1;
-        if( key_down('2') ) SKY_DIR = 1, must_reload = 1;
-        if( key_down('3') ) SKY_DIR = 2, must_reload = 1;
-        if( key_down('4') ) SKY_DIR = 3, must_reload = 1;
+        if( key_down('1') ) { SKY_DIR = 0; scene.must_reload = 1; }
+        if( key_down('2') ) { SKY_DIR = 1; scene.must_reload = 1; }
+        if( key_down('3') ) { SKY_DIR = 2; scene.must_reload = 1; }
+        if( key_down('4') ) { SKY_DIR = 3; scene.must_reload = 1; }
 
-        if( key_down('F1') ) OBJ_MDL = 0, must_reload = 1;
-        if( key_down('F2') ) OBJ_MDL = 1, must_reload = 1;
-        if( key_down('F3') ) OBJ_MDL = 2, must_reload = 1;
+        if( key_down('F1') ) { OBJ_MDL = 0; scene.must_reload = 1; }
+        if( key_down('F2') ) { OBJ_MDL = 1; scene.must_reload = 1; }
+        if( key_down('F3') ) { OBJ_MDL = 2; scene.must_reload = 1; }
 
-        if( must_reload || key_down('F5') ) {
-            must_reload = 0;
+        if( scene.must_reload || key_down('F5') ) {
+            scene.must_reload = 0;
             scene_destroy(&scene);
         }
         if( !scene.init ) {
@@ -221,6 +237,8 @@ int main(int argc, char** argv) {
         float mvp[16]; multiply44(mvp, proj, view);
 
         scene_draw(&scene, mvp);
+
+        menu(&scene);
 
         ddraw_printf(window_stats());
         ddraw_printf("%f,%f,%f %f,%f", cam.position.x,cam.position.y,cam.position.z, cam.yaw,cam.pitch);

@@ -59,7 +59,7 @@
 - [ ] 09 World streaming and level loading.
 - [ ] 10 2D/2.5D/3D/VR renderer and post-effects.
 - [x] 11 Fonts, atlases and text rendering.
-- [ ] 12 Debug draw and debug UI.
+- [x] 12 Debug draw and debug UI.
 - [ ] 13 Procedural content, brushes, voxels, noise and CSG.
 - [ ] 14 Static meshes, decals, skyboxes and skydomes.
 - [ ] 15 Sprites, sheets and spines.

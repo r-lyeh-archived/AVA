@@ -484,8 +484,8 @@ int window_update() {
     float ratio = width / (height + 1.f);
 
     //renderer_update(width, height);
-        viewport_clear(true, true);
-        viewport_clip(vec2(0,0),window_size());
+	viewport_clip(vec2(0, 0), window_size());
+	viewport_clear(true, true);
 
     mouse_update();
 

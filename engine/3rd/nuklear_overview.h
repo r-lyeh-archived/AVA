@@ -25,8 +25,9 @@ overview(struct nk_context *ctx)
     if (scale_left) window_flags |= NK_WINDOW_SCALE_LEFT; else window_flags &= ~NK_WINDOW_SCALE_LEFT;
     if (minimizable) window_flags |= NK_WINDOW_MINIMIZABLE; else window_flags &= ~NK_WINDOW_MINIMIZABLE;
 
-    if (nk_begin(ctx, "Overview", nk_rect(10, 10, 400, 600), window_flags))
+    if (nk_begin(ctx, "Overview", nk_rect(310, 10, 400, 600), window_flags))
     {
+        window_flags &= ~NK_WINDOW_MINIMIZED;
         if (show_menu)
         {
             /* menubar */
