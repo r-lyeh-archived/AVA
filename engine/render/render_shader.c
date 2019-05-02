@@ -45,8 +45,8 @@
 */
 
 #define ALIASES \
-    "#define GL_TEXCOORD  texCoord\n" \
-    "#define GL_FRAGCOLOR fragColor\n" \
+    /*"#define GL_TEXCOORD  texCoord\n"*/ \
+    /*"#define GL_FRAGCOLOR fragColor\n"*/ \
     "#define TEXCOORD  texCoord\n" \
     "#define FRAGCOLOR fragColor\n" \
     "#define TexCoord  texCoord\n" \
