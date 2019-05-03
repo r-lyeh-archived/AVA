@@ -62,6 +62,7 @@ API void image_flip( image * );
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STBIDEF API
 
 #include "3rd/stb_image.h"
 #include "3rd/stb_image_write.h"

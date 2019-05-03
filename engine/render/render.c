@@ -18,6 +18,9 @@
 #define FONT_C
 #define DDRAW_C
 #define POSTFX_C
+
+#define SHADER3_C
+#define PBR_C
 #endif
 
 #include <stdlib.h>
@@ -39,3 +42,6 @@
 #include "render_font.c"
 #include "render_ddraw.c"
 #include "render_postfx.c"
+
+#include "render_shader3.c"
+#include "render_pbr.c"

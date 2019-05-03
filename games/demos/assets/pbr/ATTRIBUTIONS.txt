@@ -1,0 +1,10 @@
+The listed files are the original work of the following authors, graciously made available under the terms of their respective licenses. Note that in some cases these files have been reduced in size or quality to save space. I strongly encourage interested parties to view the full quality files in their original locations.
+
+factory-catwalk.hdr,
+  Author: Blochi. License: Creative Commons Attribution-Noncommercial-Share Alike 3.0 License
+  https://www.hdrlabs.com/sibl/archive.html
+
+helmet-mesh.fbx, helmet-albedo.jpg, helmet-normal.jpg, helmet-metallic.jpg, helmet-roughness.jpg
+  Simple Steel Helmet (Game Model) by Michael Makivic is licensed under Creative Commons Attribution
+  https://sketchfab.com/models/1603f60804c941cba0ffeacea20a7f32
+

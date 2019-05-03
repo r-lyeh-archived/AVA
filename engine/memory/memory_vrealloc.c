@@ -5,9 +5,9 @@
 #define VREALLOC_H
 #include <stdio.h>
 
-size_t vsize( void *p );
-void *vrealloc( void *p, size_t sz );
-void *vresize( void *p, size_t sz );
+API size_t vsize( void *p );
+API void *vrealloc( void *p, size_t sz );
+API void *vresize( void *p, size_t sz );
 
 #endif
 

@@ -123,61 +123,6 @@ static void* glfwGetProcAddressExtraCompat(const char *name) {
 #define GL_DEBUG_TYPE_PUSH_GROUP          0x8269
 #define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  0x824E
 
-#if 0
-static void APIENTRY glDebug(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-    /*
-    // whitelisted codes
-    if( id == 131169 ) return;
-    if( id == 131185 ) return;
-    if( id == 131204 ) return;
-    if( id == 131218 ) return;
-    */
-
-    if( severity == GL_DEBUG_SEVERITY_HIGH ) {
-        printf_handler("!glDebug: %s (%d) (source=%s, type=%s, severity=%s) #OPENGL\n", message, id,
-            source == GL_DEBUG_SOURCE_API               ? "API" :
-            source == GL_DEBUG_SOURCE_APPLICATION       ? "Application" :
-            source == GL_DEBUG_SOURCE_OTHER             ? "Other" :
-            source == GL_DEBUG_SOURCE_SHADER_COMPILER   ? "Shader Compiler" :
-            source == GL_DEBUG_SOURCE_THIRD_PARTY       ? "Third Party" :
-            source == GL_DEBUG_SOURCE_WINDOW_SYSTEM     ? "Window System" : "",
-
-            type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR   ? "Deprecated Behavior" :
-            type == GL_DEBUG_TYPE_ERROR                 ? "Error" :
-            type == GL_DEBUG_TYPE_MARKER                ? "Marker" :
-            type == GL_DEBUG_TYPE_OTHER                 ? "Other" :
-            type == GL_DEBUG_TYPE_PERFORMANCE           ? "Performance" :
-            type == GL_DEBUG_TYPE_POP_GROUP             ? "Pop Group" :
-            type == GL_DEBUG_TYPE_PORTABILITY           ? "Portability" :
-            type == GL_DEBUG_TYPE_PUSH_GROUP            ? "Push Group" :
-            type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR    ? "Undefined Behavior" : "",
-
-            severity == GL_DEBUG_SEVERITY_HIGH          ? "High" :
-            severity == GL_DEBUG_SEVERITY_LOW           ? "Low" :
-            severity == GL_DEBUG_SEVERITY_MEDIUM        ? "Medium" :
-            severity == GL_DEBUG_SEVERITY_NOTIFICATION  ? "Notification" : "");
-//      exit(-1);
-    }
-}
-
-void glEnableDebug() {
-#ifndef SHIPPING
-    if (!glDebugMessageCallback) return;
-    int flags;
-    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    if( flags & GL_CONTEXT_FLAG_DEBUG_BIT ) {
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback((GLDEBUGPROC)glDebug, /*NULL*/0);
-        //GL( glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, /*NULL*/0, GL_TRUE) );
-        printf_handler("%s #OPENGL\n", "Debug output initialized.");
-    } else {
-        printf_handler("%s #OPENGL\n", "Debug output not supported.");
-    }
-#endif
-}
-
-#else
 
 void glDebug(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, void * userdata) {
 
@@ -187,6 +132,7 @@ void glDebug(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int
     if( id == 131185 ) return; // Buffer object 2 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations
     // if( id == 131204 ) return;
     if( id == 131218 ) return; // Program/shader state performance warning: Vertex shader in program 9 is being recompiled based on GL state.
+    if( id == 2 ) return; // INFO: API_ID_RECOMPILE_FRAGMENT_SHADER performance warning has been generated. Fragment shader recompiled due to state change. [ID: 2]
 
     const char * GL_ERROR_SOURCE[] = { "API", "WINDOW SYSTEM", "SHADER COMPILER", "THIRD PARTY", "APPLICATION", "OTHER" };
     const char * GL_ERROR_SEVERITY[] = { "HIGH", "MEDIUM", "LOW", "NOTIFICATION" };
@@ -208,7 +154,7 @@ void glDebug(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int
 #endif
 }
 
-void glEnableDebug() {
+void glDebugEnable() {
     // Enable the debug callback
     // #ifndef RELEASE
     typedef void (*GLDEBUGPROC)(uint32_t source, uint32_t type, uint32_t id, uint32_t severity, int32_t length, const char * message, const void * userParam);
@@ -221,7 +167,6 @@ void glEnableDebug() {
     // #endif
 }
 
-#endif
 
 #ifdef __GNUC__ // also, clang
     int __argc;
@@ -270,7 +215,14 @@ void window_load_opengl(void) {
 
     SDL_GL_SetSwapInterval(1); // Enable vsync, also check -1
 
-    glEnableDebug();
+    glDebugEnable();
+
+    // int end; glGetIntegerv(GL_NUM_EXTENSIONS, &end);
+    // const char *sep = ""; for( int i = 0; i < end; ++i) printf("%s%s", sep, glGetStringi(GL_EXTENSIONS,i)), sep = ","; puts("");
+    printf("; version: %.*s, glsl: %.*s, vendor: %s (%s)\n",
+        3, glGetString(GL_VERSION),
+        3, glGetString(GL_SHADING_LANGUAGE_VERSION),
+        glGetString(GL_RENDERER), glGetString(GL_VENDOR));
 }
 
 int window_create( float zoom, int flags ) {
@@ -404,7 +356,7 @@ int window_create( float zoom, int flags ) {
                 appw, apph, sdl_window_flags
             );
 
-            if(window) printf("opengl %d.%d%s%s context created\n", majv, minv, have_core ? "-core" : "", have_debug ? "-debug" : "");
+            // if(window) printf("opengl %d.%d%s%s context created\n", majv, minv, have_core ? "-core" : "", have_debug ? "-debug" : "");
         }
     }
 
@@ -423,7 +375,7 @@ int window_create( float zoom, int flags ) {
             appw, apph, sdl_window_flags
         );
 
-        if(window) printf("opengl 2.1%s%s context created\n", 0 ? "-core" : "", have_debug ? "-debug" : "");
+        // if(window) printf("opengl 2.1%s%s context created\n", 0 ? "-core" : "", have_debug ? "-debug" : "");
     }
 
     if (!window) {
@@ -484,8 +436,8 @@ int window_update() {
     float ratio = width / (height + 1.f);
 
     //renderer_update(width, height);
-	viewport_clip(vec2(0, 0), window_size());
-	viewport_clear(true, true);
+    viewport_clip(vec2(0, 0), window_size());
+    viewport_clear(true, true);
 
     mouse_update();
 

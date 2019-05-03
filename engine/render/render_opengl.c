@@ -103,3 +103,60 @@ int64_t gputime() {
 }
 
 #endif
+
+// ----------------------------------------------------------------------------
+// DEPRECATE ME: these are used in render_shader3 & render_pbr atm
+
+#ifndef OPENGL_INL
+#define OPENGL_INL
+
+// ok
+#undef glGenerateTextureMipmap
+#define glGenerateTextureMipmap(t,...) glGenerateTextureMipmapEXT(t,*texTarget(t),__VA_ARGS__)
+
+// ok
+#undef glTextureParameteri
+#define glTextureParameteri(t,...) glTextureParameteriEXT(t,*texTarget(t),__VA_ARGS__)
+
+// ok
+#undef glTextureStorage2D
+#define glTextureStorage2D(t,...) glTextureStorage2DEXT(t,*texTarget(t),__VA_ARGS__)
+
+static inline
+GLenum *texTarget(GLuint tex) {
+    static map_t(int,GLenum) m = {0}, *init = 0;
+    if( !init ) {
+        init = &m;
+        map_create_keyint(&m);
+    }
+    GLenum *found = map_find(&m, tex);
+    if( found ) return found;
+    map_insert(&m, tex, 0);
+    return texTarget(tex);
+}
+
+// ok
+#undef glCreateFramebuffers
+#define glCreateFramebuffers(num,ids) do for(int i = 0, end = (num); i < end; ++i) { \
+    GLuint *id = (ids)+i; \
+    glGenFramebuffers(1, id); \
+    glBindFramebuffer(GL_FRAMEBUFFER, *id); \
+} while(0)
+
+// ok
+#undef glCreateTextures
+#define glCreateTextures(type,num,ids) do for(int i = 0, end = (num); i < end; ++i) { \
+    GLuint *texture = (ids)+i; \
+    glGenTextures(1, texture); \
+    glBindTexture(type, *texture); \
+    *texTarget(*texture) = type; \
+} while(0)
+
+// :( 75%
+#undef glBindTextureUnit
+#define glBindTextureUnit(n, tex) do { \
+    glActiveTexture(GL_TEXTURE0 + (n));  \
+    auto *tt = texTarget(tex); if(!*tt) *tt = GL_TEXTURE_2D; \
+    glBindTexture(*tt, tex); } while(0)
+
+#endif
