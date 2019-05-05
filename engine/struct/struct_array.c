@@ -22,18 +22,19 @@
 #define array(t) t*
 #define array_init(t) ( (t) = 0 )
 #define array_resize(t, n) ( memset( array_count(t) + ((t) = array_cast(t) vrealloc((t), (n) * sizeof(0[t]) )), 0, ((n)-array_count(t)) * sizeof(0[t]) ), (t) )
-#define array_push(t, i) ( (t) = array_cast(t) vrealloc((t), (array_count(t) + 1) * sizeof(0[t]) ), (t)[ array_count(t) - 1 ] = (i) )
-#define array_back(t) ( (t) ? &(t)[ vsize(t) - 1 ] : NULL )
+#define array_push(t, ...) ( (t) = array_cast(t) vrealloc((t), (array_count(t) + 1) * sizeof(0[t]) ), (t)[ array_count(t) - 1 ] = (__VA_ARGS__) )
+#define array_back(t) ( (t) ? &(t)[ array_count(t)-1 ] : NULL )
 #define array_data(t) (t)
 #define array_at(t,i) (t[i])
 #define array_count(t) (int)( (t) ? vsize(t) / sizeof(0[t]) : 0u )
 #define array_bytes(t) (int)( (t) ? vsize(t) : 0u )
 #define array_sort(t, cmpfunc) qsort( t, array_count(t), sizeof(t[0]), cmpfunc )
-#define array_free(t) ( array_cast(t) vrealloc((t), 0), (t) = 0 )
 #define array_empty(t) ( !array_count(t) )
+#define array_clear(t) ( array_cast(t) vrealloc((t), 0), (t) = 0 )
+#define array_free(t) array_clear(t)
 
 #define array_foreach(t,val_t,v) \
-    for( val_t *v = &0[t], *vend = v + array_count(t); v < vend; ++v )
+    for( val_t *v = &0[t]; v < (&0[t] + array_count(t)); ++v )
 
 #define array_search(t, key, cmpfn) /* requires sorted array beforehand */ \
     bsearch(&key, t, array_count(t), sizeof(t[0]), cmpfn )
@@ -92,53 +93,55 @@
 #endif
 
 #ifdef ARRAY_DEMO
+#pragma once
 #include <string.h>
 
-int cmpi(const void * a, const void * b) {
+int my_cmpi(const void * a, const void * b) {
    return ( *(const int*)a - *(const int*)b );
 }
-int cmps(const void *a, const void *b ) {
+int my_cmps(const void *a, const void *b ) {
     return strcmp(*(const char**)a,*(const char**)b);
 }
 
 int main() {
-    array(int) a;
-
-    array_init(a);
-    array_insert(a, 0, 2);
-    array_push(a, 32);
-    array_push(a, 100);
-    array_push(a, 56);
-    array_push(a, 88);
-    array_push(a, 88);
-    array_push(a, 2);
-    array_push(a, 25);
-    printf("%p %d (%d elems, %d bytes)\n", array_back(a), *array_back(a), array_count(a), array_bytes(a));
-
-    array_insert(a, 1, 17);
-
-    for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
-
-    array_erase(a, 2);
-    for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
-
-    array_sort(a, cmpi);
-    for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
-
-    array_unique(a, cmpi);
-    for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
-
-
     {
+        array(int) a;
+
+        array_init(a);
+        array_insert(a, 0, 2);
+        array_push(a, 32);
+        array_push(a, 100);
+        array_push(a, 56);
+        array_push(a, 88);
+        array_push(a, 88);
+        array_push(a, 2);
+        array_push(a, 25);
+        printf("%p %d (%d elems, %d bytes)\n", array_back(a), *array_back(a), array_count(a), array_bytes(a));
+
+        for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
+
+        array_insert(a, 1, 17);
+        for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
+
+        array_erase(a, 2);
+        for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
+
+        array_sort(a, my_cmpi);
+        for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
+
+        array_unique(a, my_cmpi);
+        for( int i = 0; i < array_count(a); ++i ) printf("%d,", a[i] ); puts("");
+
+
         int key = 88;
-        int *found = array_search(a, key, cmpi);
+        int *found = array_search(a, key, my_cmpi);
         if (!found)
             printf ("%d is not in the array.\n",key);
         else
             printf ("%d is in the array.\n",*found);
-    }
 
-    array_free(a);
+        array_free(a);
+    }
 
     {
         array(char*) as = 0;
@@ -147,15 +150,15 @@ int main() {
         for( int i = 0; i < 6; ++i ) {
             array_push(as, values[i]);
         }
-        array_sort(as, cmps);
+        array_sort(as, my_cmps);
 
-        int i;
-        array_foreach(k, char*, v) {
+        int i = 0;
+        array_foreach(as, char*, v) {
             printf("#%d) %s\n", i++, *v);
         }
 
         char *key = "example";
-        char **found = array_search(as, key, cmps);
+        char **found = array_search(as, key, my_cmps);
         if (!found)
             printf ("%s is not in the array.\n",key);
         else
