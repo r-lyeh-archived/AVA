@@ -29,7 +29,8 @@
 
 enum MESH2_FLAGS {
     MESH2_STATIC = 0, // , DYNAMIC, STREAM // zero|single|many updates per frame
-    MESH2_TRIANGLE_STRIP = 1,
+    MESH2_STREAM = 1,
+    MESH2_TRIANGLE_STRIP = 2,
 };
 
 typedef struct material3 {
@@ -53,6 +54,7 @@ typedef struct mesh {
 
 
 API void   mesh_create(mesh* m, const char *format, int vertex_stride_optional,int vertex_count,void *vertex_data, int index_count,void *index_data, int flags);
+API void   mesh_update(mesh* m, const char *format, int vertex_stride_optional,int vertex_count,void *vertex_data, int index_count,void *index_data, int flags);
 API void   mesh_render(mesh* m, unsigned program); // , int instanceCount = 1);
 API void   mesh_destroy(mesh* m);
 
@@ -86,6 +88,10 @@ void mesh_create(mesh* m, const char *format, int vertex_stride,int vertex_count
     mesh z = {0};
     *m = z;
 
+    mesh_update(m, format, vertex_stride,vertex_count,vertex_data, index_count,index_data, flags);
+}
+
+void mesh_update(mesh* m, const char *format, int vertex_stride,int vertex_count,void *vertex_data, int index_count,void *index_data, int flags) {
     m->flags = flags;
 
     // setup
@@ -120,7 +126,7 @@ void mesh_create(mesh* m, const char *format, int vertex_stride,int vertex_count
     if(vertex_stride > 0) sizeof_vertex = vertex_stride;
 
     // layout
-    glGenVertexArrays(1, &m->vao);
+    if(!m->vao) glGenVertexArrays(1, &m->vao);
     glBindVertexArray(m->vao);
 
     // index data
@@ -131,18 +137,18 @@ void mesh_create(mesh* m, const char *format, int vertex_stride,int vertex_count
         if( vertex_count )
         index_optimize(index_data, index_count, vertex_count);
 
-        glGenBuffers(1, &m->ibo);
+        if(!m->ibo) glGenBuffers(1, &m->ibo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->index_count * sizeof_index, index_data, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->index_count * sizeof_index, index_data, flags & MESH2_STREAM ? GL_STREAM_DRAW : GL_STATIC_DRAW);
     }
 
     // vertex data
     if( vertex_data && vertex_count ) {
         m->vertex_count = vertex_count;
 
-        glGenBuffers(1, &m->vbo);
+        if(!m->vbo) glGenBuffers(1, &m->vbo);
         glBindBuffer(GL_ARRAY_BUFFER, m->vbo);
-        glBufferData(GL_ARRAY_BUFFER, m->vertex_count * sizeof_vertex, vertex_data, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, m->vertex_count * sizeof_vertex, vertex_data, flags & MESH2_STREAM ? GL_STREAM_DRAW : GL_STATIC_DRAW);
     }
 
     // vertex setup: iterate descriptors
@@ -207,9 +213,9 @@ void mesh_render(mesh* m, unsigned program) {
     glBindVertexArray(m->vao);
     if( m->ibo ) { // with indices
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m->ibo); // <-- why intel?
-        glDrawElements(m->flags & 1 ? GL_TRIANGLE_STRIP : GL_TRIANGLES, m->index_count, GL_UNSIGNED_INT, (char*)0);
+        glDrawElements(m->flags & MESH2_TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, m->index_count, GL_UNSIGNED_INT, (char*)0);
     } else { // with vertices only
-        glDrawArrays(m->flags & 1 ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, m->vertex_count /* / 3 */);
+        glDrawArrays(m->flags & MESH2_TRIANGLE_STRIP ? GL_TRIANGLE_STRIP : GL_TRIANGLES, 0, m->vertex_count /* / 3 */);
     }
     glBindVertexArray(0);
 
