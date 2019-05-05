@@ -298,7 +298,7 @@ int window_create( float zoom, int flags ) {
     */
     int sdl_window_flags = SDL_WINDOW_OPENGL;
     sdl_window_flags |= SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS;
-    sdl_window_flags |= fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
+    sdl_window_flags |= fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0; // SDL_WINDOW_FULLSCREEN
     sdl_window_flags |= fullscreen ? 0 : SDL_WINDOW_RESIZABLE;
     sdl_window_flags |= fullscreen ? SDL_WINDOW_INPUT_GRABBED : 0; // grabbed -> mouse confined to window
 
@@ -562,7 +562,7 @@ char* window_stats() {
         num_frames = 0;
     }
 
-    const char *appname = __argv[0]; // also print %used/%avail kib mem, %used/%avail objs
+    const char *appname = __argv[0]; // @todo: print %used/%avail kib mem, %used/%avail objs as well
     char *buf = va("%s - boot %.2fs %5.2ffps %5.2fms", appname, boot_time, fps, (now - prev_frame) * 1000.f);
     buf += (buf[0] == ' ');
 

@@ -1,9 +1,9 @@
 #include <engine.h>
 
 int main() {
-    bool frustum_cull_enabled = 1;
-    int objects_total = 0;
-    int objects_rendered = 0;
+    bool frustum_culling = true;
+    int total_objects = 0;
+    int drawn_objects = 0;
 
     window_create( 0.50f, 0 );
 
@@ -23,36 +23,36 @@ int main() {
         mat44 view; copy44(view, cam.view);
         mat44 projview; multiply44(projview, proj, view);
 
-        objects_total = 0;
-        objects_rendered = 0;
+        total_objects = 0;
+        drawn_objects = 0;
 
-        if( key_down(' ') ) frustum_cull_enabled ^= 1;
+        if( key_down(' ') ) frustum_culling = !frustum_culling;
 
         frustum f = frustum_build(projview);
 
         ddraw_begin(projview);
         for(int i = -300; i < 300; i += 5) {
             for(int j =  -300; j < 300; j += 5) {
-                objects_total++;
+                total_objects++;
 
                 vec3 minpos = vec3(i,-10,j);
                 vec3 maxpos = add3(minpos, vec3(2.5,2.5,2.5));
 
                 bool visible = frustum_test_aabb(f, aabb(minpos, maxpos));
 
-                if ( frustum_cull_enabled && !visible ) {
+                if ( frustum_culling && !visible ) {
                     // skip rendering
                     continue;
                 }
 
                 ddraw_aabb(minpos, maxpos);
-                objects_rendered++;
+                drawn_objects++;
             }
         }
         ddraw_end();
 
         ddraw_printf(window_stats());
-        ddraw_printf("frustum_cull_enabled:%s objects_rendered:%d/%d", frustum_cull_enabled ? "on":"off", objects_rendered, objects_total);
+        ddraw_printf("frustum_culling:%s drawn_objects:%d/%d", frustum_culling ? "on":"off", drawn_objects, total_objects);
         ddraw_printf("space - toggle frustum culling on/off");
         window_swap(0);
     }

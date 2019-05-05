@@ -214,7 +214,7 @@ void ddraw_begin(float projview[16]) {
     }
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE); // additive: 1 * src_color + 1 * fb_color
+    glBlendFunc(GL_ONE, GL_ONE); // additive: 1 * src_color + 1 * fb_color ; saturate: GL_SRC_ALPHA, GL_ONE
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // decal: src_color.a * src_color + (1 - src_color.a) * fb_color
     //glBlendFunc(GL_DST_COLOR, GL_ZERO); // modulate: fb_color * src_color + 0 * fb_color
 

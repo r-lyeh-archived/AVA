@@ -54,7 +54,7 @@ int main() {
         ddraw_end();
 
         static int counter = 0;
-        ddraw_console("console line test %d", counter++);
+        ddraw_console("console test line:%d", counter++);
 
         ddraw_printf(window_stats());
         window_swap(0);
