@@ -55,11 +55,14 @@
     "#define fragcolor fragColor\n"
 
 #define UNIFORMS \
+    ""
+/*
     "uniform float time = 0;\n" \
     "uniform float width = 1;\n" \
     "uniform float height = 1;\n" \
     "uniform float mousex = 1;\n" \
     "uniform float mousey = 1;\n"
+*/
 
 #define COMMON \
     "#ifdef GL_ES\n" \
