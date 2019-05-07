@@ -319,19 +319,26 @@ HEAP char *dir_ls2(const char *pathmask) {
 }
 
 array(dir_entry) dir_ls3(const char *pathmask) {
-    array(dir_entry) list = 0;
+    dir_entry de;
+    int size, modt;
+    char name[256], mode;
 
-    char *data = dir_ls2(pathmask);
-        dir_entry de;
-        int size, modt;
-        char name[256], mode;
-        for(char *next = data; *next && sscanf(next,"%c%d,%d, %[^\n]",&de.mode,&de.size,&de.modt,de.name) == 4; ) {
-            next = strchr(next,'\n') + 1;
-            array_push(list, de);
+    array(dir_entry) out = 0;
+
+    char *copy = strdup(pathmask);
+    array(char*) paths = string_split(copy, ";|");
+        for( int i = 0; i < array_count(paths); ++i) {
+            char *data = dir_ls2(paths[i]);
+                for(char *next = data; *next && sscanf(next,"%c%d,%d, %[^\n]",&de.mode,&de.size,&de.modt,de.name) == 4; ) {
+                    next = strchr(next,'\n') + 1;
+                    array_push(out, de);
+                }
+            FREE(data);
         }
-    FREE(data);
+    array_free(paths);
+    FREE(copy);
 
-    return list;
+    return out;
 }
 
 
