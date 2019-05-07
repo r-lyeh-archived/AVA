@@ -44,6 +44,13 @@ API int   dir_ls( const char *pathmask, bool (*yield)(const char *name) );
 API char *dir_list(char **s, const char *pathmask);
 */
 
+typedef struct dir_entry {
+    int size, modt;
+    char name[256], mode;
+} dir_entry;
+
+API array(dir_entry) dir_ls3( const char *pathmask );
+
 #endif
 
 #ifdef DIR_C
@@ -310,6 +317,23 @@ HEAP char *dir_ls2(const char *pathmask) {
     char *s = 0;
     return dir_list( &s, pathmask );
 }
+
+array(dir_entry) dir_ls3(const char *pathmask) {
+    array(dir_entry) list = 0;
+
+    char *data = dir_ls2(pathmask);
+        dir_entry de;
+        int size, modt;
+        char name[256], mode;
+        for(char *next = data; *next && sscanf(next,"%c%d,%d, %[^\n]",&de.mode,&de.size,&de.modt,de.name) == 4; ) {
+            next = strchr(next,'\n') + 1;
+            array_push(list, de);
+        }
+    FREE(data);
+
+    return list;
+}
+
 
 #endif
 
