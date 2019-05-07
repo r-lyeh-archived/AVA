@@ -265,6 +265,20 @@ void ui_end() {
     nk_end(ui_ctx);
 }
 
+int ui_button(const char *label) {
+    nk_layout_row_dynamic(ui_ctx, 0, 1);
+
+    const char *split = strstr(label, "@"), *tooltip = split + 1;
+    const struct nk_input *in = &ui_ctx->input;
+    struct nk_rect bounds = nk_widget_bounds(ui_ctx);
+    int ret = nk_button_label(ui_ctx, label); // nk_button_symbol_label(ui_ctx, NK_SYMBOL_TRIANGLE_RIGHT, label, NK_TEXT_RIGHT);
+    //int ret = nk_button_symbol(ui_ctx, NK_SYMBOL_TRIANGLE_RIGHT); //
+    if (split && nk_input_is_mouse_hovering_rect(in, bounds)) {
+        nk_tooltip(ui_ctx, tooltip);
+    }
+    return ret;
+}
+
 int ui_label_(const char *label, int alignment) {
     const char *split = strstr(label, "@"), *tooltip = split + 1;
     const struct nk_input *in = &ui_ctx->input;
@@ -276,21 +290,12 @@ int ui_label_(const char *label, int alignment) {
     return 1;
 }
 
-int ui_label(const char *label) {
-    return ui_label_(label, NK_TEXT_LEFT);
-}
-
 int ui_label_right(const char *label) {
     return ui_label_(label, NK_TEXT_RIGHT);
 }
 
-int ui_button(const char *label) {
-    nk_layout_row_dynamic(ui_ctx, 0, 2);
-    ui_label(label);
-
-    int ret = nk_button_symbol_label(ui_ctx, NK_SYMBOL_TRIANGLE_RIGHT, "", NK_TEXT_RIGHT);
-    //int ret = nk_button_symbol(ui_ctx, NK_SYMBOL_TRIANGLE_RIGHT); //nk_button_label(ui_ctx, "|>");
-    return ret;
+int ui_label(const char *label) {
+    return ui_label_(label, NK_TEXT_LEFT);
 }
 
 int ui_color4(const char *label, float *color4) {
