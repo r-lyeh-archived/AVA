@@ -56,8 +56,7 @@ API void image_flip( image * );
 
 #ifdef IMAGE_C
 #pragma once
-#include "engine.h" // filesys
-#define swapifbe(x) (x) // endian.h
+#include "engine.h" // filesys, endian
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_RESIZE_IMPLEMENTATION
@@ -96,8 +95,8 @@ static
 bool pug_decoder( image *img, const void *ptr, size_t size, int flags ) {
     // if .pug file, then decode alpha (png) and blend it over regular lossy image (jpg)
     if( 0 == memcmp( "pug1", (const char *)ptr + size - 4, 4 ) ) {
-        const int32_t color_size = swapifbe( *(const int32_t *)((const char *)ptr + size - 12) );
-        const int32_t alpha_size = swapifbe( *(const int32_t *)((const char *)ptr + size - 8) );
+        const int32_t color_size = swap32ifbe( *(const int32_t *)((const char *)ptr + size - 12) );
+        const int32_t alpha_size = swap32ifbe( *(const int32_t *)((const char *)ptr + size - 8) );
         int w2 = 0, h2 = 0, bpp2 = 0;
         stbi_uc *alpha = stbi_load_from_memory( (const unsigned char *)ptr + color_size, alpha_size, &w2, &h2, &bpp2, 1 );
         if( alpha ) {

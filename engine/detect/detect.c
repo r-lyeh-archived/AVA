@@ -22,6 +22,7 @@
 #define THREADLOCAL_C
 #define TYPES_C
 #define VA_C
+#define ENDIAN_C
 #endif
 
 #include "detect_assert.c"
@@ -42,5 +43,6 @@
 #include "detect_test.c"
 #include "detect_threadlocal.c"
 #include "detect_types.c"
+#include "detect_endian.c"
 
 #include "detect_va.c"
