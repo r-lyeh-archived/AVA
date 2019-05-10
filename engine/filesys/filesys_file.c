@@ -17,6 +17,7 @@ API bool        file_isdir( const char *pathfile );
 API bool        file_isfile( const char *pathfile );
 API bool        file_islink( const char *pathfile );
 
+API char*       file_chunk( const char *pathfile, size_t offset, size_t len );
 API char*       file_read( const char *pathfile );
 API char*       file_readz( const char *pathfile );
 API bool        file_write( const char *pathfile, const void *data, int len );
@@ -54,8 +55,20 @@ enum {  PROT_READ = 0x1, PROT_WRITE = 0x2, PROT_EXEC = 0x4,
         MAP_SHARED = 0x01, MAP_PRIVATE = 0x02, MAP_ANON = 0x20, MAP_ANONYMOUS = MAP_ANON };
 #define MAP_FAILED    ((void *) -1)
 static void* mmap(void* start, size_t length, int prot, int flags, int fd, size_t offset) {
+    // Offsets must be a multiple of the system's allocation granularity.  We
+    // guarantee this by making our view size equal to the allocation granularity.
+    static int32_t page_size = -1; if (page_size < 0) {
+        SYSTEM_INFO sysinfo = { 0 };
+        GetSystemInfo(&sysinfo);
+        page_size = sysinfo.dwAllocationGranularity;
+    }
+
     DWORD flProtect;
-    size_t end = length + offset;
+    size_t end = // length + offset; // 0;
+        length & ~(page_size - 1) + page_size
+        + 
+        offset & ~(page_size - 1);
+
     if( !(prot & ~(PROT_READ | PROT_WRITE | PROT_EXEC)) ) {
         if( ( fd == -1 &&  (flags & MAP_ANON) && !offset ) ||
             ( fd != -1 && !(flags & MAP_ANON)            )) {
@@ -69,7 +82,20 @@ static void* mmap(void* start, size_t length, int prot, int flags, int fd, size_
                 dwDesiredAccess |= prot & PROT_WRITE ? FILE_MAP_WRITE : FILE_MAP_READ;
                 dwDesiredAccess |= prot & PROT_EXEC ? FILE_MAP_EXECUTE : 0;
                 dwDesiredAccess |= flags & MAP_PRIVATE ? FILE_MAP_COPY : 0;
+#if 0
                 void *ret = MapViewOfFile(h, dwDesiredAccess, (offset >> 31) >> 1, (uint32_t)offset, length);
+#else
+                // hack: avoid ERROR_MAPPED_ALIGNMENT 1132 (0x46C) error
+                // see https://stackoverflow.com/questions/8583449/memory-map-file-offset-low
+                // see https://stackoverflow.com/questions/9889557/mapping-large-files-using-mapviewoffile
+           
+                // alignment
+                size_t offset_page = offset & ~(page_size - 1);
+                size_t read_size = length + (offset - offset_page);
+
+                void *ret = MapViewOfFile(h, dwDesiredAccess, (offset_page >> 31) >> 1, (uint32_t) offset_page, read_size); //ASSERT(ret, "win32 error %d", GetLastError());
+                ret = (char*)ret + (offset - offset_page);
+#endif
                 CloseHandle(h); // close the Windows Handle here (we handle the file ourselves with fd)
                 return ret == NULL ? MAP_FAILED : ret;
             }
@@ -106,7 +132,7 @@ char* file_map( const char *pathfile, size_t offset, size_t len ) {
     if( file < 0 ) {
         return 0;
     }
-    void *ptr = mmap(0, len, PROT_READ, MAP_PRIVATE, file, 0);
+    void *ptr = mmap(0, len, PROT_READ, MAP_SHARED/*MAP_PRIVATE*/, file, offset);
     if( ptr == MAP_FAILED ) {
         ptr = 0;
     }
@@ -152,11 +178,10 @@ bool file_islink( const char *pathfile ) {
 #endif
 }
 
-char* file_read(const char *pathfile) {
+char* file_chunk(const char *pathfile, size_t offset, size_t len) {
     static THREAD_LOCAL int map = 0;
     static THREAD_LOCAL struct maplen { char *map; int len; } maps[16] = {0};
-    uint64_t len = file_size(pathfile);
-    char *mem = file_map( pathfile, 0, len );
+    char *mem = file_map( pathfile, offset, len );
     if( mem ) {
         struct maplen *bl = &maps[ map = ++map & (16-1) ];
         if( bl->map ) file_unmap( bl->map, bl->len );
@@ -166,7 +191,10 @@ char* file_read(const char *pathfile) {
     return mem;
 }
 
-HEAP
+char* file_read(const char *pathfile) {
+    return file_chunk( pathfile, 0, file_size(pathfile) );
+}
+
 char* file_readz(const char *pathfile) {
 #if 0
     uint64_t len = file_size(pathfile);
