@@ -11,6 +11,7 @@
 #define KVS_C
 #define URI_C
 #define VFS_C
+#define PAK_C
 #endif
 
 #include <stdio.h>
@@ -22,3 +23,4 @@
 #include "filesys_type.c"
 #include "filesys_uri.c"
 #include "filesys_vfs.c"
+#include "filesys_pak.c"
