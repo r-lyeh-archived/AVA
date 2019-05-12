@@ -23,6 +23,7 @@
 #define array_init(t) ( (t) = 0 )
 #define array_resize(t, n) ( memset( array_count(t) + ((t) = array_cast(t) vrealloc((t), (n) * sizeof(0[t]) )), 0, ((n)-array_count(t)) * sizeof(0[t]) ), (t) )
 #define array_push(t, ...) ( (t) = array_cast(t) vrealloc((t), (array_count(t) + 1) * sizeof(0[t]) ), (t)[ array_count(t) - 1 ] = (__VA_ARGS__) )
+#define array_pop(t) ( (t) = array_cast(t) vrealloc((t), (array_count(t) - 1) * sizeof(0[t]) ) )
 #define array_back(t) ( (t) ? &(t)[ array_count(t)-1 ] : NULL )
 #define array_data(t) (t)
 #define array_at(t,i) (t[i])
@@ -32,6 +33,13 @@
 #define array_empty(t) ( !array_count(t) )
 #define array_clear(t) ( array_cast(t) vrealloc((t), 0), (t) = 0 )
 #define array_free(t) array_clear(t)
+
+#define array_reverse(t) \
+    do if( array_count(t) ) { \
+        for(int l = array_count(t), e = l-1, i = (array_push(t, 0[t]), 0); i <= e/2; ++i ) \
+            { l[t] = i[t]; i[t] = (e-i)[t]; (e-i)[t] = l[t]; } \
+        array_pop(t); \
+    } while(0)
 
 #define array_foreach(t,val_t,v) \
     for( val_t *v = &0[t]; v < (&0[t] + array_count(t)); ++v )
