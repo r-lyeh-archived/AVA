@@ -7,6 +7,7 @@
 #ifdef DETECT_C
 #pragma once
 #define API_C
+#define AUTO_C
 #define AUTORUN_C
 #define BITS_C
 #define CALLSTACK_C
@@ -28,6 +29,7 @@
 #include "detect_assert.c"
 
 #include "detect_api.c"
+#include "detect_auto.c"
 #include "detect_autorun.c"
 #include "detect_bits.c"
 #include "detect_callstack.c"
