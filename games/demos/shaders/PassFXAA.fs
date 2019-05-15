@@ -5,8 +5,6 @@ out vec4 color;
 uniform sampler2D tex;
 
 float FXAA_SUBPIX_SHIFT = 1.0/4.0;
-vec2 rcpFrame = vec2(1.0/width, 1.0/height);
-vec4 posPos = vec4(texcoord.st,texcoord.st -(rcpFrame * (0.5 + FXAA_SUBPIX_SHIFT)));
 
 // posPos: Output of FxaaVertexShader interpolated across screen.
 // tex: Input texture.
@@ -56,8 +54,9 @@ vec3 FxaaPixelShader(vec4 posPos, sampler2D tex, vec2 rcpFrame) {
 }
 
 vec4 FXAA(sampler2D tex, vec2 uv) {
+    vec2 rcpFrame = vec2(1.0/iWidth, 1.0/iHeight);
+    vec4 posPos = vec4(texcoord.st,texcoord.st -(rcpFrame * (0.5 + FXAA_SUBPIX_SHIFT)));
     vec4 c = vec4(0.0);
-    vec2 rcpFrame = vec2(1.0/width, 1.0/height);
     c.rgb = FxaaPixelShader(posPos, tex, rcpFrame);
     //c.rgb = 1.0 - texture2D(tex, posPos.xy).rgb;
     c.a = 1.0;

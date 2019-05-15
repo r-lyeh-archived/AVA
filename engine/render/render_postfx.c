@@ -83,10 +83,10 @@ bool postfx_load( postfx *fx, int slot, const char *name, const char *vertex, co
     char *fs2 = (char*)CALLOC(1, 64*1024);
     strcat(fs2, FS130);
     strcat(fs2, "uniform sampler2D iChannel0;\n");
-    strcat(fs2, "vec2 iResolution = vec2(width, height);\n");
-    strcat(fs2, "vec2 iMouse = vec2(mousex, mousey);\n");
-    strcat(fs2, "float iTime = time;\n");
-    strcat(fs2, "float iGlobalTime = time;\n");
+    strcat(fs2, "uniform float iWidth, iHeight, iTime, iMousex, iMousey;\n");
+    strcat(fs2, "vec2 iResolution = vec2(iWidth, iHeight);\n");
+    strcat(fs2, "vec2 iMouse = vec2(iMousex, iMousey);\n");
+    strcat(fs2, "float iGlobalTime = iTime;\n");
     strcat(fs2, "in vec2 texcoord;\n");
 
     if( strstr(fs, "mainImage") ) {
@@ -108,13 +108,13 @@ bool postfx_load( postfx *fx, int slot, const char *name, const char *vertex, co
 
     for( int i = 0; i < countof(p->uniforms); ++i ) p->uniforms[i] = -1;
 
-    if( p->uniforms[u_time] == -1 )   p->uniforms[u_time] = glGetUniformLocation(p->program, "time");
+    if( p->uniforms[u_time] == -1 )   p->uniforms[u_time] = glGetUniformLocation(p->program, "iTime");
 
-    if( p->uniforms[u_width] == -1 )  p->uniforms[u_width] = glGetUniformLocation(p->program, "width");
-    if( p->uniforms[u_height] == -1 ) p->uniforms[u_height] = glGetUniformLocation(p->program, "height");
+    if( p->uniforms[u_width] == -1 )  p->uniforms[u_width] = glGetUniformLocation(p->program, "iWidth");
+    if( p->uniforms[u_height] == -1 ) p->uniforms[u_height] = glGetUniformLocation(p->program, "iHeight");
 
-    if( p->uniforms[u_mousex] == -1 ) p->uniforms[u_mousex] = glGetUniformLocation(p->program, "mousex");
-    if( p->uniforms[u_mousey] == -1 ) p->uniforms[u_mousey] = glGetUniformLocation(p->program, "mousey");
+    if( p->uniforms[u_mousex] == -1 ) p->uniforms[u_mousex] = glGetUniformLocation(p->program, "iMousex");
+    if( p->uniforms[u_mousey] == -1 ) p->uniforms[u_mousey] = glGetUniformLocation(p->program, "iMousey");
 
     if( p->uniforms[u_color] == -1 ) p->uniforms[u_color] = glGetUniformLocation(p->program, "tex");
     if( p->uniforms[u_color] == -1 ) p->uniforms[u_color] = glGetUniformLocation(p->program, "tex0");
