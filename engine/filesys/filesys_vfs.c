@@ -106,7 +106,7 @@ const char *vfs_find_fuzzy( const char *file ) {
             sprintf(url, "%.*s", next ? (int) (next - index) : (int) strlen(index), index);
 
             if (url[0] && url[strlen(url)-1] != '/') { // files only
-                TEMP char *norm = string_normalize(url);
+                TEMP char *norm = file_norm(url);
                 char *k = strdup(norm), *v = strdup(url);
                 map_insert(map, k, v);
             }
@@ -120,7 +120,7 @@ const char *vfs_find_fuzzy( const char *file ) {
     if( strcmp(registry, file) ) return file;
 
     // not found? try normalized search: folder/def_abc.tga -> abc_def_folder
-    TEMP char *candidate = string_normalize(file);
+    TEMP char *candidate = file_norm(file);
     char **found = map_find(map, candidate);
     if( found ) return *found;
 

@@ -27,6 +27,9 @@ API bool        file_copy( const char *srcpath, const char *dstpath );
 API bool        file_touch( const char *pathfile );
 API bool        file_delete( const char *path );
 
+API TEMP char*  file_norm( const char *name );
+API bool        file_isnorm( const char *name );
+
 #endif
 
 #ifdef FILE_C
@@ -35,7 +38,7 @@ API bool        file_delete( const char *path );
 #include <stdio.h>
 #include <sys/stat.h>
 
-#if WINDOWS
+#ifdef _WIN32
 #include <io.h>
 #else
 #include <unistd.h>
@@ -48,7 +51,7 @@ API bool        file_delete( const char *path );
 #define stat8(path,st)    IFDEF(WINDOWS, _wstat(file_widen(path),st)            ,  stat(path,st)    )
 #define stat_             IFDEF(WINDOWS, _stat,                                 ,  stat_t           )
 
-#if WINDOWS
+#ifdef _WIN32
 #include <fcntl.h> // O_RDONLY(00)
 // mmap() replacement for Windows. Placed into the public domain (Mike Frysinger)
 enum {  PROT_READ = 0x1, PROT_WRITE = 0x2, PROT_EXEC = 0x4,
@@ -108,7 +111,7 @@ static void munmap(void* addr, size_t length) {
 }
 #endif
 
-#if WINDOWS
+#ifdef _WIN32
 #include <winsock2.h>
 #include <shlobj.h>
 wchar_t *file_widen(const char *utf8) { // wide strings (windows only)
@@ -292,16 +295,57 @@ bool file_delete( const char *path ) {
     return !file_exist(path);
 }
 
+bool file_isnorm( const char *name ) {
+    return name[0] == '\1';
+}
 
-
+char *file_norm( const char *name ) {
+    if( !file_isnorm(name) ) {
+        char buf[260] = {0}, *out = buf, c;
+        // lowercases+digits+underscores+slashes only. anything else is truncated.
+        if( name ) do {
+            /**/ if( *name >= 'a' && *name <= 'z' ) *out++ = *name;
+            else if( *name >= 'A' && *name <= 'Z' ) *out++ = *name - 'A' + 'a';
+            else if( *name >= '0' && *name <= '9' ) *out++ = *name;
+            else if( *name == '/' || *name == '\\') *out++ = '/';
+            else if( *name <= ' ' || *name == '.' ) *out++ = '_';
+        } while( *++name );
+        // remove dupe slashes
+        for( name = out = buf, c = '/'; *name ; ) {
+            while( *name && *name != c ) *out++ = *name++;
+            if( *name ) *out++ = c;
+            while( *name && *name == c ) name++;
+        } *out++ = 0;
+        // remove dupe underlines
+        for( name = out = buf, c = '_'; *name ; ) {
+            while( *name && *name != c ) *out++ = *name++;
+            if( *name ) *out++ = c;
+            while( *name && *name == c ) name++;
+        } *out++ = 0;
+        // return copy
+        name = va("\1%s", buf);
+    }
+    return (char*)name;
+}
 
 #endif
 
+// ----------------------------------------------------------------------------
+
 #ifdef FILE_DEMO
-#include <stdio.h>
+#pragma once
 int main() {
     char *readbuf = file_map(__FILE__, 0, file_size(__FILE__));
     printf( "read: [%p]: %s\n", readbuf, readbuf );
     file_unmap( readbuf, file_size(__FILE__) );
+
+    // ---
+
+    char *file1 = file_norm("There's\\\\a///Lady/who's  sure   all that \"glitters\"/is (gold)/file.audio");
+    char *file2 = file_norm(file1); // renormalize file should be safe
+
+    assert( !strcmp(file1, file2) );
+    puts(file1);
+    puts(file2);
 }
 #endif

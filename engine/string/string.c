@@ -7,7 +7,6 @@
 #define FORMAT_C
 #define FUZZY_C
 #define INI_C
-#define NORMALIZE_C
 #define QUARK_C
 #define REGEX_C
 #define SPLIT_C
@@ -27,7 +26,6 @@
 #include "string_split.c"
 #include "string_unicode.c"
 #include "string_fuzzy.c"
-#include "string_normalize.c"
 
 #include "string2.c"
 #include "string3.c"
