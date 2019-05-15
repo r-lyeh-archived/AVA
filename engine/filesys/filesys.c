@@ -12,6 +12,7 @@
 #define URI_C
 #define VFS_C
 #define PAK_C
+#define FILE56_C
 #endif
 
 #include <stdio.h>
@@ -24,3 +25,4 @@
 #include "filesys_uri.c"
 #include "filesys_vfs.c"
 #include "filesys_pak.c"
+#include "filesys_file56.c"
