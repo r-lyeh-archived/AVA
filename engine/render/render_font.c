@@ -333,8 +333,8 @@ void font_mesh(mesh *m, int font_id, const char *text ) {
 
     // utf8 to utf32
 
-    uint32_t *text32 = string32( text );
-    int count = strlen32( text32 );
+    array(uint32_t) text32 = string32( text );
+    int count = array_count( text32 );
 
     // setup vertex+index data
 
@@ -406,7 +406,7 @@ void font_mesh(mesh *m, int font_id, const char *text ) {
 
     //FREE(vertices);
     //FREE(indexes);
-    FREE(text32);
+    array_free(text32);
 }
 
 void font_create(font_t*f, const char *fontfile, int fontsize, int fontflags ) {

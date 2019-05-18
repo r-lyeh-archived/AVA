@@ -2,14 +2,9 @@
 // Ideas from https://blog.forrestthewoods.com/reverse-engineering-sublime-text-s-fuzzy-match-4cffeed33fdb
 // - rlyeh, public domain.
 
-#ifndef FUZZY_H
-#define FUZZY_H
-
-API int string_fuzzy_score( const char *str1, const char *str2 );
+API int         string_fuzzy_score( const char *str1, const char *str2 );
 API const char *string_fuzzy_find( const char *str, int num, const char *words[] );
-API int string_fuzzy_find_index( const char *str, int num, const char *words[] );
-
-#endif
+API int         string_fuzzy_find_index( const char *str, int num, const char *words[] );
 
 #ifdef FUZZY_C
 #pragma once
@@ -70,10 +65,7 @@ int string_fuzzy_find_index( const char *str, int num, const char *words[] ) {
     return best ? bestidx : -1;
 }
 
-#endif
-
 #ifdef FUZZY_DEMO
-#include <stdio.h>
 int main( int argc, char **argv ) {
     if( argc <= 1 ) printf("%s command\n", argv[0]), exit(0);
     const char *texts[] = {
@@ -113,4 +105,5 @@ int main( int argc, char **argv ) {
     const char *fuzzy_search = string_fuzzy_find( partial_word, sizeof(texts)/sizeof(texts[0]), texts );
     printf(">> Did you mean '%s' instead of '%s'?\n", fuzzy_search, partial_word );
 }
+#endif
 #endif

@@ -5,7 +5,6 @@
 #define SSO_H
 
 typedef char sso3[4];
-typedef int static_check_sso3[ sizeof(sso3) == (3+1) ];
 
 sso3 *sso3_new( sso3 *s, const char *text );
 int sso3_capacity( const sso3 *s );
@@ -15,7 +14,6 @@ int sso3_compare( const sso3 *a, const sso3 *b );
 //
 
 typedef char sso7[8];
-typedef int static_check_sso7[ sizeof(sso7) == (7+1) ];
 
 sso7 *sso7_new( sso7 *s, const char *text );
 int sso7_capacity( const sso7 *s );
@@ -24,13 +22,10 @@ int sso7_compare( const sso7 *a, const sso7 *b );
 
 #endif
 
+// ----------------------------------------------------------------------------
+
 #ifdef SSO_C
 #pragma once
-#include <string.h>
-#include <assert.h>
-#include <stdint.h>
-
-typedef char sso3[4];
 
 typedef int static_check_sso3[ sizeof(sso3) == (3+1) ];
 
@@ -59,8 +54,6 @@ int sso3_compare( const sso3 *a, const sso3 *b ) {
 
 //
 
-typedef char sso7[8];
-
 typedef int static_check_sso7[ sizeof(sso7) == (7+1) ];
 
 sso7 *sso7_new( sso7 *s, const char *text ) {
@@ -86,13 +79,9 @@ int sso7_compare( const sso7 *a, const sso7 *b ) {
     return *((uint64_t*)a) - *((uint64_t*)b);
 }
 
-#endif
-
-//
+// ----------------------------------------------------------------------------
 
 #ifdef SSO_DEMO
-#include <stdio.h>
-
 int main() {
     sso7 a;
     printf("(sizeof struct: %d)\n", (int)sizeof(sso7));
@@ -120,5 +109,5 @@ int main() {
     int compare3 = sso7_compare(&c, &b);
     printf("comparison '%s' %c '%s'\n", &c, compare3 < 0 ? '<' : (compare3 > 0 ? '>' : '='), &b);
 }
-
+#endif
 #endif

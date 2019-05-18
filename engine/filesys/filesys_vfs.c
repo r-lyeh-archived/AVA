@@ -46,7 +46,7 @@ void vfs_import( const char *pathmask ) {
     vfs_changed = 1;
 }
 const char *vfs_find( const char *file ) {
-    file = string_replace_inline(va("%s", file), "//", "/" ); // remove duplicated slashes
+    file = string_replace(va("%s", file), "//", "/" ); // remove duplicated slashes
 
     char *found = dir_registry ? strstr(dir_registry, va("%s\n", file)) : 0;
     if( found ) {

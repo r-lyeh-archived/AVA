@@ -224,15 +224,15 @@ mesh2 mesh2_load_obj(coord_system target_basis, const char *filename) {
             break; case 'v': // vertex
             /**/ if(tokens[0][1] == 't') {
                 assert( array_count(tokens) >= 3 && "malformed vertex texcoord" );
-                array_push( texcoords, vec2(string_tofloat(tokens[1]),/*1-*/string_tofloat(tokens[2])) );
+                array_push( texcoords, vec2(string_float(tokens[1]),/*1-*/string_float(tokens[2])) );
             }
             else if(tokens[0][1] == 'n') {
                 assert( array_count(tokens) >= 4 && "malformed vertex normal" );
-                array_push( normals, vec3(string_tofloat(tokens[1]),string_tofloat(tokens[2]),string_tofloat(tokens[3])) );
+                array_push( normals, vec3(string_float(tokens[1]),string_float(tokens[2]),string_float(tokens[3])) );
             }
             else {
                 assert( array_count(tokens) >= 4 && "malformed vertex" );
-                array_push( vertices, vec3(string_tofloat(tokens[1]),string_tofloat(tokens[2]),string_tofloat(tokens[3])) );
+                array_push( vertices, vec3(string_float(tokens[1]),string_float(tokens[2]),string_float(tokens[3])) );
             }
             break;
         }

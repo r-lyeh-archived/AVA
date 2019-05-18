@@ -1,17 +1,7 @@
-#ifndef UNICODE_H
-#define UNICODE_H
-#include <stdint.h>
-
-API uint32_t* string32( const char *utf8 ); // @todo: write HEAP
-API int strlen32( const uint32_t *utf32 );
-
-#endif
-
-// ----------------------------------------------------------------------------
+API array(uint32_t) string32( const char *utf8 );
 
 #ifdef UNICODE_C
 #pragma once
-#include "engine.h" // realloc
 
 static
 uint32_t extract_utf32(const char **p) {
@@ -40,21 +30,14 @@ uint32_t extract_utf32(const char **p) {
     return 0;
 }
 
-uint32_t* string32( const char *utf8 ) {
-    int worstlen = strlen(utf8) + 1;
-    uint32_t *buf = (uint32_t*)MALLOC( worstlen * sizeof(uint32_t) ), *p = buf;
+array(uint32_t) string32( const char *utf8 ) {
+    array(uint32_t) out = 0;
+    //int worstlen = strlen(utf8) + 1; array_reserve(out, worstlen);
     while( *utf8 ) {
         uint32_t unicode = extract_utf32( &utf8 );
-        *p++ = unicode;
+        array_push(out, unicode);
     }
-    *p++ = 0;
-    return buf;
-}
-
-int strlen32( const uint32_t *utf32 ) {
-    int count = 0;
-    while( *utf32++ ) ++count;
-    return count;
+    return out;
 }
 
 #endif

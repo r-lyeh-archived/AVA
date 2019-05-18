@@ -8,8 +8,8 @@
 /// - Return true if string matches wildcard pattern expression (?*).
 ///<C
 
-API      int           strregex(const char *string, const char *regex);
-API      bool          strmatch(const char *string, const char *substring);
+API      int           string_regex(const char *string, const char *regex);
+API      bool          string_match(const char *string, const char *substring);
 
 #ifdef REGEX_C
 #pragma once
@@ -35,7 +35,7 @@ int regstar(const char *string, const char *re, int c) {
     return 0;
 }
 
-int strregex(const char *string, const char *re) {
+int string_regex(const char *string, const char *re) {
     if( re[0] == '^' ) return reghere(string, re+1);
     do { /* must look even if string is empty */
         if( reghere(string, re) ) return 1;
@@ -43,21 +43,18 @@ int strregex(const char *string, const char *re) {
     return 0;
 }
 
-bool strmatch( const char *text, const char *pattern ) { $
+bool string_match( const char *text, const char *pattern ) { $
     if( *pattern=='\0' ) return !*text;
-    if( *pattern=='*' )  return strmatch(text, pattern+1) || (*text && strmatch(text+1, pattern));
-    if( *pattern=='?' )  return *text && (*text != '.') && strmatch(text+1, pattern+1);
-    return (*text == *pattern) && strmatch(text+1, pattern+1);
+    if( *pattern=='*' )  return string_match(text, pattern+1) || (*text && string_match(text+1, pattern));
+    if( *pattern=='?' )  return *text && (*text != '.') && string_match(text+1, pattern+1);
+    return (*text == *pattern) && string_match(text+1, pattern+1);
 }
-
-#endif
 
 #ifdef REGEX_DEMO
-#include <assert.h>
-#include <stdio.h>
 int main() {
-    assert( strregex("hello123", "^hel?*$") );
-    assert( strmatch("hello", "h?ll*") );
+    assert( string_regex("hello123", "^hel?*$") );
+    assert( string_match("hello", "h?ll*") );
     assert( ~puts("Ok.") );
 }
+#endif
 #endif

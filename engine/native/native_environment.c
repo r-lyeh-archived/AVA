@@ -9,15 +9,13 @@ API const char *env_set( const char *key, const char *value );
 
 // environment folders
 
-API char *env_arg0(); // appname()
-API char *env_curr(); // envwork
-API char *env_home();
-API char *env_proc_();
-API char *env_root(); // envexec, envgame
-API char *env_save(); // envdata
-API char *env_temp();
-API char *env_user();
-API const char *env_dir( const int folder );
+//API char*  env_arg0(); // appname()
+API char*    env_curr(); // envwork
+API char*    env_home();
+API char*    env_root(); // envexec, envgame
+API char*    env_save(); // envdata
+API char*    env_temp();
+API char*    env_user();
 API uint64_t env_free();
 
 #endif
@@ -92,10 +90,10 @@ char *ENV_FIX(const char *pathfile) {
     return buf;
 }
 
+#if 0
 #if !MSC
 extern char **__argv; // implemented in string.option.c
 #endif
-
 char *env_arg0() { // appname()
     static char *t = 0;
     if(t) return t;
@@ -107,6 +105,8 @@ char *env_arg0() { // appname()
     strtrimblf(t,  "/");
     return t;
 }
+#endif
+
 char *env_user() {
     static char *t = 0;
     if(t) return t;

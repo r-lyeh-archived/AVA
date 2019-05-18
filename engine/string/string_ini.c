@@ -18,21 +18,11 @@
 //   -note=utf8 everywhere.
 //
 
-#ifndef INI_H
-#define INI_H
+API char *ini( const char *text );
 
-// api
-// api, alt callback version
-
-char *ini( const char *text );
-void  ini_cb( const char *text, void (*yield)( const char *key, const char *value, void *userdata ), void *userdata );
-
-#endif
 
 #ifdef INI_C
 #pragma once
-#include <stdio.h>
-#include <stdlib.h>
 
 char *ini( const char *s ) {
     char *map = 0;
@@ -66,20 +56,6 @@ char *ini( const char *s ) {
     return map;
 }
 
-void ini_cb( const char *text, void (*yield)( const char *key, const char *value, void *userdata ), void *userdata ) {
-    char *kv = ini( text );
-    if( kv ) {
-        for( char *iter = kv; iter[0]; ) {
-            const char *key = iter; while( *iter++ );
-            const char *val = iter; while( *iter++ );
-            yield( key, val, userdata );
-        }
-        FREE( kv );
-    }
-}
-
-#endif
-
 #ifdef INI_DEMO
 int main() {
     char *kv = ini(
@@ -107,4 +83,5 @@ int main() {
         FREE( kv );
     }
 }
+#endif
 #endif
