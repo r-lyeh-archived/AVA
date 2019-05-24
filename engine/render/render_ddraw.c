@@ -801,7 +801,8 @@ void ddraw_clear() {
 // default embedded font
 
 int ddraw_font = 0;
-int ddraw_spacey = 10; // fonts[0].spaceY
+int ddraw_spacey = 10;
+#define ddraw_spacey (fonts ? fonts[0].spaceY : 10)
 
 void (ddraw_text2d)( vec2 pos, const char *buf ) {
     int slot = ddraw_find_slot();

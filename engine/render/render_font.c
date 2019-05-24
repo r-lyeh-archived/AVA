@@ -80,6 +80,7 @@ API void font_create(font_t*, const char *fontfile, int fontsize, int fontflags 
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "3rd/stb_truetype.h"
 
+extern const int bm_mini_scale;
 extern const char bm_mini_ttf[];
 extern const unsigned bm_mini_ttf_length;
 
@@ -208,11 +209,9 @@ material* font_material() {
 }
 
 int font_mem( const void *fontData, int fileSize, int fontSize, int flags ) {
-    static int seen = 0;
-    if (!seen) {
-        seen = 1;
+    static int seen = 0; if (!seen) { seen = 1;
         // init placeholder
-        font_mem(bm_mini_ttf, bm_mini_ttf_length, 8, FONT_RANGE_EU /*512, no oversample*/ );
+        font_mem(bm_mini_ttf, bm_mini_ttf_length, 8*bm_mini_scale, FONT_RANGE_EU /*512, no oversample*/ );
 
         // assign it to slot #0
         fonts[0] = fonts[1];
@@ -1692,5 +1691,7 @@ static const char bm_mini_ttf[] = {
 };
 
 static const unsigned bm_mini_ttf_length = (unsigned)sizeof(bm_mini_ttf);
+
+static const int bm_mini_scale = 1; // 1,2,3,4...
 
 #endif
