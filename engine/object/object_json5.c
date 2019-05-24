@@ -403,7 +403,7 @@ int main() {
     "  /* comment //nested comment*/\n" /* tests */
     "  // comment /*nested comment*/\n"
     "  nil: null,"
-    "  \"+lšctıáíé=:\": true,,,,"
+    "  \"+lÅ¡ctÅ¾Ã½Ã¡Ã­Ã©=:\": true,,,,"
     "  huge: 2.2239333e5, "
     "  array: [+1,2,-3,4,5],    "
     "  hello: 'world /*comment in string*/ //again', "

@@ -913,7 +913,7 @@ namespace ImGuizmo
    }
 
 ///   void BeginFrame()
-   void BeginFrame(int x, int y, int w, int h)
+   void BeginFrame(float x, float y, float w, float h)
    {
       ImGuiIO& io = ImGui::GetIO();
 
@@ -937,7 +937,7 @@ namespace ImGuizmo
       ImGui::PopStyleColor(2);
 
 #if 1 ///
-         ImGuizmo::SetRect(x,y,w,h);
+      ImGuizmo::SetRect(x,y,w,h);
 #endif
    }
 

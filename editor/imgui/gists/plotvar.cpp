@@ -61,7 +61,7 @@ void PlotVar(const char* label, float value, float scale_min, float scale_max, s
 	int current_frame = ImGui::GetFrameCount();
 	if (pvd.LastFrame != current_frame)
 	{
-		ImGui::PlotLines("##plot", &pvd.Data[0], buffer_size, pvd.DataInsertIdx, NULL, scale_min, scale_max, ImVec2(0, 40));
+		ImGui::PlotLines("##plot", &pvd.Data[0], (int)buffer_size, pvd.DataInsertIdx, NULL, scale_min, scale_max, ImVec2(0, 40));
 		ImGui::SameLine();
 		ImGui::Text("%s\n%-3.4f", label, pvd.Data[display_idx]);	// Display last value in buffer
 		pvd.LastFrame = current_frame;

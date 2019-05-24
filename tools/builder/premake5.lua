@@ -8,6 +8,7 @@ workspace "project"
     targetdir "../../_%{cfg.buildcfg}"
     configuration "windows"
         platforms { "x64" }
+        -- buildoptions { "/utf-8" } "/W3", "/wd4996", "/wd4244", "/wd4305", "/wd4267"} -- "/EHsc-"}
         links { "user32", "gdi32", "../../engine/3rd/SDL2.lib" }
     configuration "linux"
         links { "pthread" }

@@ -4,7 +4,7 @@
 #include "3rd/@jonolick/jo_gif.cpp"
 
 #include <omp.h>
-#define app_ms() omp_get_wtime()
+#define app_ms() (uint64_t)omp_get_wtime()
 
 static double show_wireframe = 0, show_textures = 0;
 static FILE *rec0 = 0, *rec1 = 0;
@@ -29,12 +29,12 @@ void set_render( int cmd, ... ) { //$
         break; case 'wire':  show_wireframe = va_arg(vl, double);
         break; case 'texs':  show_textures = va_arg(vl, double);
         break; case 'rec0':
-            recording = va_arg(vl, double);
+            recording = (int)va_arg(vl, double);
             if( recording && !rec0 ) rec0 = fopen("rec0.mpg", "wb");
             else if( rec0 && !recording ) fclose(rec0), rec0 = 0;
             if( rec0 ) setvbuf( rec0, NULL, _IOFBF, 4 * 1024 * 1024 );
         break; case 'rec1':
-            recording = va_arg(vl, double);
+            recording = (int)va_arg(vl, double);
             if( recording && !rec1 ) rec1 = fopen("rec1.mpg", "wb");
             else if( rec1 && !recording ) fclose(rec1), rec1 = 0;
             if( rec1 ) setvbuf( rec1, NULL, _IOFBF, 4 * 1024 * 1024 );

@@ -114,13 +114,13 @@ int osc_listen( const char *mask, const char *port ) {
         // failed to resolve remote socket address
         return 0;
     }
-    int fd = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+    int fd = (int)socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
     if( fd < 0 ) {
         // "failed to open socket %s", strerror(errno)
         return 0;
     }
 
-    if( bind(fd,addr->ai_addr,addr->ai_addrlen) == -1 ) {
+    if( bind(fd, addr->ai_addr, (int)addr->ai_addrlen) == -1 ) {
         // "failed to open socket %s", strerror(errno)
         return 0;
     }
@@ -206,12 +206,12 @@ int osc__parse_i32(const char **s, const char *e) {
 }
 int64_t osc__parse_i64(const char **s, const char *e) {
     if (*s+8>e) { *s=e; return 0; }
-    int rv=htonl(*(uint64_t*)*s);
+    int64_t rv=htonll(*(uint64_t*)*s);
     *s+=8;
     return rv;
 }
 const char *osc__parse_str(const char **s, const char *e) {
-    int len=strlen(*s);
+    int len=(int)strlen(*s);
     const char *rv=*s;
     *s=rv+((len+4)&~3); 
     if (*s>e) *s=e;
@@ -219,7 +219,7 @@ const char *osc__parse_str(const char **s, const char *e) {
 }
 const char *osc__parse_bin(const char **s, const char *e, int *len) {
     *len=osc__parse_i32(s,e); 
-    int maxlen=e-*s;
+    int maxlen=(int)(e-*s);
     if (*len>maxlen) *len=maxlen;
     if (*len<0) *len=0;
     const char *rv=*s;
@@ -234,7 +234,7 @@ int osc__parse(osc_message *out, int maxmsg, const char *s, const char *e) {
         int msgcount=0;
         while (s<e && msgcount<maxmsg) {
             int len=osc__parse_i32(&s,e);
-            int maxlen=e-s;
+            int maxlen=(int)(e-s);
             if (len>maxlen) len=maxlen;
             if (len<0) len=0;
             int n=osc__parse(out+msgcount, maxmsg-msgcount, s, s+len);
@@ -262,7 +262,7 @@ int osc__parse(osc_message *out, int maxmsg, const char *s, const char *e) {
             case OSC_TIME: case OSC_INT64:      out->i[param]=osc__parse_i64(&s,e); break;
             case OSC_STRING: case OSC_SYMBOL:   out->s[param]=osc__parse_str(&s,e); out->i[param]=strlen(out->s[param]); break;
             case OSC_FLOAT:                     out->f[param]=osc__asfloat(osc__parse_i32(&s,e)); f2i=1; break;
-            case OSC_DOUBLE:                    out->f[param]=osc__asdouble(osc__parse_i32(&s,e)); f2i=1; break;
+            case OSC_DOUBLE:                    out->f[param]=(float)osc__asdouble(osc__parse_i32(&s,e)); f2i=1; break;
             case OSC_BLOB:                      {int len=0; out->s[param]=osc__parse_bin(&s,e,&len); out->i[param]=len; break; }
             case OSC_INFINITY:                  out->f[param]=INFINITY; out->i[param]=0x7fffffff; break;
             case OSC_TRUE:                      out->i[param]=1; break;
@@ -272,7 +272,7 @@ int osc__parse(osc_message *out, int maxmsg, const char *s, const char *e) {
         if (f2i)
             out->i[param]=(int64_t)(out->f[param]+0.5f);
         else
-            out->f[param]=out->i[param];
+            out->f[param]=(float)out->i[param];
     }
     return 1;
 }

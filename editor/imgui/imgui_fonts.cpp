@@ -171,9 +171,9 @@ cfg->RasterizerMultiply = 1.1f; // increase brightness
         CJK Unified Ideographs                  4E00-9FFF   Common
         CJK Unified Ideographs Extension A      3400-4DBF   Rare
         CJK Unified Ideographs Extension B      20000-2A6DF Rare, historic
-        CJK Unified Ideographs Extension C      2A700–2B73F Rare, historic
-        CJK Unified Ideographs Extension D      2B740–2B81F Uncommon, some in current use
-        CJK Unified Ideographs Extension E      2B820–2CEAF Rare, historic
+        CJK Unified Ideographs Extension C      2A700â€“2B73F Rare, historic
+        CJK Unified Ideographs Extension D      2B740â€“2B81F Uncommon, some in current use
+        CJK Unified Ideographs Extension E      2B820â€“2CEAF Rare, historic
         CJK Compatibility Ideographs            F900-FAFF   Duplicates, unifiable variants, corporate characters
         CJK Compatibility Ideographs Supplement 2F800-2FA1F Unifiable variants
         */

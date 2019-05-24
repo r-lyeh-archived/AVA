@@ -69,19 +69,19 @@ static m_inline vec3 transform_normal  (const mat44 m, const vec3 normal)   {
     return transform_tangent(m, normal); // ok?
 
     mat44 t; transpose44(t,m); mat44 i; invert44(i,t);
-    return scale3(norm3(transform_vector(i, normal)), det44(m) < 0 ? -1 : 1);
+    return scale3(norm3(transform_vector(i, normal)), det44(m) < 0 ? -1.f : 1.f);
 }
 
 // A quaternion can describe both a rotation and a uniform scaling in 3D space
 static m_inline quat transform_quat     (const mat44 m, const quat q)      {
-    vec3 s = scale3(transform_vector(m, q.xyz), det44(m) < 0 ? -1 : 1);
+    vec3 s = scale3(transform_vector(m, q.xyz), det44(m) < 0 ? -1.f : 1.f);
     return quat(s.x,s.y,s.z,q.w);
 }
 
 // A matrix can describe a general transformation of homogeneous coordinates in projective space
 static m_inline float* transform_matrix(mat44 out, const mat44 m, const mat44 matrix) {
     mat44 I; invert44(I, m);
-    mat44 N; multiply344(out, I, matrix, m); // m,matrix,I instead ?
+    multiply344(out, I, matrix, m); // m,matrix,I instead ?
     return out;
 }
 

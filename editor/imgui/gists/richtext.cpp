@@ -499,15 +499,15 @@ bool richtext_demo() {
         config.Styles[RichTextStyle_Bold].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize;
 
         config.Styles[RichTextStyle_H1].Font = ImGui::GetIO().Fonts->Fonts[2];
-        config.Styles[RichTextStyle_H1].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.125;
+        config.Styles[RichTextStyle_H1].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.125f;
         config.Styles[RichTextStyle_H1].Color = IM_COL32(255,255,0,255); // YELLOW
         config.Styles[RichTextStyle_H1].ColorOutline = IM_COL32(255,0,0,255); //RED
         config.Styles[RichTextStyle_H2].Font = ImGui::GetIO().Fonts->Fonts[2];
-        config.Styles[RichTextStyle_H2].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.250;
+        config.Styles[RichTextStyle_H2].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.250f;
         config.Styles[RichTextStyle_H3].Font = ImGui::GetIO().Fonts->Fonts[2];
-        config.Styles[RichTextStyle_H3].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.500;
+        config.Styles[RichTextStyle_H3].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.500f;
         config.Styles[RichTextStyle_H4].Font = ImGui::GetIO().Fonts->Fonts[2];
-        config.Styles[RichTextStyle_H4].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.750;
+        config.Styles[RichTextStyle_H4].FontSize = ImGui::GetIO().Fonts->Fonts[2]->FontSize * 1.750f;
     }
     static CRichTextState state( &config );
     ImGuiContext& g = *GImGui;

@@ -360,11 +360,11 @@ void editor_draw() {
             //if( msg ) {
                 // @todo clear mem when remote viewport changes
                 // iii i b: w,h,fmt, y, blob
-                int ow = msg->i[0];
-                int oh = msg->i[1];
-                int format = msg->i[2];
-                int y = msg->i[3];
-                int size = msg->i[4];
+                int ow = (int)msg->i[0];
+                int oh = (int)msg->i[1];
+                int format = (int)msg->i[2];
+                int y = (int)msg->i[3];
+                int size = (int)msg->i[4];
                 const char *data = msg->s[4];
                 R.must_clear |= (R.width != ow) || (R.height != oh);
                 R.width = ow;
@@ -486,7 +486,8 @@ void editor_draw() {
         //if(e) printf( "%d,", (int)list[0].i[2] );
         return e;
     };
-    static bool threaded = (std::thread( [&]() { for(;;) { while( network_update() > 0 ); Sleep(1); } } ).detach(), 1 );
+    static auto thread = std::thread( [&]() { for(;;) { while( network_update() > 0 ); Sleep(1); } } );
+    static bool threaded = ( thread.detach(), 1 );
     // Sleep(0);
     // std::this_thread::sleep_for(std::chrono::nanoseconds(1));
     // timeBeginPeriod(1); Sleep(1); timeEndPeriod(1);

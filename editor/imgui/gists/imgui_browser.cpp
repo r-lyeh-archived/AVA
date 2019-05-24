@@ -96,7 +96,7 @@ int imgui_browser( char path[256] ) {
         bs_refreshed = true;
         //update_path( path[0] ? path : "./" );
 
-        int skip = strlen(path);
+        int skip = (int)strlen(path);
         std::function<void(const char *,bool)> callback = [&]( const char *name, bool is_dir ) {
             struct stat t = {0}; stat( name, &t ); 
 
@@ -187,7 +187,7 @@ int imgui_browser( char path[256] ) {
         ImTextureID thumbnail = (ImTextureID)(uintptr_t)(3); // 3: suru.png texture
         const auto *suru_icon = thumbnail ? find_thumbnail( f.name.c_str() ) : NULL;
         const auto *suru_blank_folder = &suru[79], *suru_blank_file = &suru[3];
-        float factor = bs_viewmode == 0 ? 6 : bs_viewmode == 1 ? 2 : 1;
+        float factor = bs_viewmode == 0 ? 6.f : bs_viewmode == 1 ? 2.f : 1.f;
         if( thumbnail != NULL ) {
             if( !suru_icon ) suru_icon = is_dir ? suru_blank_folder : suru_blank_file;
         }
@@ -195,8 +195,8 @@ int imgui_browser( char path[256] ) {
         auto iconify = [&]( float zoomout_factor ) {
             /****/ if( thumbnail != NULL ) {
                 ImGui::Image( thumbnail, ImVec2(suru_icon->w/zoomout_factor, suru_icon->h/zoomout_factor),
-                    ImVec2( suru_icon->u0, suru_icon->v0 ),
-                    ImVec2( suru_icon->u1, suru_icon->v1 ),
+                    ImVec2( (float)suru_icon->u0, (float)suru_icon->v0 ),
+                    ImVec2( (float)suru_icon->u1, (float)suru_icon->v1 ),
                     suru_icon == suru_blank_file ? editor_palette[f.color] : ImVec4(1,1,1,1)
                 );
             } else if( is_dir ) {

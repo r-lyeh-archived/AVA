@@ -289,7 +289,7 @@ jo_gif_t jo_gif_start(const char *filename, short width, short height, short rep
     gif.height = height;
     gif.repeat = repeat;
     gif.numColors = numColors;
-    gif.palSize = log2(numColors);
+    gif.palSize = (int)log2(numColors);
 
     gif.fp = fopen(filename, "wb");
     if(!gif.fp) {

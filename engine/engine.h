@@ -30,6 +30,7 @@ API int init();
 API int loop();
 API int quit();
 
+
 #ifdef __cplusplus
 }
 #endif

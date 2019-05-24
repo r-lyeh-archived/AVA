@@ -105,7 +105,7 @@ int string_count( string s ) {
 
 int string_compare( string a, string b ) {
     uint32_t ha = string_hash(a), hb = string_hash(b);
-    return ha == hb ? strcmp(a,b) : (hb & 0x00FFFFFF) - (ha & 0x00FFFFFF);
+    return ha == hb ? strcmp(a,b) : (hb & 0x00FFFFFF) - (ha & 0x00FFFFFF); // strncmp(a,b,len)
 }
 
 // ----------------------------------------------------------------------------

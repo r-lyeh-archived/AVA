@@ -17,7 +17,7 @@
 static void stencil_callback(
         const ImDrawList* parent_list, const ImDrawCmd* cmd)
 {
-    int op = ((intptr_t)cmd->UserCallbackData);
+    int op = (int)(intptr_t)cmd->UserCallbackData;
 
     switch (op) {
     case 0: // Reset

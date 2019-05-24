@@ -23,7 +23,7 @@ static inline void hashmap_create(hashmap_t *h, unsigned max_elems) {
     h->positions = (uint32_t*)REALLOC( 0, sizeof(uint32_t) * max_elems );
     h->n = max_elems;
 
-    for( int i = 0; i < h->n; ++i ) {
+    for( unsigned i = 0; i < h->n; ++i ) {
         h->keys[i] = HASH_UNUSED;
     }
 }

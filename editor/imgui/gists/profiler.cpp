@@ -801,7 +801,7 @@ namespace YAP
         for (int iPhase = 0; iPhase < gPhaseCount; iPhase++)
         {
             const char *szPhaseName = gPhaseEntries[iPhase].szPhaseName;
-            int phaseNameLen = strlen(szPhaseName);
+            int phaseNameLen = (int)strlen(szPhaseName);
             for (int iLen = 0; iLen <= phaseNameLen; iLen++)
             {
                 destination[av++] = szPhaseName[iLen];

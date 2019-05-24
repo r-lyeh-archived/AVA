@@ -183,7 +183,7 @@ static m_inline quat  mixq(quat a, quat b, float t) { return normq(dotq(a,b) < 0
     return norm(quat((1-s)*a.x + s*b.x, (1-s)*a.y + s*b.y, (1-s)*a.z + s*b.z, (1-s)*a.w + s*b.w));
 }*/
 static m_inline quat slerpq(quat a, quat b, float s) { //ok ?
-    float t = acos(dotq(a,b)), st = sin(t), wa = sin((1-s)*t)/st, wb = sin(s*t)/st;
+    float t = acosf(dotq(a,b)), st = sinf(t), wa = sinf((1-s)*t)/st, wb = sinf(s*t)/st;
     return normq(quat(wa*a.x + wb*b.x, wa*a.y + wb*b.y, wa*a.z + wb*b.z, wa*a.w + wb*b.w));
 }
 
@@ -207,7 +207,7 @@ static m_inline quat  mat44q   (mat44 M) {
 static m_inline vec3  euler    (quat q) { // returns PitchRollYaw (PRY) in degrees. from wikipedia:
     float sr_cp = 2*(q.x*q.y + q.z*q.w), cr_cp = 1-2*(q.y*q.y + q.z*q.z);
     float sy_cp = 2*(q.x*q.w + q.y*q.z), cy_cp = 1-2*(q.z*q.z + q.w*q.w), sp = 2*(q.x*q.z-q.w*q.y);
-    return scale3(vec3(fabs(sp) >= 1 ? copysignf(M_PI / 2, sp) : asinf(sp), atan2f(sr_cp, cr_cp), atan2f(sy_cp, cy_cp)), TO_DEG);
+    return scale3(vec3(fabs(sp) >= 1 ? copysignf(C_PI / 2, sp) : asinf(sp), atan2f(sr_cp, cr_cp), atan2f(sy_cp, cy_cp)), TO_DEG);
 }
 static m_inline quat  eulerq   (vec3 pry_degrees) {
     float hp = rad(pry_degrees.x) * 0.5f, hr = rad(pry_degrees.y) * 0.5f, hy = rad(pry_degrees.z) * 0.5f;
@@ -327,7 +327,7 @@ static m_inline void ortho44(mat44 m, float l, float r, float b, float t, float 
 }
 static m_inline void frustum44(mat44 m, float l, float r, float b, float t, float n, float f) {
     m[ 0] = 2*n/(r-l);   m[ 1] = 0;           m[ 2] = 0;               m[ 3] = 0;
-    m[ 4] = 0;           m[ 5] = 2.*n/(t-b);  m[ 6] = 0;               m[ 7] = 0;
+    m[ 4] = 0;           m[ 5] = 2*n/(t-b);   m[ 6] = 0;               m[ 7] = 0;
     m[ 8] = (r+l)/(r-l); m[ 9] = (t+b)/(t-b); m[10] = -(f+n)/(f-n);    m[11] = -1;
     m[12] = 0;           m[13] = 0;           m[14] = -2*(f*n)/(f-n);  m[15] = 0;
 }

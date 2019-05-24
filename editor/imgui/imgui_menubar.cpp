@@ -141,7 +141,7 @@ void imgui_menubar() {
 #if 1
                 int stage = 2;
                 ImGui::Columns(IM_ARRAYSIZE(compressors), NULL, 1);
-                for( int i = 0; i <= IM_ARRAYSIZE(compressors); i++) ImGui::SetColumnOffset(i, i * 100);
+                for( int i = 0; i <= IM_ARRAYSIZE(compressors); i++) ImGui::SetColumnOffset(i, i * 100.f);
                 for (int i = 0; i < IM_ARRAYSIZE(compressors); i++) {
                     bool v = 0;
                     ImGui::Selectable(compressors[i], &v, ImGuiSelectableFlags_DontClosePopups);
@@ -349,7 +349,7 @@ if( !notifications.empty() ) {
         int canceled = 0;
         TOGGLE( ICON_MD_CANCEL, ) ON_CLICK canceled = 1;
         THEN
-        ImGui::ProgressBar( topbar_progress+=0.001, ImVec2(-TOP_RIGHT_WIDTH,0), "progress" );
+        ImGui::ProgressBar( topbar_progress+=0.001f, ImVec2(-TOP_RIGHT_WIDTH,0), "progress" );
         if( canceled ) topbar_progress = 0;
     } else {
         // search bar

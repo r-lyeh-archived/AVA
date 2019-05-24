@@ -17,9 +17,9 @@
 
 #include <float.h>
 static const float FloatEpsilon = FLT_EPSILON;
-static const float PI = M_PI;
-static const float HalfPI = M_PI * 0.5f;
-static const float TAU    = M_PI * 2.0f;
+static const float PI = C_PI;
+static const float HalfPI = C_PI * 0.5f;
+static const float TAU    = C_PI * 2.0f;
 
 typedef union Float2UInt {
     float asFloat;
@@ -55,11 +55,11 @@ static m_inline float floatInvSqrt(float x) {
 }
 
 static m_inline float floatSin(float radians) {
-    static const float A = -2.39e-08;
-    static const float B = 2.7526e-06;
-    static const float C = 1.98409e-04;
-    static const float D = 8.3333315e-03;
-    static const float E = 1.666666664e-01;
+    static const float A = -2.39e-08f;
+    static const float B = 2.7526e-06f;
+    static const float C = 1.98409e-04f;
+    static const float D = 8.3333315e-03f;
+    static const float E = 1.666666664e-01f;
 
     if (radians < 0.0f || radians >= TAU)
     {
@@ -83,11 +83,11 @@ static m_inline float floatSin(float radians) {
 }
 
 static m_inline float floatCos(float radians) {
-    static const float A = -2.605e-07;
-    static const float B = 2.47609e-05;
-    static const float C = 1.3888397e-03;
-    static const float D = 4.16666418e-02;
-    static const float E = 4.999999963e-01;
+    static const float A = -2.605e-07f;
+    static const float B = 2.47609e-05f;
+    static const float C = 1.3888397e-03f;
+    static const float D = 4.16666418e-02f;
+    static const float E = 4.999999963e-01f;
 
     if (radians < 0.0f || radians >= TAU) {
         radians -= floatRound(radians / TAU) * TAU;

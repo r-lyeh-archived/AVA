@@ -60,7 +60,9 @@ exit
         REM MSVC
         if not "%Platform%"=="x64" (
             echo [win][msc]
-                   if exist "%VS150COMNTOOLS%\..\..\VC\Auxiliary\Build\vcvarsx86_amd64.bat" (
+                   if exist "%VS160COMNTOOLS%\..\..\VC\Auxiliary\Build\vcvarsx86_amd64.bat" (
+                      @call "%VS160COMNTOOLS%\..\..\VC\Auxiliary\Build\vcvarsx86_amd64.bat" 
+            ) else if exist "%VS150COMNTOOLS%\..\..\VC\Auxiliary\Build\vcvarsx86_amd64.bat" (
                       @call "%VS150COMNTOOLS%\..\..\VC\Auxiliary\Build\vcvarsx86_amd64.bat" 
             ) else if exist "%VS140COMNTOOLS%\..\..\VC\bin\x86_amd64\vcvarsx86_amd64.bat" (
                       @call "%VS140COMNTOOLS%\..\..\VC\bin\x86_amd64\vcvarsx86_amd64.bat"
@@ -92,7 +94,7 @@ exit
             REM project generation
             REM premake5.exe codelite
             REM premake5.exe gmake
-            ..\colorizer\colorizer premake5.exe vs2015
+            ..\colorizer\colorizer premake5.exe vs2013
             REM premake5.exe vs2013
             REM premake5.exe xcode4
             ..\colorizer\colorizer premake5.exe ninja

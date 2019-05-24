@@ -68,9 +68,9 @@ if( ImGui::BeginMenu( ("" #__VA_ARGS__)[0] == '\0' ? x : __VA_ARGS__ "  " x ) )
         ImGui::Text(text); \
         ImGui::Separator(); \
         float w = ImGui::GetContentRegionAvailWidth(); \
-        if (ImGui::Button(left, ImVec2(w*0.5,0))) { leftcb(); modal = 0; ImGui::CloseCurrentPopup(); } \
+        if (ImGui::Button(left, ImVec2(w*0.5f,0.f))) { leftcb(); modal = 0; ImGui::CloseCurrentPopup(); } \
         ImGui::SameLine(); \
-        if (ImGui::Button(right, ImVec2(-1,0))) { rightcb(); modal = 0; ImGui::CloseCurrentPopup(); } \
+        if (ImGui::Button(right, ImVec2(-1.f,0.f))) { rightcb(); modal = 0; ImGui::CloseCurrentPopup(); } \
         ImGui::EndPopup(); \
     }
 #   define POPUP(x, ...) do { \
